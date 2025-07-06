@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- iOS Safari -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<!-- Chrome, Firefox OS and Opera Status Bar Color -->
+<meta name="theme-color" content="#FFFFFF">
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css">
+<link rel="stylesheet" type="text/css"
+  href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.19.0/themes/prism.min.css">
+<link rel="stylesheet" type="text/css" href="css/SourceSansPro.css">
+<link rel="stylesheet" type="text/css" href="css/theme.css">
+<link rel="stylesheet" type="text/css" href="css/notablog.css">
+<!-- Favicon -->
+
+  <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22&gt;&lt;text text-anchor=%22middle%22 dominant-baseline=%22middle%22 x=%2250%22 y=%2255%22 font-size=%2280%22&gt;📖&lt;/text&gt;&lt;/svg&gt;">
+
+<style>
+  :root {
+    font-size: 20px;
+  }
+</style>
+  <title>3-2-1: Research Tips and Muon Optimizer&nbsp;|&nbsp;Vinci’s Garden</title>
+  <meta property="og:type" content="blog">
+  <meta property="og:title" content="3-2-1: Research Tips and Muon Optimizer">
+  
+    <meta name="description" content="The 3-2-1 Post will contain three small things I concern, two paper I want to introduce, and one question I am thinking. This format is inspired by 3-2-1 Newsletter by James Clear. Hopefully, I will update weekly like him. ">
+    <meta property="og:description" content="The 3-2-1 Post will contain three small things I concern, two paper I want to introduce, and one question I am thinking. This format is inspired by 3-2-1 Newsletter by James Clear. Hopefully, I will update weekly like him. ">
+  
+  
+  <style>
+    .DateTagBar {
+      margin-top: 1.0rem;
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="Navbar">
+  <a href="index.html">
+    <div class="Navbar__Btn">
+      
+        <span><img class="inline-img-icon" src="data:image/svg+xml,&lt;svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22&gt;&lt;text text-anchor=%22middle%22 dominant-baseline=%22middle%22 x=%2250%22 y=%2255%22 font-size=%2280%22&gt;📖&lt;/text&gt;&lt;/svg&gt;"></span>&nbsp;
+      
+      <span>Home</span>
+    </div>
+  </a>
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+      <span class="Navbar__Delim">&centerdot;</span>
+      <a href="about.html">
+        <div class="Navbar__Btn">
+          
+            <span><img class="inline-img-icon" src="data:image/svg+xml,&lt;svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22&gt;&lt;text text-anchor=%22middle%22 dominant-baseline=%22middle%22 x=%2250%22 y=%2255%22 font-size=%2280%22&gt;😀&lt;/text&gt;&lt;/svg&gt;"></span>&nbsp;
+          
+          <span>About Vinci</span>
+        </div>
+      </a>
+    
+  
+    
+  
+</nav>
+  <header class="Header">
+    
+    <div class="Header__Spacer Header__Spacer--NoCover">
+    </div>
+    
+    <h1 class="Header__Title">3-2-1: Research Tips and Muon Optimizer</h1>
+    
+      <div class="DateTagBar">
+        
+          <span class="DateTagBar__Item DateTagBar__Date">Posted on Mon, Jun 30, 2025</span>
+        
+        
+          <span class="DateTagBar__Item DateTagBar__Tag DateTagBar__Tag--red">
+            <a href="tag/3-2-1.html">3-2-1</a>
+          </span>
+        
+      </div>
+    
+  </header>
+  <article id="https://www.notion.so/222a0479abc78015b700f25add17bad0" class="PageRoot"><div id="https://www.notion.so/222a0479abc780ad8832fa8c017cda9f" class="ColorfulBlock ColorfulBlock--ColorDefault Text"><p class="Text__Content"><span class="SemanticStringArray"><span class="SemanticString"><span class="SemanticString__Fragment SemanticString__Fragment--Date">@2025/06/30</span></span><span class="SemanticString"> </span></span></p></div><blockquote id="https://www.notion.so/222a0479abc780878777fbabfb997a6b" class="ColorfulBlock ColorfulBlock--ColorDefault Quote"><span class="SemanticStringArray"><span class="SemanticString">3-2-1 Monday by Vinci Yang</span></span></blockquote><h2 id="https://www.notion.so/222a0479abc780f3a78cdc4fa97a1579" class="ColorfulBlock ColorfulBlock--ColorDefault Heading Heading--2"><a class="Anchor" href="#https://www.notion.so/222a0479abc780f3a78cdc4fa97a1579"><svg width="16" height="16" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><span class="SemanticStringArray"><span class="SemanticString">3 Small Things</span></span></h2><ul class="BulletedListWrapper"><li id="https://www.notion.so/222a0479abc7803384a2c2906361a2f0" class="BulletedList"><span class="SemanticStringArray"><span class="SemanticString">The 3-2-1 Post will contain three small things I concern, two paper I want to introduce, and one question I am thinking. This format is inspired by 3-2-1 Newsletter by James Clear. Hopefully, I will update weekly like him. </span></span></li><li id="https://www.notion.so/222a0479abc78068adfdc899967dd778" class="BulletedList"><span class="SemanticStringArray"><span class="SemanticString">A way to do research: Read a lot of paper, write down all of your ideas → design experiments carefully and build pipeline to validate them → find the working one → read more work about it , do further experiments and write paper.</span></span></li><li id="https://www.notion.so/222a0479abc7805aa0bbd94a6c07ceef" class="BulletedList"><span class="SemanticStringArray"><span class="SemanticString">What I (should) confirm before I coding (experiments): </span></span><ul class="BulletedListWrapper"><li id="https://www.notion.so/222a0479abc78078939df82423a9a393" class="BulletedList"><span class="SemanticStringArray"><span class="SemanticString">What problem I want to figure out from this experiment?</span></span></li><li id="https://www.notion.so/222a0479abc780849dd1c4ff082d5f38" class="BulletedList"><span class="SemanticStringArray"><span class="SemanticString">What data I need to solve this problem?</span></span></li><li id="https://www.notion.so/222a0479abc780619d73eca91f21ab84" class="BulletedList"><span class="SemanticStringArray"><span class="SemanticString">What result I hope to get? </span></span></li><li id="https://www.notion.so/222a0479abc780a49a78c5aa59afb9fd" class="BulletedList"><span class="SemanticStringArray"><span class="SemanticString">How to save and analysis this data?</span></span></li></ul></li></ul><div id="https://www.notion.so/222a0479abc780afb356e694cc29901f" class="ColorfulBlock ColorfulBlock--ColorDefault Text"><p class="Text__Content"><span class="SemanticStringArray"></span></p></div><div id="https://www.notion.so/222a0479abc780579812f259995d8c6d" class="ColorfulBlock ColorfulBlock--ColorDefault Text"><p class="Text__Content"><span class="SemanticStringArray"></span></p></div><div id="https://www.notion.so/222a0479abc7801ba604f2f55187c0f2" class="Divider"></div><h2 id="https://www.notion.so/222a0479abc78039b8f2ce57d2da47f3" class="ColorfulBlock ColorfulBlock--ColorDefault Heading Heading--2"><a class="Anchor" href="#https://www.notion.so/222a0479abc78039b8f2ce57d2da47f3"><svg width="16" height="16" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><span class="SemanticStringArray"><span class="SemanticString">2 Paper Introduction</span></span></h2><h3 id="https://www.notion.so/222a0479abc78094849edf72a4e407dd" class="ColorfulBlock ColorfulBlock--ColorDefault Heading Heading--3"><a class="Anchor" href="#https://www.notion.so/222a0479abc78094849edf72a4e407dd"><svg width="16" height="16" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><span class="SemanticStringArray"><span class="SemanticString"><span class="SemanticString__Fragment SemanticString__Fragment--Unknown">I. How to Read a Paper</span></span></span></h3><div id="https://www.notion.so/222a0479abc7806db764ce5ab8efa498" class="ColorfulBlock ColorfulBlock--ColorDefault Text"><p class="Text__Content"><span class="SemanticStringArray"><span class="SemanticString">The paper outlines a practical and efficient method for reading research papers, known as the </span><span class="SemanticString"><strong class="SemanticString__Fragment SemanticString__Fragment--Bold">three-pass approach </strong></span><span class="SemanticString">:</span></span></p></div><ol class="NumberedListWrapper"><li id="https://www.notion.so/222a0479abc7806180d1d25d9d5b47c1" class="NumberedList" value="1"><span class="SemanticStringArray"><span class="SemanticString"><strong class="SemanticString__Fragment SemanticString__Fragment--Bold">First Pass (Skimming): </strong></span><span class="SemanticString">This involves quickly going through the paper to get a general idea of its content. The reader should focus on the</span><span class="SemanticString"><strong class="SemanticString__Fragment SemanticString__Fragment--Bold"> title, abstract, introduction, section headings, and conclusion</strong></span><span class="SemanticString">. This pass helps determine whether the paper is relevant to their interests or research 2.</span></span></li><li id="https://www.notion.so/222a0479abc78083840ccf935f48c502" class="NumberedList" value="2"><span class="SemanticStringArray"><span class="SemanticString"><strong class="SemanticString__Fragment SemanticString__Fragment--Bold">Second Pass (In-depth Reading): </strong></span><span class="SemanticString">In this stage, the reader engages more deeply with the material, paying attention to</span><span class="SemanticString"><strong class="SemanticString__Fragment SemanticString__Fragment--Bold"> figures, tables, and key technical sections</strong></span><span class="SemanticString">. They may also try to understand the </span><span class="SemanticString"><strong class="SemanticString__Fragment SemanticString__Fragment--Bold">core contributions</strong></span><span class="SemanticString"> and </span><span class="SemanticString"><strong class="SemanticString__Fragment SemanticString__Fragment--Bold">methodology</strong></span><span class="SemanticString">, but not necessarily every detail. </span></span></li><li id="https://www.notion.so/222a0479abc780408fe6fb5eb4d14846" class="NumberedList" value="3"><span class="SemanticStringArray"><span class="SemanticString"><strong class="SemanticString__Fragment SemanticString__Fragment--Bold">Third Pass (Critical Review): </strong></span><span class="SemanticString">This is a detailed and critical examination of the paper. The reader should be able to reconstruct the paper&#x27;s arguments, evaluate its strengths and weaknesses, and consider potential improvements or further research directions.</span></span></li></ol><div id="https://www.notion.so/222a0479abc78066ba4fc5d7b5e5bf81" class="ColorfulBlock ColorfulBlock--ColorDefault Text"><p class="Text__Content"><span class="SemanticStringArray"></span></p></div><h3 id="https://www.notion.so/222a0479abc780f6a7fcd85f05eda493" class="ColorfulBlock ColorfulBlock--ColorDefault Heading Heading--3"><a class="Anchor" href="#https://www.notion.so/222a0479abc780f6a7fcd85f05eda493"><svg width="16" height="16" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><span class="SemanticStringArray"><span class="SemanticString"><strong class="SemanticString__Fragment SemanticString__Fragment--Bold"><span class="SemanticString__Fragment SemanticString__Fragment--Unknown">II. Muon: An optimizer for hidden layers in neural networks</span></strong></span></span></h3><div id="https://www.notion.so/222a0479abc7807caaecc933dc2ac3f5" class="ColorfulBlock ColorfulBlock--ColorDefault Text"><p class="Text__Content"><span class="SemanticStringArray"><span class="SemanticString"><strong class="SemanticString__Fragment SemanticString__Fragment--Bold">Muon </strong></span><span class="SemanticString">is a new optimizer for neural network training that improves speed and stability by combining momentum with fast matrix orthogonalization via the </span><span class="SemanticString"><strong class="SemanticString__Fragment SemanticString__Fragment--Bold">Newton-Schulz iteration</strong></span><span class="SemanticString">. Applied mainly to hidden layer weights, Muon enhances learning efficiency with minimal overhead (&lt;1%), outperforming AdamW and Shampoo in training speed and scalability. It achieves state-of-the-art results on tasks like CIFAR-10 and NanoGPT, and scales well to models with over 1.5B parameters. Muon offers a practical, theoretically grounded approach to faster deep learning.
+
+</span></span></p></div><h2 id="https://www.notion.so/222a0479abc7803d9456c316cceec17b" class="ColorfulBlock ColorfulBlock--ColorDefault Heading Heading--2"><a class="Anchor" href="#https://www.notion.so/222a0479abc7803d9456c316cceec17b"><svg width="16" height="16" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><span class="SemanticStringArray"><span class="SemanticString">1 Question From Me</span></span></h2><div id="https://www.notion.so/222a0479abc7803a8f23cd8362e5b5b7" class="ColorfulBlock ColorfulBlock--ColorDefault Text"><p class="Text__Content"><span class="SemanticStringArray"><span class="SemanticString">How can I analysis weights of layer if its quantization error(MSE) is much worse than others?  </span></span></p></div><div id="https://www.notion.so/222a0479abc78075a810ea2b6357f0d4" class="ColorfulBlock ColorfulBlock--ColorDefault Text"><p class="Text__Content"><span class="SemanticStringArray"></span></p></div><div id="https://www.notion.so/222a0479abc780fbb7c6ee839e62ee57" class="ColorfulBlock ColorfulBlock--ColorDefault Text"><p class="Text__Content"><span class="SemanticStringArray"><span class="SemanticString">Until Next week,</span></span></p></div><div id="https://www.notion.so/222a0479abc78024b25ffa06679f9f56" class="ColorfulBlock ColorfulBlock--ColorDefault Text"><p class="Text__Content"><span class="SemanticStringArray"></span></p></div><div id="https://www.notion.so/222a0479abc7805abf38c0e48817386c" class="ColorfulBlock ColorfulBlock--ColorDefault Text"><p class="Text__Content"><span class="SemanticStringArray"><span class="SemanticString">Vinci Yang</span></span></p></div></article>
+  <footer class="Footer">
+  <div>&copy; Vinci’s Garden 2024</div>
+  <div>&centerdot;</div>
+  <div>Powered by <a href="https://github.com/dragonman225/notablog" target="_blank"
+      rel="noopener noreferrer">Notablog</a>.
+  </div>
+</footer>
+
+</body>
+
+</html>
