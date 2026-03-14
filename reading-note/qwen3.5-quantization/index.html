@@ -1,0 +1,81 @@
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Qwen3.5量化研究 | Vinci Knowledge Base</title><meta name="description" content="https://kaitchup.substack.com/p/qwen35 quantization similar accuracy Qwen3.5量化研究 本文发布于2026年3月13日，核心围绕Qwen3.5大模型的量化展开研究，对比了BF16、FP8、INT4、NVFP4多种量化格式的表现，给出了基于AutoRound的INT4和NVFP4量化实操"><meta name="generator" content="Vinci Knowledge Base"><link rel="stylesheet" href="/_astro/_doc_.CY2v1inF.css"></head> <body> <div class="page-shell"> <header class="site-header"> <div class="site-header__inner"> <a class="brand" href="/"> <span class="brand__eyebrow">GitHub Pages Knowledge Site</span> <span class="brand__name">Vinci Knowledge Base</span> </a> <nav class="site-nav"> <a href="/">Projects</a> </nav> </div> </header> <main class="page-main">  <section class="article-hero"> <div> <p class="eyebrow">Knowledge Article</p> <h1>Qwen3.5量化研究</h1> <p class="article-hero__breadcrumbs"> <a href="/">Home</a> <span>/</span> <a href="/reading-note/">Reading Note</a> </p> </div> <div class="meta-card"> <p><strong>Project</strong> Reading Note</p> <p><strong>Source</strong> <code>knowledge/qwen3.5-quantization.md</code></p> <p><strong>Sections</strong> 13</p> </div> </section> <section class="content-grid"> <aside class="toc-card"> <p class="toc-card__title">本页目录</p> <ul class="toc-card__list"> <li class="toc-depth-1"> <a href="#qwen35量化研究">Qwen3.5量化研究</a> </li><li class="toc-depth-2"> <a href="#一研究背景与核心价值">一、研究背景与核心价值</a> </li><li class="toc-depth-2"> <a href="#二llm量化与评估的软硬件准备">二、LLM量化与评估的软硬件准备</a> </li><li class="toc-depth-3"> <a href="#一gpu选择">（一）GPU选择</a> </li><li class="toc-depth-3"> <a href="#二软件安装">（二）软件安装</a> </li><li class="toc-depth-2"> <a href="#三基于autoround的qwen35量化实操">三、基于AutoRound的Qwen3.5量化实操</a> </li><li class="toc-depth-3"> <a href="#一int4量化">（一）INT4量化</a> </li><li class="toc-depth-3"> <a href="#二nvfp4量化">（二）NVFP4量化</a> </li><li class="toc-depth-3"> <a href="#三moe模型量化">（三）MoE模型量化</a> </li><li class="toc-depth-2"> <a href="#四量化qwen35的基准测试">四、量化Qwen3.5的基准测试</a> </li><li class="toc-depth-3"> <a href="#一通用测试说明">（一）通用测试说明</a> </li><li class="toc-depth-3"> <a href="#二各模型测试结果">（二）各模型测试结果</a> </li><li class="toc-depth-2"> <a href="#五研究关键结论与未展示内容">五、研究关键结论与未展示内容</a> </li> </ul> </aside> <article class="prose-card"> <div class="prose"><p><a href="https://kaitchup.substack.com/p/qwen35-quantization-similar-accuracy">https://kaitchup.substack.com/p/qwen35-quantization-similar-accuracy</a></p>
+<h1 id="qwen35量化研究" tabindex="-1">Qwen3.5量化研究 <a class="heading-anchor" href="#qwen35量化研究" aria-hidden="true">#</a></h1>
+<p>本文发布于2026年3月13日，核心围绕Qwen3.5大模型的量化展开研究，对比了BF16、FP8、INT4、NVFP4多种量化格式的表现，给出了基于AutoRound的INT4和NVFP4量化实操方法，并通过基准测试明确了不同参数量Qwen3.5模型的量化适配性与避坑点，研究算力由欧洲AI云服务商Verda提供。</p>
+<h2 id="一研究背景与核心价值" tabindex="-1">一、研究背景与核心价值 <a class="heading-anchor" href="#一研究背景与核心价值" aria-hidden="true">#</a></h2>
+<ol>
+<li>Qwen3.5模型参数覆盖0.8B-397B，可适配不同硬件和预算，但现代量化技术让低位量化模型具备更高性价比：4位量化的大参数量模型（如27B INT4）在内存接近小参数量模型（如9B）的情况下，性能显著更强。</li>
+<li>模型部分层对量化高度敏感，若保留其高精度，名义上的4位模型内存占用可能接近FP8模型（如Qwen3.5 27B GPTQ Int4与FP8内存分别为30.3GB、30.9GB）。</li>
+<li>本文不仅对比量化格式的精度，还结合内存占用分析权衡关系，同时提供量化实操方案和模型层的量化选择建议。</li>
+</ol>
+<h2 id="二llm量化与评估的软硬件准备" tabindex="-1">二、LLM量化与评估的软硬件准备 <a class="heading-anchor" href="#二llm量化与评估的软硬件准备" aria-hidden="true">#</a></h2>
+<h3 id="一gpu选择" tabindex="-1">（一）GPU选择 <a class="heading-anchor" href="#一gpu选择" aria-hidden="true">#</a></h3>
+<ol>
+<li>量化本身成本低，AutoRound的逐块量化+<code>low_cpu_mem_usage</code>模式可降低峰值内存，无需GPU一次性容纳整个模型。</li>
+<li>模型评估对GPU内存带宽要求高，<strong>B200</strong>为优选（比H200显存多33%、带宽近乎翻倍，且专为FP4计算优化），作者研究使用了1块RTX Pro 6000、多块H200和1块B200（B200目前供应短缺）。</li>
+<li>Verda云平台可便捷启动GPU实例，基础环境自带screen、vim等工具，仅需补充少量依赖。</li>
+</ol>
+<h3 id="二软件安装" tabindex="-1">（二）软件安装 <a class="heading-anchor" href="#二软件安装" aria-hidden="true">#</a></h3>
+<ol>
+<li>必须安装<code>uv</code>（可选）和<code>python3-dev</code>（支撑vLLM的FlashInfer），且按<strong>AutoRound→vLLM→Transformers</strong>的顺序安装，避免vLLM替换不兼容的Transformers版本。</li>
+<li>额外安装<code>flash-linear-attention</code>和<code>causal-conv1d</code>可使AutoRound量化速度提升近一倍。</li>
+<li>待Qwen3.5支持稳定后，可直接通过<code>uv pip install auto-round vllm</code>完成核心依赖安装。</li>
+</ol>
+<h2 id="三基于autoround的qwen35量化实操" tabindex="-1">三、基于AutoRound的Qwen3.5量化实操 <a class="heading-anchor" href="#三基于autoround的qwen35量化实操" aria-hidden="true">#</a></h2>
+<p>AutoRound是成熟的低位量化框架，CLI界面简洁，本文主要介绍INT4、NVFP4两种量化格式的操作方法，以及MoE模型的量化注意点。</p>
+<h3 id="一int4量化" tabindex="-1">（一）INT4量化 <a class="heading-anchor" href="#一int4量化" aria-hidden="true">#</a></h3>
+<ol>
+<li>以Qwen3.5 9B为例，核心命令为<code>auto-round-best</code>，默认采用<strong>W4A16</strong>方案（权重4位，推理激活值16位），该方案适配主流推理框架。</li>
+<li>可选<code>--enable_torch_compile</code>参数，可使调优速度提升约25%（对Qwen3.5有效）；若追求量化速度，可替换为<code>auto-round</code>（牺牲部分精度）或<code>auto-round-light</code>（适合试验）。</li>
+<li>默认将视觉塔、LM head、归一化层、嵌入层保留为16位，可通过<code>--ignore_layers</code>排除易受量化影响的层（如linear_attn），提升模型精度（但会增加模型体积）。</li>
+</ol>
+<h3 id="二nvfp4量化" tabindex="-1">（二）NVFP4量化 <a class="heading-anchor" href="#二nvfp4量化" aria-hidden="true">#</a></h3>
+<ol>
+<li>核心是将INT4命令的<code>scheme</code>替换为<code>NVFP4</code>，同时需显式指定<code>--format &quot;llm_compressor&quot;</code>（AutoRound默认NVFP4格式不兼容主流推理引擎）。</li>
+<li><code>torch_compile</code>与NVFP4量化路径不兼容，即使设置该参数也会被AutoRound忽略。</li>
+<li>必须通过<code>--ignore_layers</code>显式指定保留16位的模块，否则生成的配置文件会引发vLLM报错；若仍报错，可删除<code>quantization_config.json</code>并在<code>config.json</code>中配置未量化层的正则表达式。</li>
+</ol>
+<h3 id="三moe模型量化" tabindex="-1">（三）MoE模型量化 <a class="heading-anchor" href="#三moe模型量化" aria-hidden="true">#</a></h3>
+<ol>
+<li>量化流程与普通模型一致，<strong>建议将<code>shared_expert</code>层保留为16位</strong>（英特尔官方默认选择）。</li>
+<li>量化<code>shared_expert</code>层对模型瘦身效果微乎其微，因该层仅占模型极小部分。</li>
+</ol>
+<h2 id="四量化qwen35的基准测试" tabindex="-1">四、量化Qwen3.5的基准测试 <a class="heading-anchor" href="#四量化qwen35的基准测试" aria-hidden="true">#</a></h2>
+<p>测试覆盖Qwen3.5 9B、35B-A3B、27B，将最大序列长度限制为32k token（降低评估成本），因工具版本不匹配，未统计模型推理效率；模型精度主要由<strong>量化算法、数据类型、精度布局</strong>三个因素决定。</p>
+<h3 id="一通用测试说明" tabindex="-1">（一）通用测试说明 <a class="heading-anchor" href="#一通用测试说明" aria-hidden="true">#</a></h3>
+<p>对比了通义千问官方FP8/GPTQ INT4、英特尔INT4、CyanKiwi AWQ、各提供商NVFP4及作者基于AutoRound生成的INT4/NVFP4模型。</p>
+<h3 id="二各模型测试结果" tabindex="-1">（二）各模型测试结果 <a class="heading-anchor" href="#二各模型测试结果" aria-hidden="true">#</a></h3>
+<ol>
+<li><strong>Qwen3.5 9B</strong>
+<ul>
+<li>禁用思考功能：量化模型精度与原模型差距小，作者的AutoRound模型与英特尔版本精度持平。</li>
+<li>启用思考功能：量化模型精度最高下降33%且稳定性差，因量化模型“思考”更多，导致答案截断率翻倍；将线性注意力层保留为16位仅轻微改善，而推理需求低的基准（如MMLU Pro）量化后精度基本不变。</li>
+</ul>
+</li>
+<li><strong>Qwen3.5 35B-A3B（MoE模型）</strong>
+<ul>
+<li>启用思考功能：推理行为少于9B，答案截断率低；官方INT4模型（未量化注意力层）精度近乎持平原模型，FP8效果相近但内存更高；作者的AutoRound模型因量化了<code>shared_expert</code>，性能显著逊于英特尔版本。</li>
+<li>禁用思考功能：模型在H200上会无限生成内容，暂未找到原因；NVFP4格式对该MoE模型支持不完善，在B200上会生成无意义内容。</li>
+</ul>
+</li>
+<li><strong>Qwen3.5 27B</strong>
+<ul>
+<li>对量化适应性极强，量化后虽思考更多，但整体表现稳定。</li>
+<li>启用思考功能：<strong>避免使用量化线性注意力层的NVFP4模型</strong>，其负面影响会显现。</li>
+<li>禁用思考功能：量化线性注意力层无负面影响，不同NVFP4版本表现近乎一致；FP8版本内存更大且无性能优势，未测试官方GPTQ INT4（内存接近FP8）。</li>
+</ul>
+</li>
+</ol>
+<h2 id="五研究关键结论与未展示内容" tabindex="-1">五、研究关键结论与未展示内容 <a class="heading-anchor" href="#五研究关键结论与未展示内容" aria-hidden="true">#</a></h2>
+<ol>
+<li>核心结论
+<ul>
+<li>MoE模型切勿量化<code>shared_expert</code>层，8位量化的可行性尚未验证。</li>
+<li>线性注意力层的量化负面影响<strong>仅在生成长序列时显现</strong>，短序列场景下无影响。</li>
+<li>Qwen3.5 35B-A3B优先选择<strong>官方INT4量化版本</strong>（未量化注意力层），性价比最高。</li>
+<li>Qwen3.5 27B量化需避开<strong>量化线性注意力的NVFP4模型</strong>和<strong>FP8模型</strong>。</li>
+<li>提升最大序列长度或可显著改善量化模型在推理类基准测试中的精度。</li>
+</ul>
+</li>
+<li>未展示内容：Qwen3.5 27B NVFP4与397B模型的对比分析为付费内容，本文未披露。</li>
+</ol>
+</div> <nav class="pager"> <span class="pager__link pager__link--empty">已经是第一篇</span> <a class="pager__link" href="/reading-note/training-recipe/"> <span>下一篇</span> <strong>训练神经网络的秘诀</strong> </a> </nav> </article> </section>  </main> <footer class="site-footer"> <div class="site-footer__inner"> <p>Vinci Knowledge Base</p> <p>Source directory: <code>/Users/superone77/Documents/知识库/projects</code></p> </div> </footer> </div> </body></html>
