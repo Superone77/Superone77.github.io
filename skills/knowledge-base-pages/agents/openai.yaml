@@ -1,0 +1,4 @@
+interface:
+  display_name: "Knowledge Base Pages"
+  short_description: "Build and update the Vinci Knowledge Base site"
+  default_prompt: "Build, verify, and deploy the Vinci Knowledge Base site in this repository from ~/Documents/知识库/projects using the local Astro and GitHub Pages workflow."

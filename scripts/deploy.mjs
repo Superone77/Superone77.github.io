@@ -16,7 +16,6 @@ if (!fs.existsSync(distDir)) {
   process.exit(1);
 }
 
-const branch = process.env.GH_PAGES_BRANCH ?? "gh-pages";
 const message = process.env.GH_PAGES_COMMIT_MESSAGE ?? "Deploy Vinci Knowledge Base";
 const repo =
   process.env.GITHUB_REPOSITORY_URL ??
@@ -33,26 +32,44 @@ const repo =
   })();
 const cname = process.env.GITHUB_PAGES_CNAME;
 
-const options = {
-  branch,
-  dotfiles: true,
-  message
-};
+const branches = process.env.GH_PAGES_BRANCH
+  ? [process.env.GH_PAGES_BRANCH]
+  : ["gh-pages", "master"];
 
-if (repo) {
-  options.repo = repo;
+function publishToBranch(branch) {
+  const options = {
+    branch,
+    dotfiles: true,
+    message
+  };
+
+  if (repo) {
+    options.repo = repo;
+  }
+
+  if (cname) {
+    options.cname = cname;
+  }
+
+  return new Promise((resolve, reject) => {
+    ghpages.publish(distDir, options, (error) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+
+      resolve();
+    });
+  });
 }
 
-if (cname) {
-  options.cname = cname;
-}
-
-ghpages.publish(distDir, options, (error) => {
-  if (error) {
-    console.error("GitHub Pages 发布失败。");
+for (const branch of branches) {
+  try {
+    await publishToBranch(branch);
+    console.log(`已发布到 ${branch} 分支。`);
+  } catch (error) {
+    console.error(`发布到 ${branch} 分支失败。`);
     console.error(error);
     process.exit(1);
   }
-
-  console.log(`已发布到 ${branch} 分支。`);
-});
+}

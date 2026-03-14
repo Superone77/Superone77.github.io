@@ -1,0 +1,61 @@
+# Workflow Reference
+
+## Repository Facts
+
+- Repository root: `/Users/superone77/Code/knowledge_base_deployment`
+- External content source: `~/Documents/知识库/projects/`
+- Site title: `Vinci Knowledge Base`
+- Site URL: `https://superone77.github.io`
+
+## Important Files
+
+- `src/lib/content.ts`: scan project folders, read `README.md`, `STATUS.yaml`, and `knowledge/*.md`, and exclude workflow documents from publication
+- `src/lib/markdown.ts`: convert Markdown to HTML and generate heading IDs
+- `src/pages/index.astro`: site homepage and title search UI
+- `src/pages/[project]/index.astro`: project landing page
+- `src/pages/[project]/[doc].astro`: article page and previous/next navigation
+- `scripts/deploy.mjs`: publish generated static output
+- `astro.config.mjs`: default `SITE_URL`
+
+## Normal Task Routing
+
+### Rebuild Or Republish After Knowledge Content Changes
+
+Do not change site code unless the user asks. Run:
+
+```bash
+npm run build
+npm run deploy
+```
+
+The build step re-reads the external knowledge source automatically.
+
+### Fix Rendering Or Navigation Problems
+
+Inspect and edit:
+
+- `src/lib/content.ts` for source selection, filtering, metadata, and route data
+- `src/lib/markdown.ts` for heading IDs, excerpts, and Markdown rendering
+- `src/pages/` for layout and route output
+- `src/styles/global.css` for presentational issues
+
+### Fix Deployment Problems
+
+Inspect and edit:
+
+- `scripts/deploy.mjs`
+- `astro.config.mjs`
+- `README.md` only if the user wants the workflow documentation updated too
+
+## Branch Model
+
+- `main`: source code for the Astro site
+- `gh-pages`: generated static output for GitHub Pages
+- `master`: generated static output kept in sync for compatibility with the current repository setup
+
+## Publish Rules
+
+- Publish project root `README.md`
+- Publish `knowledge/*.md`
+- Read `STATUS.yaml` as metadata only
+- Exclude `REVIEW.md`, `SUBMISSION.md`, `TASKS.md`, `RESEARCH.md`, `OUTLINE.md`, and similar workflow files unless the user explicitly changes the scope

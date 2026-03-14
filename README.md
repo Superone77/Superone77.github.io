@@ -48,6 +48,11 @@ npm run build
 npm run deploy
 ```
 
+默认会把静态产物同时发布到：
+
+- `gh-pages`：推荐的 Pages 分支
+- `master`：兼容当前仓库仍以 `master` 作为默认分支或 Pages 来源的情况
+
 可选环境变量：
 
 ```bash
