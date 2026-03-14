@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
+import { execSync } from "node:child_process";
 
 const require = createRequire(import.meta.url);
 const ghpages = require("gh-pages");
@@ -17,7 +18,19 @@ if (!fs.existsSync(distDir)) {
 
 const branch = process.env.GH_PAGES_BRANCH ?? "gh-pages";
 const message = process.env.GH_PAGES_COMMIT_MESSAGE ?? "Deploy Vinci Knowledge Base";
-const repo = process.env.GITHUB_REPOSITORY_URL;
+const repo =
+  process.env.GITHUB_REPOSITORY_URL ??
+  (() => {
+    try {
+      return execSync("git config --get remote.origin.url", {
+        cwd: rootDir,
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"]
+      }).trim();
+    } catch {
+      return "";
+    }
+  })();
 const cname = process.env.GITHUB_PAGES_CNAME;
 
 const options = {

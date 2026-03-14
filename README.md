@@ -51,8 +51,8 @@ npm run deploy
 可选环境变量：
 
 ```bash
-SITE_URL=https://<username>.github.io
-GITHUB_REPOSITORY_URL=https://github.com/<username>/<username>.github.io.git
+SITE_URL=https://superone77.github.io
+GITHUB_REPOSITORY_URL=https://github.com/Superone77/Superone77.github.io.git
 GH_PAGES_BRANCH=gh-pages
 GITHUB_PAGES_CNAME=your.domain.com
 ```
