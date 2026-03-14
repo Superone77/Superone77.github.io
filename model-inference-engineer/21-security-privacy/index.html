@@ -1,0 +1,1197 @@
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>第十三章：安全与隐私保护 | Vinci Knowledge Base</title><meta name="description" content="第十三章：安全与隐私保护 13.1 端侧模型加密 端侧模型加密是保护模型知识产权、防止模型被逆向和窃取的关键技术。通过加密，即使攻击者获取了模型文件，也无法直接读取模型结构和参数，从而保护模型的所有权。 13.1.1 模型加密原理 模型加密的核心思想是使用加密算法对模型文件进行加密，只有在设备上解密后才能加载和使用。加密和解密过程通常由操作系统或硬件安全模块"><meta name="generator" content="Vinci Knowledge Base"><link rel="stylesheet" href="/_astro/_doc_.CY2v1inF.css"></head> <body> <div class="page-shell"> <header class="site-header"> <div class="site-header__inner"> <a class="brand" href="/"> <span class="brand__eyebrow">GitHub Pages Knowledge Site</span> <span class="brand__name">Vinci Knowledge Base</span> </a> <nav class="site-nav"> <a href="/">Projects</a> </nav> </div> </header> <main class="page-main">  <section class="article-hero"> <div> <p class="eyebrow">Knowledge Article</p> <h1>第十三章：安全与隐私保护</h1> <p class="article-hero__breadcrumbs"> <a href="/">Home</a> <span>/</span> <a href="/model-inference-engineer/">端侧大模型推理工程师知识库</a> </p> </div> <div class="meta-card"> <p><strong>Project</strong> 端侧大模型推理工程师知识库</p> <p><strong>Source</strong> <code>knowledge/21-security-privacy.md</code></p> <p><strong>Sections</strong> 29</p> </div> </section> <section class="content-grid"> <aside class="toc-card"> <p class="toc-card__title">本页目录</p> <ul class="toc-card__list"> <li class="toc-depth-1"> <a href="#第十三章安全与隐私保护">第十三章：安全与隐私保护</a> </li><li class="toc-depth-2"> <a href="#131-端侧模型加密">13.1 端侧模型加密</a> </li><li class="toc-depth-3"> <a href="#1311-模型加密原理">13.1.1 模型加密原理</a> </li><li class="toc-depth-1"> <a href="#示例">示例</a> </li><li class="toc-depth-3"> <a href="#1312-apple-coreml-模型加密">13.1.2 Apple CoreML 模型加密</a> </li><li class="toc-depth-1"> <a href="#示例-1">示例</a> </li><li class="toc-depth-3"> <a href="#1313-android-模型保护方案">13.1.3 Android 模型保护方案</a> </li><li class="toc-depth-1"> <a href="#示例-2">示例</a> </li><li class="toc-depth-3"> <a href="#1314-加密密钥管理">13.1.4 加密密钥管理</a> </li><li class="toc-depth-1"> <a href="#示例-3">示例</a> </li><li class="toc-depth-2"> <a href="#132-数据隐私保护">13.2 数据隐私保护</a> </li><li class="toc-depth-3"> <a href="#1321-数据不出设备的优势">13.2.1 数据不出设备的优势</a> </li><li class="toc-depth-3"> <a href="#1322-本地数据加密">13.2.2 本地数据加密</a> </li><li class="toc-depth-3"> <a href="#1323-敏感数据识别与处理">13.2.3 敏感数据识别与处理</a> </li><li class="toc-depth-1"> <a href="#示例-4">示例</a> </li><li class="toc-depth-1"> <a href="#输出phone-13812345678-idcard-110101199001011234-email-exampleemailcom">输出：{&#39;phone&#39;: [&#39;13812345678&#39;], &#39;id_card&#39;: [&#39;110101199001011234&#39;], &#39;email&#39;: [&#39;example@email.com&#39;]}</a> </li><li class="toc-depth-1"> <a href="#示例-5">示例</a> </li><li class="toc-depth-1"> <a href="#输出person-张三-org-某公司-gpe-北京市-date-1990-年-1-月-1-日">输出：{&#39;PERSON&#39;: [&#39;张三&#39;], &#39;ORG&#39;: [&#39;某公司&#39;], &#39;GPE&#39;: [&#39;北京市&#39;], &#39;DATE&#39;: [&#39;1990 年 1 月 1 日&#39;]}</a> </li><li class="toc-depth-1"> <a href="#示例-6">示例</a> </li><li class="toc-depth-1"> <a href="#输出我的电话是-phone身份证号是-idcard邮箱是-email">输出：我的电话是 [PHONE]，身份证号是 [ID_CARD]，邮箱是 [EMAIL]</a> </li><li class="toc-depth-3"> <a href="#1324-隐私合规实践">13.2.4 隐私合规实践</a> </li><li class="toc-depth-2"> <a href="#133-安全合规要求">13.3 安全合规要求</a> </li><li class="toc-depth-3"> <a href="#1331-gdpr-等法规要求">13.3.1 GDPR 等法规要求</a> </li><li class="toc-depth-3"> <a href="#1332-模型安全防护">13.3.2 模型安全防护</a> </li><li class="toc-depth-1"> <a href="#示例-7">示例</a> </li><li class="toc-depth-1"> <a href="#示例-8">示例</a> </li><li class="toc-depth-3"> <a href="#1333-逆向工程防护">13.3.3 逆向工程防护</a> </li><li class="toc-depth-3"> <a href="#1334-安全审计与合规检查">13.3.4 安全审计与合规检查</a> </li><li class="toc-depth-2"> <a href="#小结">小结</a> </li> </ul> </aside> <article class="prose-card"> <div class="prose"><h1 id="第十三章安全与隐私保护" tabindex="-1">第十三章：安全与隐私保护 <a class="heading-anchor" href="#第十三章安全与隐私保护" aria-hidden="true">#</a></h1>
+<h2 id="131-端侧模型加密" tabindex="-1">13.1 端侧模型加密 <a class="heading-anchor" href="#131-端侧模型加密" aria-hidden="true">#</a></h2>
+<p>端侧模型加密是保护模型知识产权、防止模型被逆向和窃取的关键技术。通过加密，即使攻击者获取了模型文件，也无法直接读取模型结构和参数，从而保护模型的所有权。</p>
+<h3 id="1311-模型加密原理" tabindex="-1">13.1.1 模型加密原理 <a class="heading-anchor" href="#1311-模型加密原理" aria-hidden="true">#</a></h3>
+<p>模型加密的核心思想是使用加密算法对模型文件进行加密，只有在设备上解密后才能加载和使用。加密和解密过程通常由操作系统或硬件安全模块（如 Secure Enclave、TEE）管理，确保密钥的安全。</p>
+<p><strong>加密流程</strong></p>
+<pre class="hljs"><code>原始模型
+    ↓
+加密（使用加密密钥）
+    ↓
+加密模型
+    ↓
+部署到设备
+    ↓
+设备端解密（使用设备密钥）
+    ↓
+内存中的解密模型
+    ↓
+推理使用
+</code></pre>
+<p><strong>加密算法</strong></p>
+<p><strong>对称加密</strong></p>
+<ul>
+<li>使用相同的密钥进行加密和解密</li>
+<li>加密速度快，适合大文件加密</li>
+<li>常见算法：AES-256、AES-128</li>
+</ul>
+<p><strong>非对称加密</strong></p>
+<ul>
+<li>使用公钥加密、私钥解密</li>
+<li>密钥管理更安全，但加密速度较慢</li>
+<li>常见算法：RSA、ECC</li>
+</ul>
+<p><strong>混合加密</strong></p>
+<ul>
+<li>使用对称加密加密模型文件</li>
+<li>使用非对称加密加密对称密钥</li>
+<li>兼顾加密速度和密钥管理安全性</li>
+</ul>
+<p><strong>案例：AES-256 加密模型</strong></p>
+<pre class="hljs"><code><span class="hljs-keyword">from</span> cryptography.fernet <span class="hljs-keyword">import</span> Fernet
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">encrypt_model</span>(<span class="hljs-params">model_path, key, output_path</span>):
+    <span class="hljs-string">&quot;&quot;&quot;
+    使用 AES 加密模型文件
+    key: 32 字节的加密密钥
+    &quot;&quot;&quot;</span>
+    <span class="hljs-comment"># 读取模型文件</span>
+    <span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(model_path, <span class="hljs-string">&#x27;rb&#x27;</span>) <span class="hljs-keyword">as</span> f:
+        model_data = f.read()
+    
+    <span class="hljs-comment"># 加密模型数据</span>
+    fernet = Fernet(key)
+    encrypted_data = fernet.encrypt(model_data)
+    
+    <span class="hljs-comment"># 写入加密模型文件</span>
+    <span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(output_path, <span class="hljs-string">&#x27;wb&#x27;</span>) <span class="hljs-keyword">as</span> f:
+        f.write(encrypted_data)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">decrypt_model</span>(<span class="hljs-params">encrypted_path, key, output_path</span>):
+    <span class="hljs-string">&quot;&quot;&quot;
+    解密模型文件
+    key: 32 字节的解密密钥
+    &quot;&quot;&quot;</span>
+    <span class="hljs-comment"># 读取加密模型文件</span>
+    <span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(encrypted_path, <span class="hljs-string">&#x27;rb&#x27;</span>) <span class="hljs-keyword">as</span> f:
+        encrypted_data = f.read()
+    
+    <span class="hljs-comment"># 解密模型数据</span>
+    fernet = Fernet(key)
+    decrypted_data = fernet.decrypt(encrypted_data)
+    
+    <span class="hljs-comment"># 写入解密后的模型文件</span>
+    <span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(output_path, <span class="hljs-string">&#x27;wb&#x27;</span>) <span class="hljs-keyword">as</span> f:
+        f.write(decrypted_data)
+
+<span class="hljs-comment"># 示例</span>
+key = Fernet.generate_key()  <span class="hljs-comment"># 生成加密密钥</span>
+encrypt_model(<span class="hljs-string">&#x27;model.pt&#x27;</span>, key, <span class="hljs-string">&#x27;model_encrypted.pt&#x27;</span>)
+decrypt_model(<span class="hljs-string">&#x27;model_encrypted.pt&#x27;</span>, key, <span class="hljs-string">&#x27;model_decrypted.pt&#x27;</span>)
+</code></pre>
+<h3 id="1312-apple-coreml-模型加密" tabindex="-1">13.1.2 Apple CoreML 模型加密 <a class="heading-anchor" href="#1312-apple-coreml-模型加密" aria-hidden="true">#</a></h3>
+<p>Apple 提供了内置的模型加密机制，通过 CoreML Tools 可以轻松加密模型文件。加密后的模型文件只能在 iOS 设备上解密和使用，无法在非 Apple 设备上解密。</p>
+<p><strong>CoreML 模型加密原理</strong></p>
+<p>CoreML 模型加密使用 Apple 的 Secure Enclave（安全隔区）和 Data Protection API（数据保护 API），确保模型文件在存储时加密，在内存中解密时受到保护。</p>
+<p><strong>加密流程</strong></p>
+<ol>
+<li>使用 CoreML Tools 加密模型文件</li>
+<li>加密后的模型文件只能在 iOS 设备上解密</li>
+<li>iOS 设备使用设备密钥解密模型文件</li>
+<li>解密后的模型在内存中运行，无法被导出</li>
+</ol>
+<p><strong>加密步骤</strong></p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> coremltools <span class="hljs-keyword">as</span> ct
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">encrypt_coreml_model</span>(<span class="hljs-params">model_path, key_path, output_path</span>):
+    <span class="hljs-string">&quot;&quot;&quot;
+    加密 CoreML 模型
+    model_path: 原始模型文件路径
+    key_path: 加密密钥文件路径（可选，如果不提供则自动生成）
+    output_path: 加密模型输出路径
+    &quot;&quot;&quot;</span>
+    <span class="hljs-comment"># 读取原始模型</span>
+    model = ct.models.MLModel(model_path)
+    
+    <span class="hljs-comment"># 加密模型</span>
+    <span class="hljs-keyword">if</span> key_path:
+        <span class="hljs-comment"># 使用指定密钥加密</span>
+        encrypted_model = ct.utils.encrypt_model(model, key=key_path)
+    <span class="hljs-keyword">else</span>:
+        <span class="hljs-comment"># 自动生成密钥并加密</span>
+        encrypted_model = ct.utils.encrypt_model(model)
+    
+    <span class="hljs-comment"># 保存加密模型和密钥</span>
+    encrypted_model.save(output_path)
+    
+    <span class="hljs-comment"># 如果是自动生成的密钥，需要保存密钥文件</span>
+    <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> key_path:
+        key_path = output_path + <span class="hljs-string">&#x27;.key&#x27;</span>
+        encrypted_model.save_key(key_path)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;密钥已保存到: <span class="hljs-subst">{key_path}</span>&quot;</span>)
+    
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;加密模型已保存到: <span class="hljs-subst">{output_path}</span>&quot;</span>)
+
+<span class="hljs-comment"># 示例</span>
+encrypt_coreml_model(<span class="hljs-string">&#x27;model.mlmodel&#x27;</span>, <span class="hljs-string">&#x27;encryption.key&#x27;</span>, <span class="hljs-string">&#x27;model_encrypted.mlmodel&#x27;</span>)
+</code></pre>
+<p><strong>模型部署</strong></p>
+<p>加密后的 CoreML 模型可以直接部署到 iOS 设备上，无需额外的解密代码。iOS 系统会自动解密模型文件并加载到内存中。</p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> CoreML
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">ModelManager</span> {
+    <span class="hljs-keyword">static</span> <span class="hljs-keyword">func</span> <span class="hljs-title function_">loadEncryptedModel</span>() -&gt; <span class="hljs-type">MyModel</span>? {
+        <span class="hljs-comment">// 加载加密模型</span>
+        <span class="hljs-keyword">guard</span> <span class="hljs-keyword">let</span> modelURL <span class="hljs-operator">=</span> <span class="hljs-type">Bundle</span>.main.url(forResource: <span class="hljs-string">&quot;model_encrypted&quot;</span>, withExtension: <span class="hljs-string">&quot;mlmodelc&quot;</span>) <span class="hljs-keyword">else</span> {
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;模型文件未找到&quot;</span>)
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+        }
+        
+        <span class="hljs-keyword">do</span> {
+            <span class="hljs-keyword">let</span> model <span class="hljs-operator">=</span> <span class="hljs-keyword">try</span> <span class="hljs-type">MyModel</span>(contentsOf: modelURL)
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;模型加载成功&quot;</span>)
+            <span class="hljs-keyword">return</span> model
+        } <span class="hljs-keyword">catch</span> {
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;模型加载失败: <span class="hljs-subst">\(error)</span>&quot;</span>)
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+        }
+    }
+}
+</code></pre>
+<p><strong>密钥管理</strong></p>
+<p>CoreML 模型加密的密钥由 iOS 系统管理，使用 Data Protection API 保护密钥。密钥存储在 Keychain（钥匙串）中，即使设备被越狱，攻击者也无法直接读取密钥。</p>
+<p><strong>案例：医疗应用模型加密</strong></p>
+<p>某医疗应用使用 CoreML 模型加密保护医疗诊断模型：</p>
+<ul>
+<li><strong>模型</strong>：7B 参数的医疗诊断模型</li>
+<li><strong>加密算法</strong>：AES-256</li>
+<li><strong>密钥管理</strong>：iOS Keychain</li>
+<li><strong>安全级别</strong>：Complete Protection（设备锁定时无法访问）</li>
+<li><strong>效果</strong>：模型文件无法被导出，密钥无法被读取，即使设备被越狱也无法窃取模型</li>
+</ul>
+<h3 id="1313-android-模型保护方案" tabindex="-1">13.1.3 Android 模型保护方案 <a class="heading-anchor" href="#1313-android-模型保护方案" aria-hidden="true">#</a></h3>
+<p>Android 平台提供了多种模型保护方案，包括模型混淆、模型加密、密钥管理等。由于 Android 设备的碎片化，模型保护需要考虑不同厂商的安全机制。</p>
+<p><strong>模型混淆</strong></p>
+<p>模型混淆通过打乱模型结构、重命名张量、混淆算子名称等方式，使模型文件难以被逆向工程分析。</p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">obfuscate_model_weights</span>(<span class="hljs-params">model, obfuscation_key</span>):
+    <span class="hljs-string">&quot;&quot;&quot;
+    混淆模型权重
+    model: 模型对象
+    obfuscation_key: 混淆密钥（numpy 数组）
+    &quot;&quot;&quot;</span>
+    <span class="hljs-comment"># 遍历模型的所有权重</span>
+    <span class="hljs-keyword">for</span> name, param <span class="hljs-keyword">in</span> model.named_parameters():
+        <span class="hljs-keyword">if</span> <span class="hljs-string">&#x27;weight&#x27;</span> <span class="hljs-keyword">in</span> name:
+            <span class="hljs-comment"># 使用混淆密钥打乱权重</span>
+            obfuscated_weight = param.data * obfuscation_key
+            param.data = obfuscated_weight
+    <span class="hljs-keyword">return</span> model
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">deobfuscate_model_weights</span>(<span class="hljs-params">model, obfuscation_key</span>):
+    <span class="hljs-string">&quot;&quot;&quot;
+    解混淆模型权重
+    model: 模型对象
+    obfuscation_key: 混淆密钥（numpy 数组）
+    &quot;&quot;&quot;</span>
+    <span class="hljs-comment"># 遍历模型的所有权重</span>
+    <span class="hljs-keyword">for</span> name, param <span class="hljs-keyword">in</span> model.named_parameters():
+        <span class="hljs-keyword">if</span> <span class="hljs-string">&#x27;weight&#x27;</span> <span class="hljs-keyword">in</span> name:
+            <span class="hljs-comment"># 使用混淆密钥恢复权重</span>
+            deobfuscated_weight = param.data / obfuscation_key
+            param.data = deobfuscated_weight
+    <span class="hljs-keyword">return</span> model
+
+<span class="hljs-comment"># 示例</span>
+obfuscation_key = np.random.randn(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>)  <span class="hljs-comment"># 生成混淆密钥</span>
+obfuscated_model = obfuscate_model_weights(model, obfuscation_key)
+deobfuscated_model = deobfuscate_model_weights(obfuscated_model, obfuscation_key)
+</code></pre>
+<p><strong>模型加密</strong></p>
+<p>Android 平台可以使用 Java Cryptography Architecture (JCA) 加密模型文件，密钥存储在 Android Keystore 中。</p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> javax.crypto.Cipher
+<span class="hljs-keyword">import</span> javax.crypto.KeyGenerator
+<span class="hljs-keyword">import</span> javax.crypto.SecretKey
+<span class="hljs-keyword">import</span> javax.crypto.spec.IvParameterSpec
+<span class="hljs-keyword">import</span> java.io.File
+<span class="hljs-keyword">import</span> java.security.SecureRandom
+
+<span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">encryptModel</span><span class="hljs-params">(modelFile: <span class="hljs-type">File</span>, key: <span class="hljs-type">SecretKey</span>)</span></span>: File {
+    <span class="hljs-keyword">val</span> cipher = Cipher.getInstance(<span class="hljs-string">&quot;AES/CBC/PKCS5Padding&quot;</span>)
+    
+    <span class="hljs-comment">// 生成初始化向量（IV）</span>
+    <span class="hljs-keyword">val</span> iv = ByteArray(<span class="hljs-number">16</span>)
+    SecureRandom().nextBytes(iv)
+    <span class="hljs-keyword">val</span> ivSpec = IvParameterSpec(iv)
+    
+    cipher.<span class="hljs-keyword">init</span>(Cipher.ENCRYPT_MODE, key, ivSpec)
+    
+    <span class="hljs-comment">// 读取模型文件</span>
+    <span class="hljs-keyword">val</span> modelData = modelFile.readBytes()
+    
+    <span class="hljs-comment">// 加密模型数据</span>
+    <span class="hljs-keyword">val</span> encryptedData = cipher.doFinal(modelData)
+    
+    <span class="hljs-comment">// 写入加密文件（IV + 加密数据）</span>
+    <span class="hljs-keyword">val</span> encryptedFile = File(modelFile.parent, <span class="hljs-string">&quot;<span class="hljs-subst">${modelFile.nameWithoutExtension}</span>_encrypted.bin&quot;</span>)
+    encryptedFile.writeBytes(iv + encryptedData)
+    
+    <span class="hljs-keyword">return</span> encryptedFile
+}
+
+<span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">decryptModel</span><span class="hljs-params">(encryptedFile: <span class="hljs-type">File</span>, key: <span class="hljs-type">SecretKey</span>)</span></span>: File {
+    <span class="hljs-keyword">val</span> cipher = Cipher.getInstance(<span class="hljs-string">&quot;AES/CBC/PKCS5Padding&quot;</span>)
+    
+    <span class="hljs-comment">// 读取加密文件</span>
+    <span class="hljs-keyword">val</span> encryptedData = encryptedFile.readBytes()
+    
+    <span class="hljs-comment">// 提取 IV（前 16 字节）</span>
+    <span class="hljs-keyword">val</span> iv = encryptedData.sliceArray(<span class="hljs-number">0.</span><span class="hljs-number">.15</span>)
+    <span class="hljs-keyword">val</span> ivSpec = IvParameterSpec(iv)
+    
+    <span class="hljs-comment">// 提取加密数据（后 N 字节）</span>
+    <span class="hljs-keyword">val</span> cipherText = encryptedData.sliceArray(<span class="hljs-number">16</span> until encryptedData.size)
+    
+    cipher.<span class="hljs-keyword">init</span>(Cipher.DECRYPT_MODE, key, ivSpec)
+    
+    <span class="hljs-comment">// 解密模型数据</span>
+    <span class="hljs-keyword">val</span> decryptedData = cipher.doFinal(cipherText)
+    
+    <span class="hljs-comment">// 写入解密后的模型文件</span>
+    <span class="hljs-keyword">val</span> decryptedFile = File(encryptedFile.parent, <span class="hljs-string">&quot;model_decrypted.bin&quot;</span>)
+    decryptedFile.writeBytes(decryptedData)
+    
+    <span class="hljs-keyword">return</span> decryptedFile
+}
+
+<span class="hljs-comment">// 示例</span>
+<span class="hljs-keyword">val</span> keyGenerator = KeyGenerator.getInstance(<span class="hljs-string">&quot;AES&quot;</span>)
+keyGenerator.<span class="hljs-keyword">init</span>(<span class="hljs-number">256</span>)
+<span class="hljs-keyword">val</span> key = keyGenerator.generateKey()
+
+<span class="hljs-keyword">val</span> encryptedFile = encryptModel(File(<span class="hljs-string">&quot;model.bin&quot;</span>), key)
+<span class="hljs-keyword">val</span> decryptedFile = decryptModel(encryptedFile, key)
+</code></pre>
+<p><strong>Android Keystore 密钥管理</strong></p>
+<p>Android Keystore 提供了安全的密钥存储机制，密钥存储在硬件安全模块（如 TrustZone）中，无法被导出。</p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> android.security.keystore.KeyGenParameterSpec
+<span class="hljs-keyword">import</span> android.security.keystore.KeyProperties
+<span class="hljs-keyword">import</span> java.security.KeyStore
+<span class="hljs-keyword">import</span> javax.crypto.KeyGenerator
+<span class="hljs-keyword">import</span> javax.crypto.SecretKey
+
+<span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">generateEncryptionKey</span><span class="hljs-params">()</span></span>: SecretKey {
+    <span class="hljs-keyword">val</span> keyGenerator = KeyGenerator.getInstance(
+        KeyProperties.KEY_ALGORITHM_AES,
+        <span class="hljs-string">&quot;AndroidKeyStore&quot;</span>
+    )
+    
+    <span class="hljs-keyword">val</span> keyGenSpec = KeyGenParameterSpec.Builder(
+        <span class="hljs-string">&quot;model_encryption_key&quot;</span>,
+        KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+    )
+        .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
+        .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
+        .setUserAuthenticationRequired(<span class="hljs-literal">false</span>) <span class="hljs-comment">// 不需要用户认证</span>
+        .build()
+    
+    keyGenerator.<span class="hljs-keyword">init</span>(keyGenSpec)
+    <span class="hljs-keyword">return</span> keyGenerator.generateKey()
+}
+
+<span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">loadEncryptionKey</span><span class="hljs-params">()</span></span>: SecretKey? {
+    <span class="hljs-keyword">val</span> keyStore = KeyStore.getInstance(<span class="hljs-string">&quot;AndroidKeyStore&quot;</span>)
+    keyStore.load(<span class="hljs-literal">null</span>)
+    
+    <span class="hljs-keyword">val</span> key = keyStore.getKey(<span class="hljs-string">&quot;model_encryption_key&quot;</span>, <span class="hljs-literal">null</span>) <span class="hljs-keyword">as</span>? SecretKey
+    <span class="hljs-keyword">return</span> key
+}
+
+<span class="hljs-comment">// 示例</span>
+<span class="hljs-keyword">val</span> key = generateEncryptionKey()
+<span class="hljs-keyword">val</span> loadedKey = loadEncryptionKey()
+</code></pre>
+<p><strong>硬件安全模块（HSM）</strong></p>
+<p>某些 Android 设备支持硬件安全模块（HSM），如 TrustZone、Secure Element。HSM 提供了更高级别的安全保护，密钥存储在硬件中，无法被软件读取。</p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> android.security.keystore.KeyGenParameterSpec
+
+<span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">generateHsmKey</span><span class="hljs-params">()</span></span>: SecretKey {
+    <span class="hljs-keyword">val</span> keyGenerator = KeyGenerator.getInstance(
+        KeyProperties.KEY_ALGORITHM_AES,
+        <span class="hljs-string">&quot;AndroidKeyStore&quot;</span>
+    )
+    
+    <span class="hljs-keyword">val</span> keyGenSpec = KeyGenParameterSpec.Builder(
+        <span class="hljs-string">&quot;model_encryption_key_hsm&quot;</span>,
+        KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+    )
+        .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
+        .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
+        .setUserAuthenticationRequired(<span class="hljs-literal">false</span>)
+        .setIsStrongBoxBacked(<span class="hljs-literal">true</span>) <span class="hljs-comment">// 使用 StrongBox（硬件安全模块）</span>
+        .build()
+    
+    keyGenerator.<span class="hljs-keyword">init</span>(keyGenSpec)
+    <span class="hljs-keyword">return</span> keyGenerator.generateKey()
+}
+</code></pre>
+<p><strong>案例：金融应用模型保护</strong></p>
+<p>某金融应用使用多种技术保护模型：</p>
+<ul>
+<li><strong>模型混淆</strong>：打乱模型结构，混淆算子名称</li>
+<li><strong>模型加密</strong>：使用 AES-256 加密模型文件</li>
+<li><strong>密钥管理</strong>：使用 Android Keystore 和 StrongBox</li>
+<li><strong>安全级别</strong>：即使设备被 root，也无法窃取模型</li>
+</ul>
+<h3 id="1314-加密密钥管理" tabindex="-1">13.1.4 加密密钥管理 <a class="heading-anchor" href="#1314-加密密钥管理" aria-hidden="true">#</a></h3>
+<p>加密密钥的管理是模型加密的关键环节，密钥泄露会导致模型加密失效。密钥管理需要考虑密钥生成、密钥存储、密钥轮换、密钥撤销等方面。</p>
+<p><strong>密钥生成</strong></p>
+<p>密钥生成应该使用密码学安全的随机数生成器（CSPRNG），避免使用弱密钥。</p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> secrets
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">generate_key</span>(<span class="hljs-params">key_size=<span class="hljs-number">32</span></span>):
+    <span class="hljs-string">&quot;&quot;&quot;
+    生成加密密钥
+    key_size: 密钥大小（字节），默认 32 字节（AES-256）
+    &quot;&quot;&quot;</span>
+    <span class="hljs-keyword">return</span> secrets.token_bytes(key_size)
+
+<span class="hljs-comment"># 示例</span>
+key = generate_key(<span class="hljs-number">32</span>)  <span class="hljs-comment"># 生成 32 字节密钥（AES-256）</span>
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;密钥: <span class="hljs-subst">{key.<span class="hljs-built_in">hex</span>()}</span>&quot;</span>)
+</code></pre>
+<p><strong>密钥存储</strong></p>
+<p>密钥应该存储在安全的密钥管理系统中，如 Keychain、Keystore、AWS KMS、Azure Key Vault 等。避免将密钥硬编码在代码中或存储在普通文件中。</p>
+<p><strong>密钥轮换</strong></p>
+<p>密钥轮换是指定期更换加密密钥，减少密钥泄露的影响。密钥轮换需要考虑模型更新的时机和频率。</p>
+<p><strong>密钥轮换策略</strong></p>
+<ul>
+<li><strong>定期轮换</strong>：每 3-6 个月更换一次密钥</li>
+<li><strong>事件触发轮换</strong>：密钥泄露、人员离职、系统升级等事件触发轮换</li>
+<li><strong>增量轮换</strong>：逐步更换密钥，避免一次性更换所有模型</li>
+</ul>
+<p><strong>密钥撤销</strong></p>
+<p>密钥撤销是指撤销已泄露的密钥，防止攻击者使用泄露的密钥解密模型。密钥撤销需要考虑模型的重新加密和部署。</p>
+<p><strong>案例：企业模型密钥管理</strong></p>
+<p>某企业建立了完整的密钥管理体系：</p>
+<ul>
+<li><strong>密钥生成</strong>：使用企业内部的密钥管理系统（KMS）</li>
+<li><strong>密钥存储</strong>：使用 AWS KMS 存储密钥</li>
+<li><strong>密钥轮换</strong>：每 6 个月轮换一次密钥</li>
+<li><strong>密钥撤销</strong>：密钥泄露后 24 小时内完成撤销和重新加密</li>
+<li><strong>审计日志</strong>：记录所有密钥操作，便于审计和追溯</li>
+</ul>
+<hr>
+<h2 id="132-数据隐私保护" tabindex="-1">13.2 数据隐私保护 <a class="heading-anchor" href="#132-数据隐私保护" aria-hidden="true">#</a></h2>
+<p>数据隐私保护是端侧推理的天然优势，所有数据处理都在用户设备上完成，数据不出设备，天然满足 GDPR 等隐私法规的要求。</p>
+<h3 id="1321-数据不出设备的优势" tabindex="-1">13.2.1 数据不出设备的优势 <a class="heading-anchor" href="#1321-数据不出设备的优势" aria-hidden="true">#</a></h3>
+<p>数据不出设备是指所有数据处理（如推理、训练、微调）都在用户设备上完成，不将数据上传到云端。</p>
+<p><strong>优势</strong></p>
+<p><strong>隐私保护</strong></p>
+<ul>
+<li>用户数据从不出设备，隐私得到最大保护</li>
+<li>无需考虑数据脱敏和加密</li>
+<li>天然满足 GDPR、CCPA 等隐私法规</li>
+</ul>
+<p><strong>数据安全</strong></p>
+<ul>
+<li>数据存储在本地，避免云端数据泄露风险</li>
+<li>无需担心云端数据库被攻击</li>
+<li>减少数据传输过程中的安全风险</li>
+</ul>
+<p><strong>合规优势</strong></p>
+<ul>
+<li>更容易满足 GDPR 的&quot;数据最小化&quot;原则</li>
+<li>更容易满足 CCPA 的&quot;数据删除权&quot;要求</li>
+<li>减少跨境数据传输的法律风险</li>
+</ul>
+<p><strong>用户体验</strong></p>
+<ul>
+<li>无网络延迟，响应速度快</li>
+<li>离线可用，始终可用</li>
+<li>减少数据流量消耗</li>
+</ul>
+<p><strong>案例：医疗诊断应用</strong></p>
+<p>某医疗诊断应用采用端侧推理架构：</p>
+<ul>
+<li><strong>数据处理</strong>：所有医疗数据（如 CT 图像、病历）都在设备上处理</li>
+<li><strong>隐私保护</strong>：医疗数据不出设备，满足 HIPAA 等医疗隐私法规</li>
+<li><strong>合规优势</strong>：无需申请医疗数据跨境传输许可</li>
+<li><strong>用户体验</strong>：诊断结果在几秒内返回，无网络延迟</li>
+</ul>
+<h3 id="1322-本地数据加密" tabindex="-1">13.2.2 本地数据加密 <a class="heading-anchor" href="#1322-本地数据加密" aria-hidden="true">#</a></h3>
+<p>即使数据不出设备，仍然需要对本地数据进行加密，防止设备被盗或被攻击时数据泄露。</p>
+<p><strong>加密类型</strong></p>
+<p><strong>全盘加密</strong></p>
+<ul>
+<li>加密整个设备的存储空间</li>
+<li>操作系统级别的加密</li>
+<li>iOS：FileVault（macOS）、Data Protection（iOS）</li>
+<li>Android：Full Disk Encryption（Android 6.0+）</li>
+</ul>
+<p><strong>文件级加密</strong></p>
+<ul>
+<li>加密特定文件或目录</li>
+<li>应用级别的加密</li>
+<li>iOS：Data Protection API</li>
+<li>Android：EncryptedFile</li>
+</ul>
+<p><strong>数据库加密</strong></p>
+<ul>
+<li>加密数据库文件</li>
+<li>使用 SQLCipher、Realm Encryption 等</li>
+<li>适用于存储敏感数据的场景</li>
+</ul>
+<p><strong>iOS Data Protection</strong></p>
+<p>iOS Data Protection API 提供了不同级别的文件加密保护，根据设备锁定状态自动加密和解密文件。</p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> Foundation
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">DataProtectionManager</span> {
+    <span class="hljs-keyword">static</span> <span class="hljs-keyword">func</span> <span class="hljs-title function_">saveProtectedData</span>(<span class="hljs-params">data</span>: <span class="hljs-type">Data</span>, <span class="hljs-params">filename</span>: <span class="hljs-type">String</span>) {
+        <span class="hljs-keyword">let</span> fileManager <span class="hljs-operator">=</span> <span class="hljs-type">FileManager</span>.default
+        
+        <span class="hljs-comment">// 获取应用程序的 Documents 目录</span>
+        <span class="hljs-keyword">guard</span> <span class="hljs-keyword">let</span> documentsURL <span class="hljs-operator">=</span> fileManager.urls(for: .documentDirectory, in: .userDomainMask).first <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">return</span>
+        }
+        
+        <span class="hljs-keyword">let</span> fileURL <span class="hljs-operator">=</span> documentsURL.appendingPathComponent(filename)
+        
+        <span class="hljs-comment">// 写入文件（Data Protection API 会自动加密文件）</span>
+        <span class="hljs-keyword">do</span> {
+            <span class="hljs-keyword">try</span> data.write(to: fileURL, options: .completeFileProtection)
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;数据已保存并加密&quot;</span>)
+        } <span class="hljs-keyword">catch</span> {
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;保存失败: <span class="hljs-subst">\(error)</span>&quot;</span>)
+        }
+    }
+    
+    <span class="hljs-keyword">static</span> <span class="hljs-keyword">func</span> <span class="hljs-title function_">loadProtectedData</span>(<span class="hljs-params">filename</span>: <span class="hljs-type">Data</span>) -&gt; <span class="hljs-type">Data</span>? {
+        <span class="hljs-keyword">let</span> fileManager <span class="hljs-operator">=</span> <span class="hljs-type">FileManager</span>.default
+        
+        <span class="hljs-keyword">guard</span> <span class="hljs-keyword">let</span> documentsURL <span class="hljs-operator">=</span> fileManager.urls(for: .documentDirectory, in: .userDomainMask).first <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+        }
+        
+        <span class="hljs-keyword">let</span> fileURL <span class="hljs-operator">=</span> documentsURL.appendingPathComponent(<span class="hljs-type">String</span>(data: filename, encoding: .utf8)<span class="hljs-operator">!</span>)
+        
+        <span class="hljs-comment">// 读取文件（Data Protection API 会自动解密文件）</span>
+        <span class="hljs-keyword">do</span> {
+            <span class="hljs-keyword">let</span> data <span class="hljs-operator">=</span> <span class="hljs-keyword">try</span> <span class="hljs-type">Data</span>(contentsOf: fileURL)
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;数据已加载并解密&quot;</span>)
+            <span class="hljs-keyword">return</span> data
+        } <span class="hljs-keyword">catch</span> {
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;加载失败: <span class="hljs-subst">\(error)</span>&quot;</span>)
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">nil</span>
+        }
+    }
+}
+
+<span class="hljs-comment">// 保护级别</span>
+<span class="hljs-keyword">enum</span> <span class="hljs-title class_">FileProtectionType</span> {
+    <span class="hljs-keyword">case</span> completeFileProtection          <span class="hljs-comment">// 设备锁定时无法访问</span>
+    <span class="hljs-keyword">case</span> completeFileProtectionUnlessOpen  <span class="hljs-comment">// 文件打开时可以在设备锁定时访问</span>
+    <span class="hljs-keyword">case</span> completeUntilFirstUserAuthentication <span class="hljs-comment">// 用户首次解锁后可以访问</span>
+    <span class="hljs-keyword">case</span> noProtection                     <span class="hljs-comment">// 无保护</span>
+}
+</code></pre>
+<p><strong>Android EncryptedFile</strong></p>
+<p>Android Jetpack Security 提供了 EncryptedFile API，可以方便地加密和解密文件。</p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> androidx.security.crypto.EncryptedFile
+<span class="hljs-keyword">import</span> androidx.security.crypto.MasterKey
+<span class="hljs-keyword">import</span> java.io.File
+
+<span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">saveEncryptedData</span><span class="hljs-params">(context: <span class="hljs-type">Context</span>, <span class="hljs-keyword">data</span>: <span class="hljs-type">ByteArray</span>, filename: <span class="hljs-type">String</span>)</span></span> {
+    <span class="hljs-keyword">val</span> masterKey = MasterKey.Builder(context)
+        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+        .build()
+    
+    <span class="hljs-keyword">val</span> encryptedFile = EncryptedFile.Builder(
+        context,
+        File(context.filesDir, filename),
+        masterKey,
+        EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
+    ).build()
+    
+    encryptedFile.openFileOutput().use { outputStream -&gt;
+        outputStream.write(<span class="hljs-keyword">data</span>)
+    }
+    
+    println(<span class="hljs-string">&quot;数据已保存并加密&quot;</span>)
+}
+
+<span class="hljs-function"><span class="hljs-keyword">fun</span> <span class="hljs-title">loadEncryptedData</span><span class="hljs-params">(context: <span class="hljs-type">Context</span>, filename: <span class="hljs-type">String</span>)</span></span>: ByteArray? {
+    <span class="hljs-keyword">val</span> masterKey = MasterKey.Builder(context)
+        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+        .build()
+    
+    <span class="hljs-keyword">val</span> encryptedFile = EncryptedFile.Builder(
+        context,
+        File(context.filesDir, filename),
+        masterKey,
+        EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
+    ).build()
+    
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">try</span> {
+        encryptedFile.openFileInput().use { inputStream -&gt;
+            inputStream.readBytes()
+        }
+    } <span class="hljs-keyword">catch</span> (e: Exception) {
+        println(<span class="hljs-string">&quot;加载失败: <span class="hljs-variable">$e</span>&quot;</span>)
+        <span class="hljs-literal">null</span>
+    }
+}
+
+<span class="hljs-comment">// 示例</span>
+saveEncryptedData(context, <span class="hljs-string">&quot;Hello, World!&quot;</span>.toByteArray(), <span class="hljs-string">&quot;secret.txt&quot;</span>)
+<span class="hljs-keyword">val</span> <span class="hljs-keyword">data</span> = loadEncryptedData(context, <span class="hljs-string">&quot;secret.txt&quot;</span>)
+println(String(<span class="hljs-keyword">data</span> ?: byteArrayOf()))
+</code></pre>
+<p><strong>案例：密码管理应用</strong></p>
+<p>某密码管理应用使用本地数据加密：</p>
+<ul>
+<li><strong>加密策略</strong>：使用 AES-256-GCM 加密密码文件</li>
+<li><strong>密钥管理</strong>：使用 iOS Keychain / Android Keystore 存储加密密钥</li>
+<li><strong>保护级别</strong>：iOS CompleteFileProtection，Android 设备锁定时无法访问</li>
+<li><strong>效果</strong>：即使设备被盗，密码数据也无法被读取</li>
+</ul>
+<h3 id="1323-敏感数据识别与处理" tabindex="-1">13.2.3 敏感数据识别与处理 <a class="heading-anchor" href="#1323-敏感数据识别与处理" aria-hidden="true">#</a></h3>
+<p>敏感数据识别与处理是指在数据处理前识别敏感信息（如姓名、电话、身份证号、信用卡号等），并对敏感数据进行脱敏或加密处理。</p>
+<p><strong>敏感数据类型</strong></p>
+<p><strong>个人身份信息（PII）</strong></p>
+<ul>
+<li>姓名、身份证号、护照号、驾驶证号</li>
+<li>电话号码、邮箱地址、家庭住址</li>
+<li>银行卡号、信用卡号、社保号</li>
+</ul>
+<p><strong>医疗信息</strong></p>
+<ul>
+<li>病历、诊断结果、处方记录</li>
+<li>医学图像（CT、MRI、X 光）</li>
+<li>基因数据、生物识别数据</li>
+</ul>
+<p><strong>财务信息</strong></p>
+<ul>
+<li>收入、资产、负债信息</li>
+<li>交易记录、投资记录</li>
+<li>税务信息、保险信息</li>
+</ul>
+<p><strong>敏感数据识别</strong></p>
+<p><strong>正则表达式</strong></p>
+<ul>
+<li>使用正则表达式匹配敏感数据模式</li>
+<li>适用于结构化数据（如身份证号、银行卡号）</li>
+</ul>
+<p><strong>命名实体识别（NER）</strong></p>
+<ul>
+<li>使用 NLP 模型识别敏感实体</li>
+<li>适用于非结构化数据（如文本、对话）</li>
+</ul>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> re
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">detect_pii</span>(<span class="hljs-params">text</span>):
+    <span class="hljs-string">&quot;&quot;&quot;
+    检测文本中的敏感信息（PII）
+    &quot;&quot;&quot;</span>
+    pii_patterns = {
+        <span class="hljs-string">&#x27;phone&#x27;</span>: <span class="hljs-string">r&#x27;1[3-9]\d{9}&#x27;</span>,  <span class="hljs-comment"># 中国手机号</span>
+        <span class="hljs-string">&#x27;id_card&#x27;</span>: <span class="hljs-string">r&#x27;\d{17}[\dXx]&#x27;</span>,  <span class="hljs-comment"># 中国身份证号</span>
+        <span class="hljs-string">&#x27;email&#x27;</span>: <span class="hljs-string">r&#x27;\S+@\S+&#x27;</span>,  <span class="hljs-comment"># 邮箱地址</span>
+        <span class="hljs-string">&#x27;credit_card&#x27;</span>: <span class="hljs-string">r&#x27;\d{4}-\d{4}-\d{4}-\d{4}&#x27;</span>,  <span class="hljs-comment"># 信用卡号</span>
+    }
+    
+    detected_pii = {}
+    
+    <span class="hljs-keyword">for</span> pii_type, pattern <span class="hljs-keyword">in</span> pii_patterns.items():
+        matches = re.findall(pattern, text)
+        <span class="hljs-keyword">if</span> matches:
+            detected_pii[pii_type] = matches
+    
+    <span class="hljs-keyword">return</span> detected_pii
+
+<span class="hljs-comment"># 示例</span>
+text = <span class="hljs-string">&quot;我的电话是 13812345678，身份证号是 110101199001011234，邮箱是 example@email.com&quot;</span>
+detected = detect_pii(text)
+<span class="hljs-built_in">print</span>(detected)
+<span class="hljs-comment"># 输出：{&#x27;phone&#x27;: [&#x27;13812345678&#x27;], &#x27;id_card&#x27;: [&#x27;110101199001011234&#x27;], &#x27;email&#x27;: [&#x27;example@email.com&#x27;]}</span>
+</code></pre>
+<p><strong>命名实体识别（NER）</strong></p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> spacy
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">detect_pii_ner</span>(<span class="hljs-params">text</span>):
+    <span class="hljs-string">&quot;&quot;&quot;
+    使用 NLP 模型检测文本中的敏感信息（PII）
+    &quot;&quot;&quot;</span>
+    nlp = spacy.load(<span class="hljs-string">&quot;zh_core_web_sm&quot;</span>)  <span class="hljs-comment"># 加载中文 NLP 模型</span>
+    doc = nlp(text)
+    
+    pii_entities = {
+        <span class="hljs-string">&#x27;PERSON&#x27;</span>: [],      <span class="hljs-comment"># 人名</span>
+        <span class="hljs-string">&#x27;ORG&#x27;</span>: [],         <span class="hljs-comment"># 组织名</span>
+        <span class="hljs-string">&#x27;GPE&#x27;</span>: [],         <span class="hljs-comment"># 地理位置</span>
+        <span class="hljs-string">&#x27;DATE&#x27;</span>: [],        <span class="hljs-comment"># 日期</span>
+    }
+    
+    <span class="hljs-keyword">for</span> ent <span class="hljs-keyword">in</span> doc.ents:
+        <span class="hljs-keyword">if</span> ent.label_ <span class="hljs-keyword">in</span> pii_entities:
+            pii_entities[ent.label_].append(ent.text)
+    
+    <span class="hljs-keyword">return</span> pii_entities
+
+<span class="hljs-comment"># 示例</span>
+text = <span class="hljs-string">&quot;张三是北京市某公司的员工，出生于 1990 年 1 月 1 日&quot;</span>
+detected = detect_pii_ner(text)
+<span class="hljs-built_in">print</span>(detected)
+<span class="hljs-comment"># 输出：{&#x27;PERSON&#x27;: [&#x27;张三&#x27;], &#x27;ORG&#x27;: [&#x27;某公司&#x27;], &#x27;GPE&#x27;: [&#x27;北京市&#x27;], &#x27;DATE&#x27;: [&#x27;1990 年 1 月 1 日&#x27;]}</span>
+</code></pre>
+<p><strong>敏感数据脱敏</strong></p>
+<p><strong>替换</strong></p>
+<ul>
+<li>将敏感数据替换为占位符（如 <code>[PHONE]</code>、<code>[ID_CARD]</code>）</li>
+<li>适用于不保留原始数据的场景</li>
+</ul>
+<p><strong>哈希</strong></p>
+<ul>
+<li>使用哈希函数对敏感数据进行哈希处理</li>
+<li>适用于需要保留数据唯一性但不需要原始数据的场景</li>
+</ul>
+<p><strong>加密</strong></p>
+<ul>
+<li>使用加密算法对敏感数据进行加密</li>
+<li>适用于需要保留数据但保护隐私的场景</li>
+</ul>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> hashlib
+<span class="hljs-keyword">import</span> re
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">anonymize_text</span>(<span class="hljs-params">text</span>):
+    <span class="hljs-string">&quot;&quot;&quot;
+    对文本中的敏感信息进行脱敏处理
+    &quot;&quot;&quot;</span>
+    <span class="hljs-comment"># 替换敏感信息</span>
+    anonymized_text = re.sub(<span class="hljs-string">r&#x27;1[3-9]\d{9}&#x27;</span>, <span class="hljs-string">&#x27;[PHONE]&#x27;</span>, text)
+    anonymized_text = re.sub(<span class="hljs-string">r&#x27;\d{17}[\dXx]&#x27;</span>, <span class="hljs-string">&#x27;[ID_CARD]&#x27;</span>, anonymized_text)
+    anonymized_text = re.sub(<span class="hljs-string">r&#x27;\S+@\S+&#x27;</span>, <span class="hljs-string">&#x27;[EMAIL]&#x27;</span>, anonymized_text)
+    
+    <span class="hljs-keyword">return</span> anonymized_text
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">hash_sensitive_data</span>(<span class="hljs-params">data, salt=<span class="hljs-string">&#x27;&#x27;</span></span>):
+    <span class="hljs-string">&quot;&quot;&quot;
+    对敏感数据进行哈希处理
+    &quot;&quot;&quot;</span>
+    hasher = hashlib.sha256()
+    hasher.update((data + salt).encode(<span class="hljs-string">&#x27;utf-8&#x27;</span>))
+    <span class="hljs-keyword">return</span> hasher.hexdigest()
+
+<span class="hljs-comment"># 示例</span>
+text = <span class="hljs-string">&quot;我的电话是 13812345678，身份证号是 110101199001011234，邮箱是 example@email.com&quot;</span>
+anonymized = anonymize_text(text)
+<span class="hljs-built_in">print</span>(anonymized)
+<span class="hljs-comment"># 输出：我的电话是 [PHONE]，身份证号是 [ID_CARD]，邮箱是 [EMAIL]</span>
+
+hashed_phone = hash_sensitive_data(<span class="hljs-string">&quot;13812345678&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;哈希后的电话号码: <span class="hljs-subst">{hashed_phone}</span>&quot;</span>)
+</code></pre>
+<h3 id="1324-隐私合规实践" tabindex="-1">13.2.4 隐私合规实践 <a class="heading-anchor" href="#1324-隐私合规实践" aria-hidden="true">#</a></h3>
+<p>隐私合规实践是指在数据处理过程中遵守 GDPR、CCPA 等隐私法规的要求，保护用户隐私权利。</p>
+<p><strong>GDPR 核心要求</strong></p>
+<p><strong>数据最小化</strong></p>
+<ul>
+<li>只收集和处理必要的数据</li>
+<li>避免过度收集用户数据</li>
+</ul>
+<p><strong>目的限制</strong></p>
+<ul>
+<li>数据只能用于声明目的</li>
+<li>不能未经同意用于其他目的</li>
+</ul>
+<p><strong>用户同意</strong></p>
+<ul>
+<li>获取用户的明确同意</li>
+<li>提供撤回同意的机制</li>
+</ul>
+<p><strong>数据可移植权</strong></p>
+<ul>
+<li>用户有权获取自己的数据</li>
+<li>用户有权将数据转移到其他服务</li>
+</ul>
+<p><strong>被遗忘权</strong></p>
+<ul>
+<li>用户有权要求删除自己的数据</li>
+<li>数据删除后无法恢复</li>
+</ul>
+<p><strong>实践案例</strong></p>
+<p><strong>隐私政策</strong></p>
+<ul>
+<li>明确说明数据收集目的、使用方式、存储期限</li>
+<li>提供清晰的隐私政策链接</li>
+<li>定期更新隐私政策</li>
+</ul>
+<p><strong>用户同意管理</strong></p>
+<ul>
+<li>在首次使用时获取用户同意</li>
+<li>提供撤回同意的选项</li>
+<li>记录用户同意的时间和方式</li>
+</ul>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> Foundation
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">PrivacyConsentManager</span> {
+    <span class="hljs-keyword">static</span> <span class="hljs-keyword">let</span> consentKey <span class="hljs-operator">=</span> <span class="hljs-string">&quot;privacy_consent_granted&quot;</span>
+    
+    <span class="hljs-keyword">static</span> <span class="hljs-keyword">func</span> <span class="hljs-title function_">requestConsent</span>(<span class="hljs-params">completion</span>: <span class="hljs-keyword">@escaping</span> (<span class="hljs-type">Bool</span>) -&gt; <span class="hljs-type">Void</span>) {
+        <span class="hljs-comment">// 检查用户是否已经同意</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-type">UserDefaults</span>.standard.bool(forKey: consentKey) {
+            completion(<span class="hljs-literal">true</span>)
+            <span class="hljs-keyword">return</span>
+        }
+        
+        <span class="hljs-comment">// 显示隐私政策对话框</span>
+        <span class="hljs-keyword">let</span> alert <span class="hljs-operator">=</span> <span class="hljs-type">UIAlertController</span>(
+            title: <span class="hljs-string">&quot;隐私政策&quot;</span>,
+            message: <span class="hljs-string">&quot;本应用需要收集您的使用数据以改进服务。数据只在本地处理，不会上传到云端。您同意吗？&quot;</span>,
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(<span class="hljs-type">UIAlertAction</span>(title: <span class="hljs-string">&quot;同意&quot;</span>, style: .default) { <span class="hljs-keyword">_</span> <span class="hljs-keyword">in</span>
+            <span class="hljs-comment">// 记录用户同意</span>
+            <span class="hljs-type">UserDefaults</span>.standard.set(<span class="hljs-literal">true</span>, forKey: <span class="hljs-keyword">self</span>.consentKey)
+            completion(<span class="hljs-literal">true</span>)
+        })
+        
+        alert.addAction(<span class="hljs-type">UIAlertAction</span>(title: <span class="hljs-string">&quot;不同意&quot;</span>, style: .cancel) { <span class="hljs-keyword">_</span> <span class="hljs-keyword">in</span>
+            completion(<span class="hljs-literal">false</span>)
+        })
+        
+        <span class="hljs-comment">// 显示对话框</span>
+        <span class="hljs-type">DispatchQueue</span>.main.async {
+            <span class="hljs-keyword">if</span> <span class="hljs-keyword">let</span> windowScene <span class="hljs-operator">=</span> <span class="hljs-type">UIApplication</span>.shared.connectedScenes.first <span class="hljs-keyword">as?</span> <span class="hljs-type">UIWindowScene</span>,
+               <span class="hljs-keyword">let</span> rootViewController <span class="hljs-operator">=</span> windowScene.windows.first<span class="hljs-operator">?</span>.rootViewController {
+                rootViewController.present(alert, animated: <span class="hljs-literal">true</span>)
+            }
+        }
+    }
+    
+    <span class="hljs-keyword">static</span> <span class="hljs-keyword">func</span> <span class="hljs-title function_">withdrawConsent</span>() {
+        <span class="hljs-comment">// 撤销用户同意</span>
+        <span class="hljs-type">UserDefaults</span>.standard.set(<span class="hljs-literal">false</span>, forKey: consentKey)
+        
+        <span class="hljs-comment">// 删除用户数据</span>
+        <span class="hljs-type">UserDataManager</span>.deleteAllData()
+    }
+}
+</code></pre>
+<p><strong>数据删除</strong></p>
+<ul>
+<li>提供删除用户数据的功能</li>
+<li>确保数据删除后无法恢复</li>
+<li>删除数据前需要用户确认</li>
+</ul>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> Foundation
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">UserDataManager</span> {
+    <span class="hljs-keyword">static</span> <span class="hljs-keyword">func</span> <span class="hljs-title function_">deleteAllData</span>() {
+        <span class="hljs-keyword">let</span> fileManager <span class="hljs-operator">=</span> <span class="hljs-type">FileManager</span>.default
+        
+        <span class="hljs-keyword">guard</span> <span class="hljs-keyword">let</span> documentsURL <span class="hljs-operator">=</span> fileManager.urls(for: .documentDirectory, in: .userDomainMask).first <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">return</span>
+        }
+        
+        <span class="hljs-comment">// 删除所有用户数据</span>
+        <span class="hljs-keyword">do</span> {
+            <span class="hljs-keyword">let</span> files <span class="hljs-operator">=</span> <span class="hljs-keyword">try</span> fileManager.contentsOfDirectory(at: documentsURL, includingPropertiesForKeys: <span class="hljs-literal">nil</span>)
+            <span class="hljs-keyword">for</span> file <span class="hljs-keyword">in</span> files {
+                <span class="hljs-keyword">try</span> fileManager.removeItem(at: file)
+            }
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;所有用户数据已删除&quot;</span>)
+        } <span class="hljs-keyword">catch</span> {
+            <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;删除失败: <span class="hljs-subst">\(error)</span>&quot;</span>)
+        }
+    }
+}
+</code></pre>
+<p><strong>案例：合规实践</strong></p>
+<p>某应用建立了完整的隐私合规体系：</p>
+<ul>
+<li><strong>隐私政策</strong>：清晰的隐私政策，明确说明数据处理方式</li>
+<li><strong>用户同意</strong>：首次使用时获取用户同意，提供撤回同意的选项</li>
+<li><strong>数据最小化</strong>：只收集必要的数据，数据在本地处理</li>
+<li><strong>数据删除</strong>：提供删除用户数据的功能，数据删除后无法恢复</li>
+<li><strong>审计日志</strong>：记录所有数据处理操作，便于审计和追溯</li>
+</ul>
+<hr>
+<h2 id="133-安全合规要求" tabindex="-1">13.3 安全合规要求 <a class="heading-anchor" href="#133-安全合规要求" aria-hidden="true">#</a></h2>
+<p>安全合规要求是指遵守行业法规和标准，如 GDPR、CCPA、HIPAA 等，确保应用和数据的安全性和合规性。</p>
+<h3 id="1331-gdpr-等法规要求" tabindex="-1">13.3.1 GDPR 等法规要求 <a class="heading-anchor" href="#1331-gdpr-等法规要求" aria-hidden="true">#</a></h3>
+<p><strong>GDPR（通用数据保护条例）</strong></p>
+<p>GDPR 是欧盟的数据保护法规，适用于处理欧盟公民数据的所有组织。</p>
+<p><strong>核心原则</strong></p>
+<p><strong>合法性、公平性和透明性</strong></p>
+<ul>
+<li>必须合法地处理数据</li>
+<li>数据处理方式必须公平</li>
+<li>必须向用户透明地说明数据处理方式</li>
+</ul>
+<p><strong>目的限制</strong></p>
+<ul>
+<li>数据只能用于声明目的</li>
+<li>不能未经同意用于其他目的</li>
+</ul>
+<p><strong>数据最小化</strong></p>
+<ul>
+<li>只收集和处理必要的数据</li>
+<li>避免过度收集用户数据</li>
+</ul>
+<p><strong>准确性</strong></p>
+<ul>
+<li>数据必须准确且保持更新</li>
+<li>不准确的数据必须及时删除</li>
+</ul>
+<p><strong>存储限制</strong></p>
+<ul>
+<li>数据不能无限期存储</li>
+<li>存储期限必须合理</li>
+</ul>
+<p><strong>完整性和保密性</strong></p>
+<ul>
+<li>必须采取适当的安全措施保护数据</li>
+<li>防止数据泄露、丢失或损坏</li>
+</ul>
+<p><strong>用户权利</strong></p>
+<p><strong>知情权</strong></p>
+<ul>
+<li>用户有权知道自己的数据被如何处理</li>
+<li>必须提供清晰的隐私政策</li>
+</ul>
+<p><strong>访问权</strong></p>
+<ul>
+<li>用户有权访问自己的数据</li>
+<li>必须提供数据副本</li>
+</ul>
+<p><strong>更正权</strong></p>
+<ul>
+<li>用户有权更正不准确的个人数据</li>
+</ul>
+<p><strong>删除权（被遗忘权）</strong></p>
+<ul>
+<li>用户有权要求删除自己的数据</li>
+<li>数据删除后无法恢复</li>
+</ul>
+<p><strong>限制处理权</strong></p>
+<ul>
+<li>用户有权限制数据处理</li>
+<li>在争议期间可以暂停数据处理</li>
+</ul>
+<p><strong>可移植权</strong></p>
+<ul>
+<li>用户有权将数据转移到其他服务</li>
+<li>必须提供机器可读的数据副本</li>
+</ul>
+<p><strong>反对权</strong></p>
+<ul>
+<li>用户有权反对数据处理</li>
+<li>特别是用于营销目的的数据处理</li>
+</ul>
+<p><strong>实践案例</strong></p>
+<p><strong>隐私政策</strong></p>
+<ul>
+<li>清晰说明数据处理目的、使用方式、存储期限</li>
+<li>提供隐私政策链接和下载</li>
+<li>定期更新隐私政策</li>
+</ul>
+<p><strong>用户同意管理</strong></p>
+<ul>
+<li>获取用户的明确同意</li>
+<li>提供撤回同意的选项</li>
+<li>记录用户同意的时间和方式</li>
+</ul>
+<p><strong>数据访问请求</strong></p>
+<ul>
+<li>提供用户访问自己数据的功能</li>
+<li>在 30 天内响应数据访问请求</li>
+<li>提供机器可读的数据副本</li>
+</ul>
+<p><strong>数据删除请求</strong></p>
+<ul>
+<li>提供用户删除数据的功能</li>
+<li>在 30 天内响应数据删除请求</li>
+<li>确保数据删除后无法恢复</li>
+</ul>
+<p><strong>CCPA（加州消费者隐私法）</strong></p>
+<p>CCPA 是加州的隐私法规，适用于处理加州居民数据的组织。</p>
+<p><strong>用户权利</strong></p>
+<p><strong>知情权</strong></p>
+<ul>
+<li>用户有权知道企业收集了哪些数据</li>
+<li>用户有权知道数据如何被使用</li>
+</ul>
+<p><strong>删除权</strong></p>
+<ul>
+<li>用户有权要求删除自己的数据</li>
+</ul>
+<p><strong>选择退出权</strong></p>
+<ul>
+<li>用户有权选择退出数据销售</li>
+<li>企业必须提供&quot;请勿出售我的信息&quot;链接</li>
+</ul>
+<p><strong>平等对待权</strong></p>
+<ul>
+<li>企业不得因用户行使隐私权而歧视用户</li>
+</ul>
+<h3 id="1332-模型安全防护" tabindex="-1">13.3.2 模型安全防护 <a class="heading-anchor" href="#1332-模型安全防护" aria-hidden="true">#</a></h3>
+<p>模型安全防护是指保护模型免受攻击，如模型窃取、模型逆向工程、对抗攻击等。</p>
+<p><strong>模型窃取防护</strong></p>
+<p><strong>模型加密</strong></p>
+<ul>
+<li>加密模型文件，防止模型被导出</li>
+<li>使用硬件安全模块（HSM）保护密钥</li>
+</ul>
+<p><strong>模型混淆</strong></p>
+<ul>
+<li>混淆模型结构和算子名称</li>
+<li>使模型难以被逆向工程分析</li>
+</ul>
+<p><strong>模型水印</strong></p>
+<ul>
+<li>在模型中嵌入水印</li>
+<li>用于模型版权保护</li>
+</ul>
+<p><strong>模型水印技术</strong></p>
+<p>模型水印是一种在模型中嵌入隐形标识的技术，用于模型版权保护和追踪。</p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> torch
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">add_model_watermark</span>(<span class="hljs-params">model, watermark</span>):
+    <span class="hljs-string">&quot;&quot;&quot;
+    在模型中添加水印
+    model: 模型对象
+    watermark: 水印数据（tensor）
+    &quot;&quot;&quot;</span>
+    <span class="hljs-comment"># 选择模型的某一层作为水印载体</span>
+    target_layer = model.layer[<span class="hljs-number">0</span>]
+    
+    <span class="hljs-comment"># 将水印嵌入到模型的权重中</span>
+    <span class="hljs-keyword">with</span> torch.no_grad():
+        target_layer.weight += watermark * <span class="hljs-number">0.001</span>  <span class="hljs-comment"># 微小的水印权重</span>
+    
+    <span class="hljs-keyword">return</span> model
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">detect_model_watermark</span>(<span class="hljs-params">model, watermark</span>):
+    <span class="hljs-string">&quot;&quot;&quot;
+    检测模型中是否存在水印
+    model: 模型对象
+    watermark: 预期的水印数据（tensor）
+    &quot;&quot;&quot;</span>
+    <span class="hljs-comment"># 提取模型某一层的权重</span>
+    target_layer = model.layer[<span class="hljs-number">0</span>]
+    extracted_watermark = target_layer.weight[<span class="hljs-number">0</span>, <span class="hljs-number">0</span>:watermark.size(<span class="hljs-number">0</span>)]
+    
+    <span class="hljs-comment"># 检测水印是否存在（计算相似度）</span>
+    similarity = torch.cosine_similarity(
+        extracted_watermark.unsqueeze(<span class="hljs-number">0</span>),
+        watermark.unsqueeze(<span class="hljs-number">0</span>)
+    )
+    
+    <span class="hljs-keyword">return</span> similarity.item() &gt; <span class="hljs-number">0.9</span>  <span class="hljs-comment"># 相似度阈值</span>
+
+<span class="hljs-comment"># 示例</span>
+watermark = torch.randn(<span class="hljs-number">10</span>, <span class="hljs-number">10</span>)  <span class="hljs-comment"># 生成随机水印</span>
+watermarked_model = add_model_watermark(model, watermark)
+is_watermarked = detect_model_watermark(watermarked_model, watermark)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;模型中是否存在水印: <span class="hljs-subst">{is_watermarked}</span>&quot;</span>)
+</code></pre>
+<p><strong>对抗攻击防护</strong></p>
+<p>对抗攻击是指通过精心设计的输入样本欺骗模型，使模型输出错误的预测结果。</p>
+<p><strong>对抗样本防御</strong></p>
+<p><strong>对抗训练</strong></p>
+<ul>
+<li>在训练数据中加入对抗样本</li>
+<li>提高模型对对抗攻击的鲁棒性</li>
+</ul>
+<p><strong>输入净化</strong></p>
+<ul>
+<li>对输入数据进行净化处理</li>
+<li>移除对抗性扰动</li>
+</ul>
+<p><strong>模型集成</strong></p>
+<ul>
+<li>使用多个模型进行集成预测</li>
+<li>降低单个模型被攻击的风险</li>
+</ul>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> torch
+<span class="hljs-keyword">import</span> torch.nn.functional <span class="hljs-keyword">as</span> F
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">adversarial_training</span>(<span class="hljs-params">model, data, target, epsilon=<span class="hljs-number">0.01</span>, alpha=<span class="hljs-number">0.001</span>, num_iter=<span class="hljs-number">10</span></span>):
+    <span class="hljs-string">&quot;&quot;&quot;
+    对抗训练
+    model: 模型对象
+    data: 输入数据
+    target: 目标标签
+    epsilon: 扰动大小
+    alpha: 扰动步长
+    num_iter: 迭代次数
+    &quot;&quot;&quot;</span>
+    <span class="hljs-comment"># 创建对抗样本</span>
+    perturbed_data = data.clone().detach()
+    perturbed_data.requires_grad = <span class="hljs-literal">True</span>
+    
+    <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(num_iter):
+        <span class="hljs-comment"># 前向传播</span>
+        output = model(perturbed_data)
+        loss = F.cross_entropy(output, target)
+        
+        <span class="hljs-comment"># 反向传播</span>
+        model.zero_grad()
+        loss.backward()
+        
+        <span class="hljs-comment"># 计算扰动</span>
+        perturbation = alpha * perturbed_data.grad.sign()
+        
+        <span class="hljs-comment"># 更新对抗样本</span>
+        perturbed_data = perturbed_data + perturbation
+        
+        <span class="hljs-comment"># 限制扰动大小</span>
+        perturbed_data = torch.clamp(perturbed_data, data - epsilon, data + epsilon)
+        perturbed_data = torch.clamp(perturbed_data, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>)
+    
+    <span class="hljs-comment"># 使用对抗样本训练模型</span>
+    output = model(perturbed_data)
+    loss = F.cross_entropy(output, target)
+    
+    <span class="hljs-keyword">return</span> loss
+
+<span class="hljs-comment"># 示例</span>
+<span class="hljs-keyword">for</span> batch <span class="hljs-keyword">in</span> dataloader:
+    data, target = batch
+    loss = adversarial_training(model, data, target)
+    loss.backward()
+    optimizer.step()
+</code></pre>
+<p><strong>案例：模型安全防护实践</strong></p>
+<p>某应用建立了完整的模型安全防护体系：</p>
+<ul>
+<li><strong>模型加密</strong>：使用 AES-256 加密模型文件</li>
+<li><strong>模型混淆</strong>：混淆模型结构和算子名称</li>
+<li><strong>模型水印</strong>：在模型中嵌入水印，用于版权保护</li>
+<li><strong>对抗训练</strong>：在训练数据中加入对抗样本，提高鲁棒性</li>
+<li><strong>输入净化</strong>：对输入数据进行净化处理，移除对抗性扰动</li>
+</ul>
+<h3 id="1333-逆向工程防护" tabindex="-1">13.3.3 逆向工程防护 <a class="heading-anchor" href="#1333-逆向工程防护" aria-hidden="true">#</a></h3>
+<p>逆向工程防护是指防止攻击者通过分析应用或模型文件，提取模型参数、算法逻辑等敏感信息。</p>
+<p><strong>代码混淆</strong></p>
+<p>代码混淆是通过修改代码结构、重命名变量、插入垃圾代码等方式，使代码难以被理解和分析。</p>
+<p><strong>iOS 代码混淆</strong></p>
+<p>Xcode 提供了代码混淆功能，可以在编译时自动混淆代码。</p>
+<pre class="hljs"><code><span class="hljs-comment">// Swift 代码混淆示例</span>
+<span class="hljs-comment">// 在 Xcode Build Settings 中开启 &quot;Enable Obfuscation&quot;</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">DataManager</span> {
+    <span class="hljs-keyword">func</span> <span class="hljs-title function_">processUserData</span>(<span class="hljs-keyword">_</span> <span class="hljs-params">data</span>: [<span class="hljs-type">String</span>]) -&gt; [<span class="hljs-type">String</span>] {
+        <span class="hljs-comment">// 混淆后，变量名和方法名会被替换为无意义的名称</span>
+        <span class="hljs-keyword">var</span> result: [<span class="hljs-type">String</span>] <span class="hljs-operator">=</span> []
+        <span class="hljs-keyword">for</span> item <span class="hljs-keyword">in</span> data {
+            <span class="hljs-keyword">if</span> <span class="hljs-operator">!</span>item.isEmpty {
+                result.append(item.uppercased())
+            }
+        }
+        <span class="hljs-keyword">return</span> result
+    }
+}
+
+<span class="hljs-comment">// 混淆后可能变成：</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">a</span> {
+    <span class="hljs-keyword">func</span> <span class="hljs-title function_">b</span>(<span class="hljs-keyword">_</span> <span class="hljs-params">c</span>: [<span class="hljs-type">String</span>]) -&gt; [<span class="hljs-type">String</span>] {
+        <span class="hljs-keyword">var</span> d: [<span class="hljs-type">String</span>] <span class="hljs-operator">=</span> []
+        <span class="hljs-keyword">for</span> e <span class="hljs-keyword">in</span> c {
+            <span class="hljs-keyword">if</span> <span class="hljs-operator">!</span>e.isEmpty {
+                d.append(e.uppercased())
+            }
+        }
+        <span class="hljs-keyword">return</span> d
+    }
+}
+</code></pre>
+<p><strong>Android 代码混淆</strong></p>
+<p>Android 提供了 R8/ProGuard 混淆工具，可以在编译时自动混淆代码。</p>
+<pre class="hljs"><code><span class="hljs-comment">// build.gradle</span>
+android {
+    buildTypes {
+        release {
+            minifyEnabled <span class="hljs-keyword">true</span>
+            proguardFiles getDefaultProguardFile(<span class="hljs-string">&#x27;proguard-android-optimize.txt&#x27;</span>), <span class="hljs-string">&#x27;proguard-rules.pro&#x27;</span>
+        }
+    }
+}
+
+<span class="hljs-comment">// proguard-rules.pro</span>
+-keep <span class="hljs-keyword">class</span> com.example.model.Model { *; }
+-keepclassmembers <span class="hljs-keyword">class</span> com.example.model.Model {
+    <span class="hljs-keyword">public</span> *;
+}
+</code></pre>
+<p><strong>二进制加固</strong></p>
+<p>二进制加固是指对编译后的二进制文件进行加固处理，防止被逆向工程分析。</p>
+<p><strong>iOS 二进制加固</strong></p>
+<p>iOS 可以使用 MachO 加密、代码签名等技术加固二进制文件。</p>
+<p><strong>Android 二进制加固</strong></p>
+<p>Android 可以使用 Dex 加密、VMP（虚拟机保护）等技术加固二进制文件。</p>
+<p><strong>案例：逆向工程防护实践</strong></p>
+<p>某应用建立了完整的逆向工程防护体系：</p>
+<ul>
+<li><strong>代码混淆</strong>：混淆代码结构和变量名</li>
+<li><strong>二进制加固</strong>：加固编译后的二进制文件</li>
+<li><strong>反调试</strong>：检测调试器，防止动态分析</li>
+<li><strong>反模拟器</strong>：检测模拟器，防止在模拟器上分析</li>
+<li><strong>完整性校验</strong>：校验应用完整性，防止篡改</li>
+</ul>
+<h3 id="1334-安全审计与合规检查" tabindex="-1">13.3.4 安全审计与合规检查 <a class="heading-anchor" href="#1334-安全审计与合规检查" aria-hidden="true">#</a></h3>
+<p>安全审计与合规检查是指定期检查应用和数据的安全性和合规性，及时发现和修复安全问题。</p>
+<p><strong>安全审计</strong></p>
+<p><strong>日志记录</strong></p>
+<ul>
+<li>记录所有关键操作（如数据访问、模型加载、用户登录）</li>
+<li>记录安全事件（如登录失败、数据泄露尝试）</li>
+<li>日志应该包含时间、用户、操作、结果等信息</li>
+</ul>
+<p><strong>异常检测</strong></p>
+<ul>
+<li>检测异常行为（如大量数据导出、频繁登录失败）</li>
+<li>检测异常访问模式（如异常时间访问、异常地点访问）</li>
+<li>使用机器学习模型进行异常检测</li>
+</ul>
+<p><strong>安全评估</strong></p>
+<ul>
+<li>定期进行安全评估（如渗透测试、漏洞扫描）</li>
+<li>使用专业的安全评估工具（如 OWASP ZAP、Burp Suite）</li>
+<li>修复发现的安全问题</li>
+</ul>
+<p><strong>合规检查</strong></p>
+<p><strong>隐私合规检查</strong></p>
+<ul>
+<li>检查隐私政策是否完整和准确</li>
+<li>检查用户同意是否有效</li>
+<li>检查数据处理是否符合 GDPR、CCPA 等法规</li>
+</ul>
+<p><strong>安全合规检查</strong></p>
+<ul>
+<li>检查是否使用了安全的加密算法</li>
+<li>检查密钥管理是否安全</li>
+<li>检查是否有安全漏洞</li>
+</ul>
+<p><strong>案例：安全审计与合规检查实践</strong></p>
+<p>某应用建立了完整的安全审计与合规检查体系：</p>
+<ul>
+<li><strong>日志记录</strong>：记录所有关键操作和安全事件</li>
+<li><strong>异常检测</strong>：使用机器学习模型检测异常行为</li>
+<li><strong>安全评估</strong>：每季度进行一次渗透测试和漏洞扫描</li>
+<li><strong>隐私合规检查</strong>：每年进行一次隐私合规审计</li>
+<li><strong>安全培训</strong>：定期对开发人员进行安全培训</li>
+</ul>
+<hr>
+<h2 id="小结" tabindex="-1">小结 <a class="heading-anchor" href="#小结" aria-hidden="true">#</a></h2>
+<p>安全与隐私保护是端侧推理的核心优势，所有数据处理都在用户设备上完成，数据不出设备，天然满足 GDPR 等隐私法规的要求。本章介绍了端侧模型加密、数据隐私保护、安全合规要求的关键技术。端侧推理工程师需要建立完整的安全防护体系，包括模型加密、数据加密、敏感数据识别、隐私合规实践、模型安全防护、逆向工程防护、安全审计与合规检查等，确保应用和数据的安全性和合规性。</p>
+<p><strong>本章关键要点</strong></p>
+<ul>
+<li>端侧模型加密是保护模型知识产权的关键技术，包括模型加密原理、Apple CoreML 模型加密、Android 模型保护方案、加密密钥管理</li>
+<li>数据隐私保护是端侧推理的天然优势，包括数据不出设备、本地数据加密、敏感数据识别与处理、隐私合规实践</li>
+<li>安全合规要求包括 GDPR 等法规要求、模型安全防护、逆向工程防护、安全审计与合规检查</li>
+</ul>
+<p><strong>参考文献</strong></p>
+<ul>
+<li>Apple Data Protection: <a href="https://developer.apple.com/documentation/security/data_protection">https://developer.apple.com/documentation/security/data_protection</a></li>
+<li>Android Keystore: <a href="https://developer.android.com/training/articles/keystore">https://developer.android.com/training/articles/keystore</a></li>
+<li>GDPR 官方网站: <a href="https://gdpr.eu">https://gdpr.eu</a></li>
+<li>OWASP Mobile Security: <a href="https://owasp.org/www-project-mobile-security/">https://owasp.org/www-project-mobile-security/</a></li>
+</ul>
+<hr>
+<p><em>文档版本：v1.0</em>
+<em>最后更新：2026-03-13</em></p>
+</div> <nav class="pager"> <a class="pager__link" href="/model-inference-engineer/20-cloud-edge-collaboration/"> <span>上一篇</span> <strong>第十二章：端云协同架构</strong> </a> <a class="pager__link" href="/model-inference-engineer/A-terminology/"> <span>下一篇</span> <strong>附录 A：术语表</strong> </a> </nav> </article> </section>  </main> <footer class="site-footer"> <div class="site-footer__inner"> <p>Vinci Knowledge Base</p> <p>Source directory: <code>/Users/superone77/Documents/知识库/projects</code></p> </div> </footer> </div> </body></html>

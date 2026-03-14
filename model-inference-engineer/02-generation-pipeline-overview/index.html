@@ -1,0 +1,497 @@
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>生成式 LLM 推理主链路总览 | Vinci Knowledge Base</title><meta name="description" content="生成式 LLM 推理主链路总览 本文介绍生成式大语言模型（LLM）在端侧推理的完整链路，从文本编码到模型输出，涵盖所有关键环节。重点关注端侧环境下的特殊挑战，如首字延迟优化、KV Cache 内存占用、流式输出体验和多会话隔离。 推理链路全景 生成式 LLM 的推理链路可以分为两个主要阶段： Prefill（预填充） 和 Decode（解码） 。在端侧推理中"><meta name="generator" content="Vinci Knowledge Base"><link rel="stylesheet" href="/_astro/_doc_.CY2v1inF.css"></head> <body> <div class="page-shell"> <header class="site-header"> <div class="site-header__inner"> <a class="brand" href="/"> <span class="brand__eyebrow">GitHub Pages Knowledge Site</span> <span class="brand__name">Vinci Knowledge Base</span> </a> <nav class="site-nav"> <a href="/">Projects</a> </nav> </div> </header> <main class="page-main">  <section class="article-hero"> <div> <p class="eyebrow">Knowledge Article</p> <h1>生成式 LLM 推理主链路总览</h1> <p class="article-hero__breadcrumbs"> <a href="/">Home</a> <span>/</span> <a href="/model-inference-engineer/">端侧大模型推理工程师知识库</a> </p> </div> <div class="meta-card"> <p><strong>Project</strong> 端侧大模型推理工程师知识库</p> <p><strong>Source</strong> <code>knowledge/02-generation-pipeline-overview.md</code></p> <p><strong>Sections</strong> 42</p> </div> </section> <section class="content-grid"> <aside class="toc-card"> <p class="toc-card__title">本页目录</p> <ul class="toc-card__list"> <li class="toc-depth-1"> <a href="#生成式-llm-推理主链路总览">生成式 LLM 推理主链路总览</a> </li><li class="toc-depth-2"> <a href="#推理链路全景">推理链路全景</a> </li><li class="toc-depth-2"> <a href="#tokenizer-与文本编码">Tokenizer 与文本编码</a> </li><li class="toc-depth-3"> <a href="#tokenizer-的作用">Tokenizer 的作用</a> </li><li class="toc-depth-3"> <a href="#常见分词方法">常见分词方法</a> </li><li class="toc-depth-3"> <a href="#端侧-tokenizer-优化">端侧 Tokenizer 优化</a> </li><li class="toc-depth-3"> <a href="#编码与特殊-token">编码与特殊 Token</a> </li><li class="toc-depth-2"> <a href="#prompt-组织与拼接">Prompt 组织与拼接</a> </li><li class="toc-depth-3"> <a href="#prompt-的结构">Prompt 的结构</a> </li><li class="toc-depth-3"> <a href="#端侧-prompt-优化挑战">端侧 Prompt 优化挑战</a> </li><li class="toc-depth-2"> <a href="#prefill-与-decode-阶段">Prefill 与 Decode 阶段</a> </li><li class="toc-depth-3"> <a href="#prefill-阶段处理输入序列">Prefill 阶段：处理输入序列</a> </li><li class="toc-depth-3"> <a href="#decode-阶段逐-token-生成">Decode 阶段：逐 token 生成</a> </li><li class="toc-depth-3"> <a href="#性能指标对比">性能指标对比</a> </li><li class="toc-depth-2"> <a href="#sampling-策略与参数">Sampling 策略与参数</a> </li><li class="toc-depth-3"> <a href="#采样策略概述">采样策略概述</a> </li><li class="toc-depth-3"> <a href="#常见采样策略">常见采样策略</a> </li><li class="toc-depth-1"> <a href="#示例调整后的概率分布">示例：调整后的概率分布</a> </li><li class="toc-depth-3"> <a href="#端侧采样优化">端侧采样优化</a> </li><li class="toc-depth-3"> <a href="#采样参数对输出质量的影响">采样参数对输出质量的影响</a> </li><li class="toc-depth-2"> <a href="#streaming-输出与延迟优化">Streaming 输出与延迟优化</a> </li><li class="toc-depth-3"> <a href="#streaming-输出的优势">Streaming 输出的优势</a> </li><li class="toc-depth-3"> <a href="#端侧-streaming-实现">端侧 Streaming 实现</a> </li><li class="toc-depth-3"> <a href="#端侧-vs-云侧-streaming-对比">端侧 vs 云侧 Streaming 对比</a> </li><li class="toc-depth-2"> <a href="#session-state-与多轮对话">Session State 与多轮对话</a> </li><li class="toc-depth-3"> <a href="#会话状态的定义">会话状态的定义</a> </li><li class="toc-depth-3"> <a href="#多轮对话的-kv-cache-复用">多轮对话的 KV Cache 复用</a> </li><li class="toc-depth-1"> <a href="#伪代码kv-cache-复用">伪代码：KV Cache 复用</a> </li><li class="toc-depth-3"> <a href="#会话的生命周期">会话的生命周期</a> </li><li class="toc-depth-3"> <a href="#端侧会话隔离">端侧会话隔离</a> </li><li class="toc-depth-2"> <a href="#kv-cache-生命周期管理">KV Cache 生命周期管理</a> </li><li class="toc-depth-3"> <a href="#kv-cache-的作用">KV Cache 的作用</a> </li><li class="toc-depth-3"> <a href="#kv-cache-的内存占用分析">KV Cache 的内存占用分析</a> </li><li class="toc-depth-3"> <a href="#kv-cache-优化策略">KV Cache 优化策略</a> </li><li class="toc-depth-3"> <a href="#多会话的-kv-cache-管理">多会话的 KV Cache 管理</a> </li><li class="toc-depth-3"> <a href="#kv-cache-的生命周期">KV Cache 的生命周期</a> </li><li class="toc-depth-2"> <a href="#端侧推理特殊挑战总结">端侧推理特殊挑战总结</a> </li><li class="toc-depth-3"> <a href="#1-首字延迟ttft">1. 首字延迟（TTFT）</a> </li><li class="toc-depth-3"> <a href="#2-kv-cache-内存占用">2. KV Cache 内存占用</a> </li><li class="toc-depth-3"> <a href="#3-流式输出体验">3. 流式输出体验</a> </li><li class="toc-depth-3"> <a href="#4-会话隔离与管理">4. 会话隔离与管理</a> </li><li class="toc-depth-2"> <a href="#小结">小结</a> </li> </ul> </aside> <article class="prose-card"> <div class="prose"><h1 id="生成式-llm-推理主链路总览" tabindex="-1">生成式 LLM 推理主链路总览 <a class="heading-anchor" href="#生成式-llm-推理主链路总览" aria-hidden="true">#</a></h1>
+<p>本文介绍生成式大语言模型（LLM）在端侧推理的完整链路，从文本编码到模型输出，涵盖所有关键环节。重点关注端侧环境下的特殊挑战，如首字延迟优化、KV Cache 内存占用、流式输出体验和多会话隔离。</p>
+<hr>
+<h2 id="推理链路全景" tabindex="-1">推理链路全景 <a class="heading-anchor" href="#推理链路全景" aria-hidden="true">#</a></h2>
+<p>生成式 LLM 的推理链路可以分为两个主要阶段：<strong>Prefill（预填充）</strong> 和 <strong>Decode（解码）</strong>。在端侧推理中，这两个阶段的性能优化策略差异很大，需要分别关注。</p>
+<p>下图展示了完整的推理流程：</p>
+<pre class="hljs"><code>graph TD
+    A[用户输入] --&gt; B[Tokenizer 分词]
+    B --&gt; C{是否有历史对话?}
+    C --&gt;|是| D[加载会话 KV Cache]
+    C --&gt;|否| E[初始化 KV Cache]
+    D --&gt; F[组织 Prompt: 系统提示 + 历史消息 + 用户输入]
+    E --&gt; F
+    F --&gt; G[Prefill 阶段: 一次性处理完整输入序列]
+    G --&gt; H[生成初始 KV Cache]
+    H --&gt; I[Decode 阶段: 逐 token 自回归生成]
+    I --&gt; J{是否结束?}
+    J --&gt;|否| K[采样下一个 token]
+    K --&gt; L[扩展 KV Cache]
+    L --&gt; I
+    J --&gt;|是| M[输出完整文本]
+    M --&gt; N{用户继续对话?}
+    N --&gt;|是| O[保存当前 KV Cache 到会话]
+    N --&gt;|否| P[清理会话资源]
+    O --&gt; A
+</code></pre>
+<p><strong>端侧挑战</strong>：在端侧环境中，Prefill 阶段决定首字延迟（Time to First Token，TTFT），直接影响用户体验；Decode 阶段的每个 token 生成时间影响整体响应速度。同时，KV Cache 的内存占用是端侧推理的核心瓶颈，需要在多轮对话中精细管理。<strong>来源：<a href="http://RESEARCH.md">RESEARCH.md</a> 关键结论 - 大模型端侧推理的特殊挑战</strong></p>
+<hr>
+<h2 id="tokenizer-与文本编码" tabindex="-1">Tokenizer 与文本编码 <a class="heading-anchor" href="#tokenizer-与文本编码" aria-hidden="true">#</a></h2>
+<h3 id="tokenizer-的作用" tabindex="-1">Tokenizer 的作用 <a class="heading-anchor" href="#tokenizer-的作用" aria-hidden="true">#</a></h3>
+<p>Tokenizer 是推理链路的第一道关卡，负责将用户输入的文本转换成模型可理解的 token 序列（整数 ID）。这个过程看似简单，但对端侧推理的性能影响深远。</p>
+<h3 id="常见分词方法" tabindex="-1">常见分词方法 <a class="heading-anchor" href="#常见分词方法" aria-hidden="true">#</a></h3>
+<p>主流的分词方法包括：</p>
+<ul>
+<li><strong>BPE（Byte-Pair Encoding）</strong>：通过合并高频字节对构建词表，GPT 系列模型广泛使用</li>
+<li><strong>WordPiece</strong>：BERT 模型使用，与 BPE 类似但合并策略略有不同</li>
+<li><strong>SentencePiece</strong>：Google 开发的通用分词工具，支持多种分词算法</li>
+</ul>
+<p>分词方法的选择会影响：</p>
+<ul>
+<li><strong>词汇表大小</strong>：影响模型 embedding 层的内存占用</li>
+<li><strong>平均 token 数</strong>：同样的文本，不同分词方法产生的 token 数不同，直接影响计算量</li>
+<li><strong>分词速度</strong>：端侧设备上分词时间会占用整体延迟的一部分</li>
+</ul>
+<p><strong>来源：<a href="http://RESEARCH.md">RESEARCH.md</a> 关键结论 - Tokenizer：文本到 token 的分词过程，影响输入长度和内存占用</strong></p>
+<h3 id="端侧-tokenizer-优化" tabindex="-1">端侧 Tokenizer 优化 <a class="heading-anchor" href="#端侧-tokenizer-优化" aria-hidden="true">#</a></h3>
+<p>在端侧环境中，Tokenizer 优化重点关注：</p>
+<ol>
+<li><strong>词汇表压缩</strong>：使用更小的词汇表（如 3万 而非 10万）可显著减少 embedding 层内存占用</li>
+<li><strong>预处理缓存</strong>：对常用短语进行预分词和缓存，减少实时分词开销</li>
+<li><strong>并行分词</strong>：利用多核 CPU 并行处理长文本的分词</li>
+<li><strong>增量分词</strong>：对于流式输入，增量式分词可以降低首字延迟</li>
+</ol>
+<h3 id="编码与特殊-token" tabindex="-1">编码与特殊 Token <a class="heading-anchor" href="#编码与特殊-token" aria-hidden="true">#</a></h3>
+<p>除了常规文本 token，还需要处理特殊 token：</p>
+<ul>
+<li><strong>BOS（Beginning of Sequence）</strong>：序列开始标记</li>
+<li><strong>EOS（End of Sequence）</strong>：序列结束标记</li>
+<li><strong>PAD（Padding）</strong>：填充标记，用于批处理时的长度对齐</li>
+<li><strong>UNK（Unknown）</strong>：未知词标记</li>
+</ul>
+<p>这些特殊 token 在 prompt 组织阶段需要正确插入，否则会影响模型理解。</p>
+<hr>
+<h2 id="prompt-组织与拼接" tabindex="-1">Prompt 组织与拼接 <a class="heading-anchor" href="#prompt-组织与拼接" aria-hidden="true">#</a></h2>
+<h3 id="prompt-的结构" tabindex="-1">Prompt 的结构 <a class="heading-anchor" href="#prompt-的结构" aria-hidden="true">#</a></h3>
+<p>一个完整的 Prompt 通常包含以下部分：</p>
+<pre class="hljs"><code>[系统提示] + [历史对话] + [用户输入] + [可能的特殊标记]
+</code></pre>
+<h4>系统提示（System Prompt）</h4>
+<p>系统提示定义模型的角色和行为规则，例如：</p>
+<pre class="hljs"><code>你是一个友好的 AI 助手，负责帮助用户解决技术问题。请用简洁、准确的语言回答，避免冗余信息。
+</code></pre>
+<p>在端侧推理中，系统提示可以：</p>
+<ul>
+<li><strong>缩短提示长度</strong>：使用更简洁的描述减少 token 数量</li>
+<li><strong>内置应用提示</strong>：将应用特定的提示预置在模型中，避免每次请求都发送</li>
+<li><strong>动态调整</strong>：根据场景动态选择不同的系统提示（如&quot;专业模式&quot; vs “简洁模式”）</li>
+</ul>
+<p><strong>来源：<a href="http://RESEARCH.md">RESEARCH.md</a> 关键结论 - Prompt 组织：系统提示、用户输入、历史消息的拼接策略</strong></p>
+<h4>历史消息组织</h4>
+<p>多轮对话需要保留历史消息，但端侧内存有限，必须设计合理的截断策略：</p>
+<ul>
+<li><strong>窗口截断</strong>：保留最近 N 轮对话（如最近 5 轮）</li>
+<li><strong>重要性截断</strong>：根据消息的重要性评分，保留更相关的历史</li>
+<li><strong>上下文压缩</strong>：使用摘要或关键句提取压缩历史内容</li>
+<li><strong>滑动窗口</strong>：固定长度的上下文窗口，新消息进入时旧消息移出</li>
+</ul>
+<h4>用户输入处理</h4>
+<p>用户输入需要经过预处理：</p>
+<ul>
+<li><strong>文本清洗</strong>：去除无关的空格、换行、特殊字符</li>
+<li><strong>长度检查</strong>：超过模型最大长度时需要截断或分块</li>
+<li><strong>敏感信息过滤</strong>：端侧可以在本地过滤敏感信息，避免发送到云端</li>
+</ul>
+<h3 id="端侧-prompt-优化挑战" tabindex="-1">端侧 Prompt 优化挑战 <a class="heading-anchor" href="#端侧-prompt-优化挑战" aria-hidden="true">#</a></h3>
+<p><strong>首字延迟敏感</strong>：Prompt 越长，Prefill 阶段耗时越长。在端侧，用户对首字延迟更敏感，因此需要：</p>
+<ul>
+<li>预处理常用 prompt 模板</li>
+<li>避免冗余的系统提示</li>
+<li>精简历史消息</li>
+</ul>
+<p><strong>内存占用限制</strong>：Prompt 的 token 数直接影响 KV Cache 的初始大小，需要平衡上下文长度和内存占用。</p>
+<p><strong>来源：<a href="http://RESEARCH.md">RESEARCH.md</a> 关键结论 - Prefill 阶段：一次性处理长上下文，生成完整 KV Cache，对首字延迟（TTFT）影响大</strong></p>
+<hr>
+<h2 id="prefill-与-decode-阶段" tabindex="-1">Prefill 与 Decode 阶段 <a class="heading-anchor" href="#prefill-与-decode-阶段" aria-hidden="true">#</a></h2>
+<h3 id="prefill-阶段处理输入序列" tabindex="-1">Prefill 阶段：处理输入序列 <a class="heading-anchor" href="#prefill-阶段处理输入序列" aria-hidden="true">#</a></h3>
+<p>Prefill 阶段是模型一次性处理整个输入序列（包括系统提示、历史消息、用户输入）的过程。这个阶段的特点是：</p>
+<ul>
+<li><strong>计算密集</strong>：需要并行处理所有输入 token</li>
+<li><strong>一次性生成 KV Cache</strong>：为所有输入 token 生成完整的 Key-Value 缓存</li>
+<li><strong>决定首字延迟</strong>：Prefill 阶段的耗时直接决定用户看到第一个输出的时间</li>
+</ul>
+<h4>端侧 Prefill 优化</h4>
+<p>端侧环境下，Prefill 阶段的优化策略包括：</p>
+<ol>
+<li><strong>减少输入长度</strong>：精简系统提示和截断历史消息</li>
+<li><strong>批处理优化</strong>：对多个会话的 Prefill 任务进行批处理（如果并发量大）</li>
+<li><strong>硬件加速</strong>：使用 NPU 或 GPU 加速 Prefill 计算</li>
+<li><strong>预计算缓存</strong>：对常用的系统提示进行预计算并缓存 KV Cache</li>
+</ol>
+<p><strong>来源：<a href="http://RESEARCH.md">RESEARCH.md</a> 关键结论 - Prefill 阶段的特点与作用</strong></p>
+<h3 id="decode-阶段逐-token-生成" tabindex="-1">Decode 阶段：逐 token 生成 <a class="heading-anchor" href="#decode-阶段逐-token-生成" aria-hidden="true">#</a></h3>
+<p>Decode 阶段是自回归生成过程，每次生成一个 token，并将其添加到已生成序列中，继续生成下一个 token。这个阶段的特点是：</p>
+<ul>
+<li><strong>串行计算</strong>：每个 token 的生成依赖前一个 token 的结果，无法并行</li>
+<li><strong>KV Cache 扩展</strong>：每生成一个 token，需要扩展 KV Cache</li>
+<li><strong>持续输出</strong>：生成过程可以流式输出给用户，降低感知延迟</li>
+</ul>
+<h4>端侧 Decode 优化</h4>
+<p>端侧环境下，Decode 阶段的优化策略包括：</p>
+<ol>
+<li><strong>采样策略简化</strong>：使用 greedy sampling 或简化的 top-k 采样，减少计算开销</li>
+<li><strong>量化模型</strong>：使用 INT8 或 INT4 量化模型，提高推理速度</li>
+<li><strong>算子融合</strong>：将多个算子融合，减少内存访问</li>
+<li><strong>投机采样</strong>：用小模型预测，大模型验证，减少大模型推理次数</li>
+</ol>
+<p><strong>来源：<a href="http://RESEARCH.md">RESEARCH.md</a> 关键结论 - Decode 阶段：逐 token 自回归生成，每个 token 的生成时间影响响应速度</strong></p>
+<h3 id="性能指标对比" tabindex="-1">性能指标对比 <a class="heading-anchor" href="#性能指标对比" aria-hidden="true">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>计算模式</th>
+<th>端侧挑战</th>
+<th>关键指标</th>
+<th>优化策略</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Prefill</strong></td>
+<td>并行计算</td>
+<td>首字延迟敏感</td>
+<td>TTFT（首字延迟）</td>
+<td>减少输入长度、预计算、硬件加速</td>
+</tr>
+<tr>
+<td><strong>Decode</strong></td>
+<td>串行计算</td>
+<td>持续延迟敏感</td>
+<td>Token 生成时间</td>
+<td>量化、算子融合、投机采样</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="sampling-策略与参数" tabindex="-1">Sampling 策略与参数 <a class="heading-anchor" href="#sampling-策略与参数" aria-hidden="true">#</a></h2>
+<h3 id="采样策略概述" tabindex="-1">采样策略概述 <a class="heading-anchor" href="#采样策略概述" aria-hidden="true">#</a></h3>
+<p>Sampling 策略决定了模型如何从概率分布中选择下一个 token，直接影响输出的质量和多样性。</p>
+<h3 id="常见采样策略" tabindex="-1">常见采样策略 <a class="heading-anchor" href="#常见采样策略" aria-hidden="true">#</a></h3>
+<h4>贪婪采样（Greedy Sampling）</h4>
+<p>选择概率最高的 token 作为输出。</p>
+<ul>
+<li><strong>优点</strong>：生成速度快，输出确定性强</li>
+<li><strong>缺点</strong>：可能陷入重复循环，输出缺乏多样性</li>
+<li><strong>端侧适用性</strong>：适合对延迟敏感的应用，如实时翻译</li>
+</ul>
+<h4>温度采样（Temperature Sampling）</h4>
+<p>通过调整温度参数控制输出的随机性。</p>
+<ul>
+<li><strong>温度 = 0</strong>：等价于贪婪采样</li>
+<li><strong>温度 &gt; 1</strong>：增加随机性，输出更多样</li>
+<li><strong>温度 &lt; 1</strong>：减少随机性，输出更确定</li>
+</ul>
+<pre class="hljs"><code><span class="hljs-comment"># 示例：调整后的概率分布</span>
+adjusted_probs = logits ** (<span class="hljs-number">1</span> / temperature) / <span class="hljs-built_in">sum</span>(logits ** (<span class="hljs-number">1</span> / temperature))
+</code></pre>
+<ul>
+<li><strong>端侧适用性</strong>：适合创意写作、对话生成等需要多样性的场景</li>
+</ul>
+<h4>Top-k 采样</h4>
+<p>从概率最高的 k 个 token 中随机选择。</p>
+<ul>
+<li><strong>k 值选择</strong>：通常选择 40-50</li>
+<li><strong>优点</strong>：避免低概率 token 的干扰，输出质量更稳定</li>
+<li><strong>缺点</strong>：k 值过小会降低多样性</li>
+<li><strong>端侧适用性</strong>：平衡质量和多样性的通用策略</li>
+</ul>
+<h4>Top-p（Nucleus）采样</h4>
+<p>从累积概率达到 p 的最小 token 集合中随机选择。</p>
+<ul>
+<li><strong>p 值选择</strong>：通常选择 0.9-0.95</li>
+<li><strong>优点</strong>：动态调整候选集，适应不同模型输出</li>
+<li><strong>缺点</strong>：计算略复杂于 top-k</li>
+<li><strong>端侧适用性</strong>：适合需要自适应调整的场景</li>
+</ul>
+<p><strong>来源：<a href="http://RESEARCH.md">RESEARCH.md</a> 关键结论 - Sampling 策略：贪婪采样、温度、top-k、top-p 等策略影响输出质量和多样性</strong></p>
+<h3 id="端侧采样优化" tabindex="-1">端侧采样优化 <a class="heading-anchor" href="#端侧采样优化" aria-hidden="true">#</a></h3>
+<p>端侧环境下，采样策略的优化重点：</p>
+<ol>
+<li><strong>简化采样</strong>：使用 greedy 或简单的 top-k 采样，减少计算开销</li>
+<li><strong>预计算阈值</strong>：预计算 top-k 或 top-p 的阈值，避免实时排序</li>
+<li><strong>缓存概率分布</strong>：对常用 prompt 的概率分布进行缓存</li>
+<li><strong>动态调整</strong>：根据设备性能动态调整采样策略（如高负载时用 greedy）</li>
+</ol>
+<h3 id="采样参数对输出质量的影响" tabindex="-1">采样参数对输出质量的影响 <a class="heading-anchor" href="#采样参数对输出质量的影响" aria-hidden="true">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>推荐值（端侧）</th>
+<th>对输出的影响</th>
+<th>端侧优化建议</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Temperature</strong></td>
+<td>0.7-0.9</td>
+<td>温度越高，输出越随机</td>
+<td>动态调整，高性能设备用较高温度</td>
+</tr>
+<tr>
+<td><strong>Top-k</strong></td>
+<td>40-50</td>
+<td>k 值越大，输出越多样</td>
+<td>低端设备用较小的 k 值</td>
+</tr>
+<tr>
+<td><strong>Top-p</strong></td>
+<td>0.9-0.95</td>
+<td>p 值越小，输出越保守</td>
+<td>预计算阈值，避免实时排序</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="streaming-输出与延迟优化" tabindex="-1">Streaming 输出与延迟优化 <a class="heading-anchor" href="#streaming-输出与延迟优化" aria-hidden="true">#</a></h2>
+<h3 id="streaming-输出的优势" tabindex="-1">Streaming 输出的优势 <a class="heading-anchor" href="#streaming-输出的优势" aria-hidden="true">#</a></h3>
+<p>Streaming 输出是指模型在生成过程中逐 token 或逐片段地输出结果，而不是等待完整生成后再输出。这种方式的优点：</p>
+<ul>
+<li><strong>降低感知延迟</strong>：用户可以边生成边阅读，减少等待感</li>
+<li><strong>提升交互体验</strong>：实时看到输出，感觉更流畅</li>
+<li><strong>支持中断</strong>：用户可以在生成过程中中断，节省计算资源</li>
+</ul>
+<p><strong>来源：<a href="http://RESEARCH.md">RESEARCH.md</a> 关键结论 - Streaming 输出：流式推理可以降低用户感知延迟，但需要合理的分块策略</strong></p>
+<h3 id="端侧-streaming-实现" tabindex="-1">端侧 Streaming 实现 <a class="heading-anchor" href="#端侧-streaming-实现" aria-hidden="true">#</a></h3>
+<h4>分块策略</h4>
+<p>Streaming 输出需要确定合理的分块策略：</p>
+<ul>
+<li><strong>按 token 分块</strong>：每生成一个 token 就输出，实时性最强但网络开销大</li>
+<li><strong>按片段分块</strong>：每生成 N 个 token 或达到一定字数后输出，平衡实时性和开销</li>
+<li><strong>按句子分块</strong>：每生成完整句子后输出，保证输出可读性</li>
+</ul>
+<h4>延迟优化</h4>
+<p>端侧环境下，Streaming 输出的延迟优化包括：</p>
+<ol>
+<li><strong>减少首字延迟</strong>：优化 Prefill 阶段，让用户尽快看到第一个输出</li>
+<li><strong>降低生成延迟</strong>：优化 Decode 阶段，提高每个 token 的生成速度</li>
+<li><strong>平滑输出</strong>：使用缓冲策略避免输出卡顿</li>
+<li><strong>预加载资源</strong>：提前加载模型和依赖，避免启动延迟</li>
+</ol>
+<h4>用户体验优化</h4>
+<p>Streaming 输出的用户体验优化：</p>
+<ul>
+<li><strong>视觉反馈</strong>：显示生成进度或打字效果</li>
+<li><strong>中断支持</strong>：允许用户中断生成</li>
+<li><strong>重试机制</strong>：生成失败时自动重试</li>
+<li><strong>错误处理</strong>：优雅处理生成错误，避免影响整体体验</li>
+</ul>
+<h3 id="端侧-vs-云侧-streaming-对比" tabindex="-1">端侧 vs 云侧 Streaming 对比 <a class="heading-anchor" href="#端侧-vs-云侧-streaming-对比" aria-hidden="true">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>端侧 Streaming</th>
+<th>云侧 Streaming</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>首字延迟</strong></td>
+<td>受限于设备性能，通常较高</td>
+<td>网络延迟较低，但可能有排队延迟</td>
+</tr>
+<tr>
+<td><strong>生成速度</strong></td>
+<td>受限于设备性能，通常较慢</td>
+<td>云端算力充足，通常较快</td>
+</tr>
+<tr>
+<td><strong>网络依赖</strong></td>
+<td>无网络依赖</td>
+<td>依赖网络质量</td>
+</tr>
+<tr>
+<td><strong>隐私保护</strong></td>
+<td>数据不出设备</td>
+<td>数据需要上传到云端</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="session-state-与多轮对话" tabindex="-1">Session State 与多轮对话 <a class="heading-anchor" href="#session-state-与多轮对话" aria-hidden="true">#</a></h2>
+<h3 id="会话状态的定义" tabindex="-1">会话状态的定义 <a class="heading-anchor" href="#会话状态的定义" aria-hidden="true">#</a></h3>
+<p>会话状态（Session State）是指在一次多轮对话中需要保存的所有信息，包括：</p>
+<ul>
+<li><strong>历史消息</strong>：用户和模型的历史对话内容</li>
+<li><strong>KV Cache</strong>：已生成 token 的 Key-Value 缓存</li>
+<li><strong>系统提示</strong>：本轮对话使用的系统提示</li>
+<li><strong>上下文信息</strong>：如用户 ID、对话时间等</li>
+</ul>
+<p><strong>来源：<a href="http://RESEARCH.md">RESEARCH.md</a> 关键结论 - Session State：多轮对话的会话管理，需要高效存储和检索历史 KV Cache</strong></p>
+<h3 id="多轮对话的-kv-cache-复用" tabindex="-1">多轮对话的 KV Cache 复用 <a class="heading-anchor" href="#多轮对话的-kv-cache-复用" aria-hidden="true">#</a></h3>
+<p>在多轮对话中，复用 KV Cache 可以显著提升性能：</p>
+<ul>
+<li><strong>避免重复计算</strong>：历史消息的 KV Cache 可以直接复用，无需重新 Prefill</li>
+<li><strong>降低首字延迟</strong>：新对话的首字延迟大幅降低</li>
+<li><strong>减少内存开销</strong>：不需要为每轮对话重新分配 KV Cache</li>
+</ul>
+<h4>KV Cache 复用的实现</h4>
+<pre class="hljs"><code><span class="hljs-comment"># 伪代码：KV Cache 复用</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">generate_with_cache</span>(<span class="hljs-params">session_id, new_input</span>):
+    <span class="hljs-comment"># 从会话中加载历史 KV Cache</span>
+    kv_cache = session_manager.get_kv_cache(session_id)
+
+    <span class="hljs-comment"># 只对新输入进行 Prefill</span>
+    new_tokens = tokenizer.encode(new_input)
+    new_kv_cache = prefill(new_tokens, kv_cache)
+
+    <span class="hljs-comment"># Decode 阶段复用整个 KV Cache</span>
+    output_tokens = decode(new_kv_cache)
+
+    <span class="hljs-comment"># 更新会话的 KV Cache</span>
+    session_manager.update_kv_cache(session_id, new_kv_cache)
+
+    <span class="hljs-keyword">return</span> tokenizer.decode(output_tokens)
+</code></pre>
+<h3 id="会话的生命周期" tabindex="-1">会话的生命周期 <a class="heading-anchor" href="#会话的生命周期" aria-hidden="true">#</a></h3>
+<p>端侧环境下，会话的生命周期管理需要考虑：</p>
+<h4>会话创建</h4>
+<ul>
+<li><strong>新会话</strong>：用户开始新的对话时，初始化新的会话状态</li>
+<li><strong>会话复用</strong>：用户继续之前的对话时，从存储中恢复会话状态</li>
+</ul>
+<h4>会话更新</h4>
+<ul>
+<li><strong>KV Cache 扩展</strong>：每轮对话后，扩展 KV Cache</li>
+<li><strong>历史消息追加</strong>：将本轮对话追加到历史消息</li>
+<li><strong>上下文管理</strong>：根据策略截断历史消息，控制上下文长度</li>
+</ul>
+<h4>会话清理</h4>
+<ul>
+<li><strong>会话结束</strong>：用户明确结束对话时，清理会话资源</li>
+<li><strong>会话超时</strong>：会话长时间无活动时，自动清理</li>
+<li><strong>内存压力</strong>：内存不足时，清理低优先级会话</li>
+</ul>
+<p><strong>来源：<a href="http://RESEARCH.md">RESEARCH.md</a> 关键结论 - KV Cache 生命周期：创建、扩展、复用、清理</strong></p>
+<h3 id="端侧会话隔离" tabindex="-1">端侧会话隔离 <a class="heading-anchor" href="#端侧会话隔离" aria-hidden="true">#</a></h3>
+<p>端侧环境下，多个会话需要隔离管理：</p>
+<ul>
+<li><strong>独立 KV Cache</strong>：每个会话维护独立的 KV Cache</li>
+<li><strong>内存隔离</strong>：会话之间共享内存池，但不会互相干扰</li>
+<li><strong>并发控制</strong>：控制并发会话数量，避免内存溢出</li>
+<li><strong>会话优先级</strong>：根据应用场景设置会话优先级，内存不足时优先清理低优先级会话</li>
+</ul>
+<hr>
+<h2 id="kv-cache-生命周期管理" tabindex="-1">KV Cache 生命周期管理 <a class="heading-anchor" href="#kv-cache-生命周期管理" aria-hidden="true">#</a></h2>
+<h3 id="kv-cache-的作用" tabindex="-1">KV Cache 的作用 <a class="heading-anchor" href="#kv-cache-的作用" aria-hidden="true">#</a></h3>
+<p>KV Cache（Key-Value Cache）是 Transformer 模型的关键优化，用于存储自注意力机制中的 Key 和 Value 矩阵。在生成式推理中，KV Cache 可以避免重复计算历史 token 的注意力，大幅提升性能。</p>
+<p><strong>来源：<a href="http://RESEARCH.md">RESEARCH.md</a> 关键结论 - KV Cache 生命周期：新会话创建、每轮对话扩展、会话清理、内存回收</strong></p>
+<h3 id="kv-cache-的内存占用分析" tabindex="-1">KV Cache 的内存占用分析 <a class="heading-anchor" href="#kv-cache-的内存占用分析" aria-hidden="true">#</a></h3>
+<p>KV Cache 的内存占用是端侧推理的核心挑战。对于一个包含 L 层、隐藏维度为 H、注意力头数为 A 的模型，每个 token 的 KV Cache 占用为：</p>
+<pre class="hljs"><code>KV Cache 内存占用（每 token） = 2 × L × H × A × sizeof(dtype)
+</code></pre>
+<p>其中：</p>
+<ul>
+<li><code>2</code> 表示 Key 和 Value 两个矩阵</li>
+<li><code>L</code> 是层数</li>
+<li><code>H</code> 是隐藏维度</li>
+<li><code>A</code> 是注意力头数</li>
+<li><code>sizeof(dtype)</code> 是数据类型大小（FP16 为 2 字节，INT8 为 1 字节）</li>
+</ul>
+<p><strong>示例</strong>：对于一个 32 层、隐藏维度 4096、32 个注意力头的模型，使用 FP16 类型时，每个 token 的 KV Cache 占用约为 8 MB。</p>
+<p>如果上下文长度为 2048 tokens，总 KV Cache 占用约为 16 GB，这在端侧设备上难以承受。</p>
+<p><strong>来源：<a href="http://RESEARCH.md">RESEARCH.md</a> 关键结论 - KV Cache 的内存占用分析</strong></p>
+<h3 id="kv-cache-优化策略" tabindex="-1">KV Cache 优化策略 <a class="heading-anchor" href="#kv-cache-优化策略" aria-hidden="true">#</a></h3>
+<p>端侧环境下，KV Cache 的优化策略包括：</p>
+<h4>1. 量化 KV Cache</h4>
+<p>将 KV Cache 从 FP16 量化到 INT8，可减少 50% 的内存占用：</p>
+<ul>
+<li><strong>优点</strong>：内存占用大幅降低，精度损失较小</li>
+<li><strong>缺点</strong>：量化计算可能略微增加延迟</li>
+<li><strong>适用性</strong>：适合内存敏感的场景</li>
+</ul>
+<h4>2. KV Cache 压缩</h4>
+<p>使用压缩算法减少 KV Cache 的内存占用：</p>
+<ul>
+<li><strong>稀疏化</strong>：保留最重要的 KV pairs，丢弃低重要性的</li>
+<li><strong>低秩分解</strong>：将 KV Cache 分解为低秩矩阵</li>
+<li><strong>共享 Key/Value</strong>：在多头注意力中共享部分 Key/Value</li>
+</ul>
+<p><strong>来源：<a href="http://RESEARCH.md">RESEARCH.md</a> 关键结论 - KV Cache 优化策略</strong></p>
+<h4>3. 滑动窗口</h4>
+<p>限制 KV Cache 只保留最近的 N 个 tokens：</p>
+<ul>
+<li><strong>优点</strong>：内存占用可控，适合长对话</li>
+<li><strong>缺点</strong>：丢失早期上下文，可能影响理解</li>
+<li><strong>适用性</strong>：适合对话类应用，早期内容对当前轮次影响较小</li>
+</ul>
+<h4>4. 分层 KV Cache</h4>
+<p>将模型分层，不同层使用不同长度的 KV Cache：</p>
+<ul>
+<li><strong>浅层</strong>：使用较短的 KV Cache（如最近 512 tokens）</li>
+<li><strong>深层</strong>：使用较长的 KV Cache（如最近 2048 tokens）</li>
+</ul>
+<p>这种策略可以在保持模型性能的同时降低内存占用。</p>
+<h4>5. KV Cache Offloading</h4>
+<p>将部分 KV Cache 卸载到磁盘或云端：</p>
+<ul>
+<li><strong>优点</strong>：大幅降低内存占用</li>
+<li><strong>缺点</strong>：访问速度变慢，影响推理性能</li>
+<li><strong>适用性</strong>：适合内存极度受限的场景，如移动设备</li>
+</ul>
+<h3 id="多会话的-kv-cache-管理" tabindex="-1">多会话的 KV Cache 管理 <a class="heading-anchor" href="#多会话的-kv-cache-管理" aria-hidden="true">#</a></h3>
+<p>端侧环境下，多个会话的 KV Cache 管理策略：</p>
+<ol>
+<li><strong>内存池管理</strong>：预先分配固定大小的内存池，所有会话共享</li>
+<li><strong>LRU 缓存</strong>：使用最近最少使用策略管理 KV Cache，内存不足时自动清理</li>
+<li><strong>会话优先级</strong>：根据应用场景设置会话优先级，优先清理低优先级会话的 KV Cache</li>
+<li><strong>动态调整</strong>：根据设备内存压力动态调整 KV Cache 大小</li>
+</ol>
+<h3 id="kv-cache-的生命周期" tabindex="-1">KV Cache 的生命周期 <a class="heading-anchor" href="#kv-cache-的生命周期" aria-hidden="true">#</a></h3>
+<p>下图展示了 KV Cache 在多轮对话中的完整生命周期：</p>
+<pre class="hljs"><code>stateDiagram-v2
+    [*] --&gt; 初始化: 新会话创建
+    初始化 --&gt; Prefill: 用户输入
+    Prefill --&gt; 首次生成: 生成初始 KV Cache
+    首次生成 --&gt; 扩展: 用户继续对话
+    扩展 --&gt; 扩展: KV Cache 持续扩展
+    扩展 --&gt; 复用: 新会话复用历史 KV Cache
+    复用 --&gt; 清理: 会话结束或超时
+    清理 --&gt; [*]: 释放 KV Cache
+</code></pre>
+<p><strong>来源：<a href="http://RESEARCH.md">RESEARCH.md</a> 关键结论 - KV Cache 生命周期：创建、扩展、复用、清理</strong></p>
+<hr>
+<h2 id="端侧推理特殊挑战总结" tabindex="-1">端侧推理特殊挑战总结 <a class="heading-anchor" href="#端侧推理特殊挑战总结" aria-hidden="true">#</a></h2>
+<p>生成式 LLM 在端侧推理面临的特殊挑战主要集中在以下几个方面：</p>
+<h3 id="1-首字延迟ttft" tabindex="-1">1. 首字延迟（TTFT） <a class="heading-anchor" href="#1-首字延迟ttft" aria-hidden="true">#</a></h3>
+<ul>
+<li><strong>挑战</strong>：Prefill 阶段耗时直接影响用户看到第一个输出的时间</li>
+<li><strong>优化</strong>：减少输入长度、预计算、硬件加速</li>
+<li><strong>目标</strong>：首字延迟控制在 500ms 以内（移动设备）</li>
+</ul>
+<h3 id="2-kv-cache-内存占用" tabindex="-1">2. KV Cache 内存占用 <a class="heading-anchor" href="#2-kv-cache-内存占用" aria-hidden="true">#</a></h3>
+<ul>
+<li><strong>挑战</strong>：KV Cache 占用大量内存，端侧设备内存有限</li>
+<li><strong>优化</strong>：量化、压缩、滑动窗口、分层 KV Cache、Offloading</li>
+<li><strong>目标</strong>：在 4GB-8GB 内存的设备上支持 2K-4K 上下文长度</li>
+</ul>
+<h3 id="3-流式输出体验" tabindex="-1">3. 流式输出体验 <a class="heading-anchor" href="#3-流式输出体验" aria-hidden="true">#</a></h3>
+<ul>
+<li><strong>挑战</strong>：Streaming 输出需要平滑流畅，避免卡顿</li>
+<li><strong>优化</strong>：合理的分块策略、缓冲机制、预加载资源</li>
+<li><strong>目标</strong>：输出流畅，无明显停顿</li>
+</ul>
+<h3 id="4-会话隔离与管理" tabindex="-1">4. 会话隔离与管理 <a class="heading-anchor" href="#4-会话隔离与管理" aria-hidden="true">#</a></h3>
+<ul>
+<li><strong>挑战</strong>：多会话需要隔离管理，内存不足时需智能清理</li>
+<li><strong>优化</strong>：内存池管理、LRU 缓存、会话优先级、动态调整</li>
+<li><strong>目标</strong>：支持 3-5 个并发会话，会话切换时间 &lt; 100ms</li>
+</ul>
+<p><strong>来源：<a href="http://RESEARCH.md">RESEARCH.md</a> 关键结论 - 大模型端侧推理的特殊挑战</strong></p>
+<hr>
+<h2 id="小结" tabindex="-1">小结 <a class="heading-anchor" href="#小结" aria-hidden="true">#</a></h2>
+<p>生成式 LLM 的推理链路是一个复杂的系统工程，涉及文本编码、Prompt 组织、Prefill/Decode、Sampling、Streaming、会话管理等多个环节。在端侧环境下，这些环节都面临独特的挑战：</p>
+<ul>
+<li><strong>Tokenizer</strong>：影响输入长度和内存占用，需要优化词汇表和分词算法</li>
+<li><strong>Prompt 组织</strong>：需要在上下文长度和内存占用之间取得平衡</li>
+<li><strong>Prefill 与 Decode</strong>：两个阶段的优化策略不同，需要分别关注</li>
+<li><strong>Sampling</strong>：需要在输出质量和多样性之间权衡</li>
+<li><strong>Streaming</strong>：需要合理的分块策略，降低用户感知延迟</li>
+<li><strong>Session State</strong>：需要高效存储和检索历史 KV Cache</li>
+<li><strong>KV Cache</strong>：是端侧推理的核心瓶颈，需要精细的生命周期管理</li>
+</ul>
+<p>下一章将详细介绍端侧硬件加速器，包括 NPU、GPU、CPU 的能力与特性，以及异构计算调度策略。</p>
+</div> <nav class="pager"> <a class="pager__link" href="/model-inference-engineer/01-edge-llm-inference-overview/"> <span>上一篇</span> <strong>端侧大模型推理全景总览</strong> </a> <a class="pager__link" href="/model-inference-engineer/03-hardware-accelerators-overview/"> <span>下一篇</span> <strong>端侧硬件加速器总览</strong> </a> </nav> </article> </section>  </main> <footer class="site-footer"> <div class="site-footer__inner"> <p>Vinci Knowledge Base</p> <p>Source directory: <code>/Users/superone77/Documents/知识库/projects</code></p> </div> </footer> </div> </body></html>

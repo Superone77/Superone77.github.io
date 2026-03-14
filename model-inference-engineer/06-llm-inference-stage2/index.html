@@ -1,0 +1,298 @@
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>端侧 LLM 推理链路进阶：Streaming、Session 与 KV Cache 生命周期 | Vinci Knowledge Base</title><meta name="description" content="端侧 LLM 推理链路进阶：Streaming、Session 与 KV Cache 生命周期 端侧 LLM 推理的核心挑战不仅在于单次推理的性能，更在于 多轮对话的内存管理 和 用户感知延迟的优化 。Streaming 输出、Session State 管理和 KV Cache 生命周期是端侧推理进阶优化的关键。 Streaming 输出与延迟优化 流式推"><meta name="generator" content="Vinci Knowledge Base"><link rel="stylesheet" href="/_astro/_doc_.CY2v1inF.css"></head> <body> <div class="page-shell"> <header class="site-header"> <div class="site-header__inner"> <a class="brand" href="/"> <span class="brand__eyebrow">GitHub Pages Knowledge Site</span> <span class="brand__name">Vinci Knowledge Base</span> </a> <nav class="site-nav"> <a href="/">Projects</a> </nav> </div> </header> <main class="page-main">  <section class="article-hero"> <div> <p class="eyebrow">Knowledge Article</p> <h1>端侧 LLM 推理链路进阶：Streaming、Session 与 KV Cache 生命周期</h1> <p class="article-hero__breadcrumbs"> <a href="/">Home</a> <span>/</span> <a href="/model-inference-engineer/">端侧大模型推理工程师知识库</a> </p> </div> <div class="meta-card"> <p><strong>Project</strong> 端侧大模型推理工程师知识库</p> <p><strong>Source</strong> <code>knowledge/06-llm-inference-stage2.md</code></p> <p><strong>Sections</strong> 17</p> </div> </section> <section class="content-grid"> <aside class="toc-card"> <p class="toc-card__title">本页目录</p> <ul class="toc-card__list"> <li class="toc-depth-1"> <a href="#端侧-llm-推理链路进阶streamingsession-与-kv-cache-生命周期">端侧 LLM 推理链路进阶：Streaming、Session 与 KV Cache 生命周期</a> </li><li class="toc-depth-2"> <a href="#streaming-输出与延迟优化">Streaming 输出与延迟优化</a> </li><li class="toc-depth-3"> <a href="#流式推理的优势">流式推理的优势</a> </li><li class="toc-depth-3"> <a href="#分块输出策略">分块输出策略</a> </li><li class="toc-depth-3"> <a href="#用户感知延迟优化">用户感知延迟优化</a> </li><li class="toc-depth-3"> <a href="#服务端与客户端流式配合">服务端与客户端流式配合</a> </li><li class="toc-depth-2"> <a href="#session-state-与多轮对话">Session State 与多轮对话</a> </li><li class="toc-depth-3"> <a href="#会话状态的定义与管理">会话状态的定义与管理</a> </li><li class="toc-depth-3"> <a href="#多轮对话的-kv-cache-复用">多轮对话的 KV Cache 复用</a> </li><li class="toc-depth-3"> <a href="#会话的生命周期">会话的生命周期</a> </li><li class="toc-depth-3"> <a href="#会话并发与隔离">会话并发与隔离</a> </li><li class="toc-depth-2"> <a href="#kv-cache-生命周期管理">KV Cache 生命周期管理</a> </li><li class="toc-depth-3"> <a href="#kv-cache-的创建与初始化">KV Cache 的创建与初始化</a> </li><li class="toc-depth-3"> <a href="#每轮对话的-kv-cache-扩展">每轮对话的 KV Cache 扩展</a> </li><li class="toc-depth-3"> <a href="#kv-cache-的清理与回收">KV Cache 的清理与回收</a> </li><li class="toc-depth-3"> <a href="#多会话的-kv-cache-管理">多会话的 KV Cache 管理</a> </li><li class="toc-depth-2"> <a href="#总结">总结</a> </li> </ul> </aside> <article class="prose-card"> <div class="prose"><h1 id="端侧-llm-推理链路进阶streamingsession-与-kv-cache-生命周期" tabindex="-1">端侧 LLM 推理链路进阶：Streaming、Session 与 KV Cache 生命周期 <a class="heading-anchor" href="#端侧-llm-推理链路进阶streamingsession-与-kv-cache-生命周期" aria-hidden="true">#</a></h1>
+<p>端侧 LLM 推理的核心挑战不仅在于单次推理的性能，更在于<strong>多轮对话的内存管理</strong>和<strong>用户感知延迟的优化</strong>。Streaming 输出、Session State 管理和 KV Cache 生命周期是端侧推理进阶优化的关键。</p>
+<hr>
+<h2 id="streaming-输出与延迟优化" tabindex="-1">Streaming 输出与延迟优化 <a class="heading-anchor" href="#streaming-输出与延迟优化" aria-hidden="true">#</a></h2>
+<h3 id="流式推理的优势" tabindex="-1">流式推理的优势 <a class="heading-anchor" href="#流式推理的优势" aria-hidden="true">#</a></h3>
+<p>流式推理（Streaming）是指在推理过程中逐 token 生成并输出，而不是等待全部生成完成后一次性输出。流式推理的优势：</p>
+<ul>
+<li><strong>降低用户感知延迟</strong>：第一个 token 的输出时间（TTFT）决定了用户感知的响应速度，流式推理可以在 Prefill 阶段完成后立即输出第一个 token</li>
+<li><strong>提高用户体验</strong>：用户可以实时看到生成过程，减少等待焦虑</li>
+<li><strong>支持长文本生成</strong>：对于长文本生成任务，流式推理可以让用户提前看到部分结果，即使生成未完成</li>
+<li><strong>节省内存</strong>：不需要缓存全部生成结果，逐 token 输出后可释放内存</li>
+</ul>
+<p>端侧推理的流式输出优势更明显：端侧设备通常网络不稳定，流式输出可以减少用户等待时间，提升用户体验。</p>
+<h3 id="分块输出策略" tabindex="-1">分块输出策略 <a class="heading-anchor" href="#分块输出策略" aria-hidden="true">#</a></h3>
+<p>流式推理的分块输出策略直接影响用户感知延迟和性能：</p>
+<p><strong>1. 单 token 输出</strong></p>
+<ul>
+<li><strong>优点</strong>：延迟最低，用户最快看到第一个 token</li>
+<li><strong>缺点</strong>：频繁输出导致网络传输开销大，增加 UI 刷新压力</li>
+<li><strong>适用场景</strong>：网络稳定、UI 刷新开销小的端侧推理</li>
+</ul>
+<p><strong>2. 固定块大小输出</strong></p>
+<ul>
+<li><strong>优点</strong>：平衡延迟和性能，减少网络传输和 UI 刷新开销</li>
+<li><strong>缺点</strong>：第一个 token 的输出时间略高于单 token 输出</li>
+<li><strong>适用场景</strong>：网络不稳定、UI 刷新开销大的端侧推理</li>
+<li><strong>推荐块大小</strong>：2-4 个 token（根据网络和 UI 能力调整）</li>
+</ul>
+<p><strong>3. 动态块大小输出</strong></p>
+<ul>
+<li><strong>优点</strong>：根据网络状况和生成速度动态调整块大小，优化用户体验</li>
+<li><strong>缺点</strong>：实现复杂，需要实时监控网络和生成速度</li>
+<li><strong>适用场景</strong>：网络波动大、生成速度不稳定的环境</li>
+</ul>
+<p>端侧推理的分块输出策略需要综合考虑：</p>
+<ul>
+<li><strong>网络状况</strong>：网络不稳定时使用固定块大小，网络稳定时使用单 token 输出</li>
+<li><strong>UI 刷新开销</strong>：UI 刷新开销大时使用固定块大小，UI 刷新开销小时使用单 token 输出</li>
+<li><strong>生成速度</strong>：生成速度快时使用大块大小，生成速度慢时使用小块大小</li>
+</ul>
+<h3 id="用户感知延迟优化" tabindex="-1">用户感知延迟优化 <a class="heading-anchor" href="#用户感知延迟优化" aria-hidden="true">#</a></h3>
+<p>用户感知延迟（Perceived Latency）是流式推理的关键指标，优化用户感知延迟需要从多个维度考虑：</p>
+<p><strong>1. 首字延迟（TTFT）优化</strong></p>
+<ul>
+<li><strong>缩短系统提示</strong>：系统提示越短，Prefill 阶段时间越短，TTFT 越小</li>
+<li><strong>优化 Prefill 阶段</strong>：使用 NPU/GPU 进行 Prefill 阶段，提升计算效率</li>
+<li><strong>异步 Prefill</strong>：用户输入到达前，提前 Prefill，减少用户感知延迟</li>
+<li><strong>热点缓存</strong>：缓存常用系统提示的 KV Cache，避免重复计算</li>
+</ul>
+<p><strong>2. 分块输出优化</strong></p>
+<ul>
+<li><strong>选择合适的块大小</strong>：根据网络状况和 UI 刷新开销选择合适的块大小</li>
+<li><strong>动态调整块大小</strong>：根据网络状况和生成速度动态调整块大小</li>
+<li><strong>预输出部分内容</strong>：在 Prefill 阶段完成后，先输出系统提示等固定内容</li>
+</ul>
+<p><strong>3. UI 优化</strong></p>
+<ul>
+<li><strong>异步渲染</strong>：使用异步渲染，避免阻塞主线程</li>
+<li><strong>增量渲染</strong>：使用增量渲染，避免全量刷新</li>
+<li><strong>动画过渡</strong>：使用动画过渡，平滑 token 生成过程，减少用户感知延迟</li>
+</ul>
+<p><strong>4. 用户交互优化</strong></p>
+<ul>
+<li><strong>提前加载模型</strong>：用户交互前提前加载模型，减少响应时间</li>
+<li><strong>预测用户输入</strong>：根据上下文预测用户输入，提前 Prefill</li>
+<li><strong>缓存对话上下文</strong>：缓存对话上下文，减少重复计算</li>
+</ul>
+<h3 id="服务端与客户端流式配合" tabindex="-1">服务端与客户端流式配合 <a class="heading-anchor" href="#服务端与客户端流式配合" aria-hidden="true">#</a></h3>
+<p>对于端云协同场景，服务端与客户端的流式配合需要考虑：</p>
+<p><strong>1. 服务端流式输出</strong></p>
+<ul>
+<li><strong>服务端逐 token 生成</strong>：服务端逐 token 生成并输出，减少服务端延迟</li>
+<li><strong>服务端压缩输出</strong>：服务端压缩输出，减少网络传输开销</li>
+<li><strong>服务端缓存 KV Cache</strong>：服务端缓存 KV Cache，支持多轮对话</li>
+</ul>
+<p><strong>2. 客户端流式接收</strong></p>
+<ul>
+<li><strong>客户端逐 token 接收</strong>：客户端逐 token 接收并渲染，减少客户端延迟</li>
+<li><strong>客户端缓存接收</strong>：客户端缓存接收结果，支持离线查看</li>
+<li><strong>客户端反馈机制</strong>：客户端实时反馈生成进度，提升用户体验</li>
+</ul>
+<p><strong>3. 端云协同流式</strong></p>
+<ul>
+<li><strong>端侧优先流式</strong>：优先使用端侧推理，流式输出；端侧推理失败时降级到云侧流式</li>
+<li><strong>云侧流式降级</strong>：云侧推理流式输出时，降级为批量输出，减少网络传输开销</li>
+<li><strong>端云混合流式</strong>：端侧处理简单请求，云侧处理复杂请求，混合流式输出</li>
+</ul>
+<p>端侧推理的流式输出优化需要综合考虑端侧设备性能、网络状况、UI 能力等因素，找到最佳平衡点。</p>
+<hr>
+<h2 id="session-state-与多轮对话" tabindex="-1">Session State 与多轮对话 <a class="heading-anchor" href="#session-state-与多轮对话" aria-hidden="true">#</a></h2>
+<h3 id="会话状态的定义与管理" tabindex="-1">会话状态的定义与管理 <a class="heading-anchor" href="#会话状态的定义与管理" aria-hidden="true">#</a></h3>
+<p>会话状态（Session State）是多轮对话的核心概念，定义了：</p>
+<ul>
+<li><strong>当前会话的上下文</strong>：包括系统提示、历史消息、当前用户输入</li>
+<li><strong>KV Cache 状态</strong>：Prefill 阶段生成的 KV Cache，用于多轮对话的复用</li>
+<li><strong>会话生命周期</strong>：会话的创建、激活、挂起、销毁</li>
+</ul>
+<p>端侧推理的会话状态管理需要考虑：</p>
+<ul>
+<li><strong>内存限制</strong>：端侧设备内存有限，需要限制并发会话数</li>
+<li><strong>性能优化</strong>：会话切换时需要高效加载和卸载 KV Cache</li>
+<li><strong>隐私保护</strong>：会话状态可能包含敏感信息，需要加密存储</li>
+</ul>
+<p><strong>会话状态的定义</strong></p>
+<pre class="hljs"><code><span class="hljs-keyword">class</span> <span class="hljs-title class_">SessionState</span>:
+    session_id: <span class="hljs-built_in">str</span>              <span class="hljs-comment"># 会话唯一标识</span>
+    system_prompt: <span class="hljs-built_in">str</span>           <span class="hljs-comment"># 系统提示</span>
+    messages: <span class="hljs-type">List</span>[Message]       <span class="hljs-comment"># 历史消息列表</span>
+    kv_cache: KVCache            <span class="hljs-comment"># KV Cache 状态</span>
+    created_at: <span class="hljs-built_in">float</span>            <span class="hljs-comment"># 会话创建时间</span>
+    last_active_at: <span class="hljs-built_in">float</span>        <span class="hljs-comment"># 会话最后活跃时间</span>
+    is_active: <span class="hljs-built_in">bool</span>              <span class="hljs-comment"># 会话是否活跃</span>
+</code></pre>
+<p><strong>会话状态的管理</strong></p>
+<ul>
+<li><strong>会话创建</strong>：用户首次交互时创建新会话，初始化系统提示和历史消息</li>
+<li><strong>会话激活</strong>：用户切换到已有会话时，激活会话，加载 KV Cache</li>
+<li><strong>会话挂起</strong>：用户离开会话时，挂起会话，保留 KV Cache，释放部分资源</li>
+<li><strong>会话销毁</strong>：会话超时或用户主动删除时，销毁会话，释放 KV Cache</li>
+</ul>
+<h3 id="多轮对话的-kv-cache-复用" tabindex="-1">多轮对话的 KV Cache 复用 <a class="heading-anchor" href="#多轮对话的-kv-cache-复用" aria-hidden="true">#</a></h3>
+<p>多轮对话的 KV Cache 复用是端侧推理的性能关键：</p>
+<p><strong>KV Cache 复用的优势</strong></p>
+<ul>
+<li><strong>避免重复计算</strong>：多轮对话的 Prefill 阶段可以复用上一轮的 KV Cache，避免重复计算</li>
+<li><strong>降低内存占用</strong>：复用 KV Cache 不需要重新生成，减少内存占用</li>
+<li><strong>提升响应速度</strong>：复用 KV Cache 可以直接进入 Decode 阶段，提升响应速度</li>
+</ul>
+<p><strong>KV Cache 复用的实现</strong></p>
+<ul>
+<li><strong>增量扩展 KV Cache</strong>：每轮对话时，将新的 token 添加到 KV Cache，而不是重新生成整个 KV Cache</li>
+<li><strong>KV Cache 分片存储</strong>：将 KV Cache 分片存储，按需加载和卸载</li>
+<li><strong>KV Cache 压缩</strong>：对 KV Cache 进行压缩（如 INT8 量化），减少内存占用</li>
+</ul>
+<p><strong>KV Cache 复用的挑战</strong></p>
+<ul>
+<li><strong>KV Cache 管理复杂</strong>：多轮对话的 KV Cache 需要高效管理，避免内存泄漏</li>
+<li><strong>KV Cache 版本控制</strong>：多轮对话的 KV Cache 可能需要版本控制，支持回滚</li>
+<li><strong>KV Cache 并发访问</strong>：多个会话并发访问 KV Cache 时，需要线程安全</li>
+</ul>
+<p>端侧推理的 KV Cache 复用需要综合考虑内存限制、性能要求、实现复杂度等因素。</p>
+<h3 id="会话的生命周期" tabindex="-1">会话的生命周期 <a class="heading-anchor" href="#会话的生命周期" aria-hidden="true">#</a></h3>
+<p>会话的生命周期包括创建、激活、挂起、销毁四个阶段：</p>
+<p><strong>1. 会话创建</strong></p>
+<ul>
+<li><strong>创建时机</strong>：用户首次交互时创建新会话</li>
+<li><strong>初始化内容</strong>：初始化系统提示、空的历史消息、空的 KV Cache</li>
+<li><strong>资源分配</strong>：分配内存、加载 tokenizer、初始化推理引擎</li>
+</ul>
+<p><strong>2. 会话激活</strong></p>
+<ul>
+<li><strong>激活时机</strong>：用户切换到已有会话时激活会话</li>
+<li><strong>加载 KV Cache</strong>：加载会话的 KV Cache，准备推理</li>
+<li><strong>更新活跃时间</strong>：更新会话的最后活跃时间</li>
+</ul>
+<p><strong>3. 会话挂起</strong></p>
+<ul>
+<li><strong>挂起时机</strong>：用户离开会话时挂起会话</li>
+<li><strong>保留 KV Cache</strong>：保留 KV Cache，但不占用计算资源</li>
+<li><strong>释放部分资源</strong>：释放部分计算资源（如 GPU/NPU 占用）</li>
+</ul>
+<p><strong>4. 会话销毁</strong></p>
+<ul>
+<li><strong>销毁时机</strong>：会话超时或用户主动删除时销毁会话</li>
+<li><strong>释放 KV Cache</strong>：释放 KV Cache，释放内存</li>
+<li><strong>释放资源</strong>：释放所有相关资源（如 tokenizer、推理引擎）</li>
+</ul>
+<p>端侧推理的会话生命周期管理需要考虑：</p>
+<ul>
+<li><strong>内存限制</strong>：限制并发会话数，避免 OOM</li>
+<li><strong>性能优化</strong>：会话切换时高效加载和卸载 KV Cache</li>
+<li><strong>用户体验</strong>：会话切换时平滑过渡，避免卡顿</li>
+</ul>
+<h3 id="会话并发与隔离" tabindex="-1">会话并发与隔离 <a class="heading-anchor" href="#会话并发与隔离" aria-hidden="true">#</a></h3>
+<p>端侧推理的会话并发与隔离需要考虑：</p>
+<p><strong>1. 会话并发策略</strong></p>
+<ul>
+<li><strong>单会话优先</strong>：端侧设备资源有限，优先支持单会话，多会话时串行处理</li>
+<li><strong>多会话并发</strong>：如果内存和计算资源充足，支持多会话并发，提升用户体验</li>
+<li><strong>动态调整并发数</strong>：根据资源占用动态调整并发会话数，避免 OOM</li>
+</ul>
+<p><strong>2. 会话隔离策略</strong></p>
+<ul>
+<li><strong>内存隔离</strong>：每个会话独立分配内存，避免相互干扰</li>
+<li><strong>计算资源隔离</strong>：每个会话独立分配计算资源（如 GPU/NPU 占用）</li>
+<li><strong>KV Cache 隔离</strong>：每个会话独立管理 KV Cache，避免冲突</li>
+</ul>
+<p><strong>3. 会话优先级</strong></p>
+<ul>
+<li><strong>活跃会话优先</strong>：优先分配资源给活跃会话，提升用户体验</li>
+<li><strong>新会话降级</strong>：新会话创建时，如果资源不足，可以降级或延迟创建</li>
+<li><strong>超时会话销毁</strong>：超时会话自动销毁，释放资源</li>
+</ul>
+<p>端侧推理的会话并发与隔离需要在性能、用户体验、资源限制之间找到平衡。</p>
+<hr>
+<h2 id="kv-cache-生命周期管理" tabindex="-1">KV Cache 生命周期管理 <a class="heading-anchor" href="#kv-cache-生命周期管理" aria-hidden="true">#</a></h2>
+<h3 id="kv-cache-的创建与初始化" tabindex="-1">KV Cache 的创建与初始化 <a class="heading-anchor" href="#kv-cache-的创建与初始化" aria-hidden="true">#</a></h3>
+<p>KV Cache 的创建与初始化是端侧推理的第一步：</p>
+<p><strong>KV Cache 的结构</strong>
+KV Cache 是自回归推理过程中缓存的前序 token 的 Key 和 Value 矩阵，用于加速后续推理：</p>
+<pre class="hljs"><code><span class="hljs-keyword">class</span> <span class="hljs-title class_">KVCache</span>:
+    keys: <span class="hljs-type">List</span>[Tensor]          <span class="hljs-comment"># 每层的 Key 矩阵 [num_layers, seq_len, hidden_dim]</span>
+    values: <span class="hljs-type">List</span>[Tensor]        <span class="hljs-comment"># 每层的 Value 矩阵 [num_layers, seq_len, hidden_dim]</span>
+    seq_len: <span class="hljs-built_in">int</span>                <span class="hljs-comment"># 当前序列长度</span>
+    max_seq_len: <span class="hljs-built_in">int</span>            <span class="hljs-comment"># 最大序列长度</span>
+</code></pre>
+<p><strong>KV Cache 的创建时机</strong></p>
+<ul>
+<li><strong>会话创建时</strong>：会话创建时创建空的 KV Cache，初始化 seq_len = 0</li>
+<li><strong>Prefill 阶段</strong>：Prefill 阶段一次性处理输入文本，生成完整的 KV Cache</li>
+<li><strong>多轮对话时</strong>：每轮对话时增量扩展 KV Cache，而不是重新生成</li>
+</ul>
+<p><strong>KV Cache 的初始化</strong></p>
+<ul>
+<li><strong>分配内存</strong>：根据最大序列长度（如 4096）分配 KV Cache 内存</li>
+<li><strong>初始化张量</strong>：初始化 Key 和 Value 张量为空张量</li>
+<li><strong>设置最大序列长度</strong>：根据模型上下文长度设置最大序列长度</li>
+</ul>
+<p>端侧推理的 KV Cache 创建与初始化需要考虑：</p>
+<ul>
+<li><strong>内存限制</strong>：根据端侧设备内存限制调整最大序列长度</li>
+<li><strong>量化策略</strong>：使用 INT8 量化减少 KV Cache 内存占用</li>
+<li><strong>分片存储</strong>：将 KV Cache 分片存储，按需加载和卸载</li>
+</ul>
+<h3 id="每轮对话的-kv-cache-扩展" tabindex="-1">每轮对话的 KV Cache 扩展 <a class="heading-anchor" href="#每轮对话的-kv-cache-扩展" aria-hidden="true">#</a></h3>
+<p>每轮对话时，KV Cache 需要增量扩展：</p>
+<p><strong>KV Cache 扩展过程</strong></p>
+<ol>
+<li><strong>Prefill 新输入</strong>：Prefill 阶段处理新的用户输入，生成新的 KV Cache 块</li>
+<li><strong>合并 KV Cache</strong>：将新的 KV Cache 块合并到现有 KV Cache</li>
+<li><strong>更新序列长度</strong>：更新 seq_len，记录新的序列长度</li>
+</ol>
+<p><strong>KV Cache 扩展的优化</strong></p>
+<ul>
+<li><strong>增量扩展</strong>：只扩展新的 token 的 KV Cache，不重新生成整个 KV Cache</li>
+<li><strong>异步扩展</strong>：异步扩展 KV Cache，避免阻塞用户交互</li>
+<li><strong>批量扩展</strong>：如果用户输入很长，分块扩展 KV Cache，避免阻塞 UI 线程</li>
+</ul>
+<p><strong>KV Cache 扩展的挑战</strong></p>
+<ul>
+<li><strong>内存占用增长</strong>：每轮对话 KV Cache 内存占用增长，需要限制最大序列长度</li>
+<li><strong>性能开销</strong>：KV Cache 扩展需要内存拷贝，可能影响性能</li>
+<li><strong>版本控制</strong>：多轮对话的 KV Cache 可能需要版本控制，支持回滚</li>
+</ul>
+<p>端侧推理的 KV Cache 扩展需要在性能、内存占用、实现复杂度之间找到平衡。</p>
+<h3 id="kv-cache-的清理与回收" tabindex="-1">KV Cache 的清理与回收 <a class="heading-anchor" href="#kv-cache-的清理与回收" aria-hidden="true">#</a></h3>
+<p>KV Cache 的清理与回收是端侧推理的内存管理关键：</p>
+<p><strong>KV Cache 清理时机</strong></p>
+<ul>
+<li><strong>会话销毁时</strong>：会话销毁时清理 KV Cache，释放内存</li>
+<li><strong>KV Cache 超长时</strong>：KV Cache 超过最大序列长度时，清理最早的 KV Cache 块（滑动窗口）</li>
+<li><strong>内存不足时</strong>：内存不足时，清理非活跃会话的 KV Cache，释放内存</li>
+</ul>
+<p><strong>KV Cache 回收策略</strong></p>
+<ul>
+<li><strong>直接释放</strong>：直接释放 KV Cache 内存，立即回收</li>
+<li><strong>内存池复用</strong>：使用内存池复用 KV Cache 内存，减少内存分配/释放开销</li>
+<li><strong>延迟回收</strong>：延迟回收 KV Cache 内存，减少内存抖动</li>
+</ul>
+<p><strong>KV Cache 清理的优化</strong></p>
+<ul>
+<li><strong>按需清理</strong>：按需清理 KV Cache，避免过度清理影响性能</li>
+<li><strong>热点保留</strong>：保留热点 KV Cache（如系统提示的 KV Cache），避免重复计算</li>
+<li><strong>异步清理</strong>：异步清理 KV Cache，避免阻塞用户交互</li>
+</ul>
+<p>端侧推理的 KV Cache 清理与回收需要在内存释放、性能、用户体验之间找到平衡。</p>
+<h3 id="多会话的-kv-cache-管理" tabindex="-1">多会话的 KV Cache 管理 <a class="heading-anchor" href="#多会话的-kv-cache-管理" aria-hidden="true">#</a></h3>
+<p>多会话的 KV Cache 管理是端侧推理的复杂场景：</p>
+<p><strong>多会话 KV Cache 管理策略</strong></p>
+<ul>
+<li><strong>独立管理</strong>：每个会话独立管理 KV Cache，避免相互干扰</li>
+<li><strong>共享部分 KV Cache</strong>：多个会话可以共享部分 KV Cache（如系统提示的 KV Cache）</li>
+<li><strong>KV Cache 池化</strong>：使用 KV Cache 池化机制，复用 KV Cache 内存</li>
+</ul>
+<p><strong>多会话 KV Cache 的挑战</strong></p>
+<ul>
+<li><strong>内存占用增长</strong>：多个会话同时存在时，KV Cache 内存占用增长，需要限制并发会话数</li>
+<li><strong>性能竞争</strong>：多个会话并发推理时，竞争计算资源（如 GPU/NPU），影响性能</li>
+<li><strong>管理复杂度</strong>：多会话的 KV Cache 管理复杂度增加，需要高效的数据结构</li>
+</ul>
+<p><strong>多会话 KV Cache 的优化</strong></p>
+<ul>
+<li><strong>限制并发数</strong>：根据内存和计算资源限制并发会话数，避免 OOM</li>
+<li><strong>优先级调度</strong>：优先调度活跃会话，提升用户体验</li>
+<li><strong>KV Cache 分片</strong>：将 KV Cache 分片存储，按需加载和卸载，减少单次内存占用</li>
+</ul>
+<p>端侧推理的多会话 KV Cache 管理需要在性能、用户体验、资源限制之间找到平衡。</p>
+<hr>
+<h2 id="总结" tabindex="-1">总结 <a class="heading-anchor" href="#总结" aria-hidden="true">#</a></h2>
+<p>端侧 LLM 推理链路的进阶优化需要综合考虑 Streaming 输出、Session State 管理和 KV Cache 生命周期：</p>
+<ul>
+<li><strong>Streaming 输出优化</strong>：分块输出策略、用户感知延迟优化、端云协同流式配合</li>
+<li><strong>Session State 管理</strong>：会话状态定义、KV Cache 复用、会话生命周期、会话并发与隔离</li>
+<li><strong>KV Cache 生命周期管理</strong>：创建与初始化、每轮对话扩展、清理与回收、多会话管理</li>
+</ul>
+<p>在实际部署中，端侧 LLM 推理的进阶优化需要根据硬件能力、软件栈兼容性、用户偏好综合调整。推理框架通过优化的 Streaming、Session State 和 KV Cache 管理，提供高效的端侧多轮对话能力。</p>
+<p><strong>记住</strong>：端侧 LLM 推理的核心目标不是追求最快的 TTFT 或最高的吞吐量，而是在有限资源约束下实现可接受的性能和质量平衡，同时提供流畅的多轮对话体验。</p>
+</div> <nav class="pager"> <a class="pager__link" href="/model-inference-engineer/05-llm-inference-stage1/"> <span>上一篇</span> <strong>端侧 LLM 推理链路：分词、提示词、预填充与解码、采样策略</strong> </a> <a class="pager__link" href="/model-inference-engineer/07-operator-kernel/"> <span>下一篇</span> <strong>端侧推理的算子层与 Kernel 层：从高层抽象到底层优化</strong> </a> </nav> </article> </section>  </main> <footer class="site-footer"> <div class="site-footer__inner"> <p>Vinci Knowledge Base</p> <p>Source directory: <code>/Users/superone77/Documents/知识库/projects</code></p> </div> </footer> </div> </body></html>

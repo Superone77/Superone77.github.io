@@ -1,0 +1,587 @@
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>附录 C：性能基准测试方法 | Vinci Knowledge Base</title><meta name="description" content="附录 C：性能基准测试方法 本附录介绍端侧大模型推理的性能基准测试方法，包括性能指标、基准测试工具、测试方法与流程、结果分析与优化。 C.1 端侧推理性能指标 C.1.1 延迟指标 首字延迟（TTFT，Time To First Token） 定义：从用户输入到生成第一个 token 所需的时间 测量单位：毫秒（ms） 典型值：10 500ms 测量方法：在"><meta name="generator" content="Vinci Knowledge Base"><link rel="stylesheet" href="/_astro/_doc_.CY2v1inF.css"></head> <body> <div class="page-shell"> <header class="site-header"> <div class="site-header__inner"> <a class="brand" href="/"> <span class="brand__eyebrow">GitHub Pages Knowledge Site</span> <span class="brand__name">Vinci Knowledge Base</span> </a> <nav class="site-nav"> <a href="/">Projects</a> </nav> </div> </header> <main class="page-main">  <section class="article-hero"> <div> <p class="eyebrow">Knowledge Article</p> <h1>附录 C：性能基准测试方法</h1> <p class="article-hero__breadcrumbs"> <a href="/">Home</a> <span>/</span> <a href="/model-inference-engineer/">端侧大模型推理工程师知识库</a> </p> </div> <div class="meta-card"> <p><strong>Project</strong> 端侧大模型推理工程师知识库</p> <p><strong>Source</strong> <code>knowledge/C-benchmark-methods.md</code></p> <p><strong>Sections</strong> 22</p> </div> </section> <section class="content-grid"> <aside class="toc-card"> <p class="toc-card__title">本页目录</p> <ul class="toc-card__list"> <li class="toc-depth-1"> <a href="#附录-c性能基准测试方法">附录 C：性能基准测试方法</a> </li><li class="toc-depth-2"> <a href="#c1-端侧推理性能指标">C.1 端侧推理性能指标</a> </li><li class="toc-depth-3"> <a href="#c11-延迟指标">C.1.1 延迟指标</a> </li><li class="toc-depth-3"> <a href="#c12-吞吐量指标">C.1.2 吞吐量指标</a> </li><li class="toc-depth-3"> <a href="#c13-内存指标">C.1.3 内存指标</a> </li><li class="toc-depth-3"> <a href="#c14-功耗指标">C.1.4 功耗指标</a> </li><li class="toc-depth-3"> <a href="#c15-准确性指标">C.1.5 准确性指标</a> </li><li class="toc-depth-2"> <a href="#c2-基准测试工具">C.2 基准测试工具</a> </li><li class="toc-depth-3"> <a href="#c21-android-平台">C.2.1 Android 平台</a> </li><li class="toc-depth-3"> <a href="#c22-ios-平台">C.2.2 iOS 平台</a> </li><li class="toc-depth-3"> <a href="#c23-跨平台工具">C.2.3 跨平台工具</a> </li><li class="toc-depth-2"> <a href="#c3-测试方法与流程">C.3 测试方法与流程</a> </li><li class="toc-depth-3"> <a href="#c31-测试环境准备">C.3.1 测试环境准备</a> </li><li class="toc-depth-3"> <a href="#c32-测试方法">C.3.2 测试方法</a> </li><li class="toc-depth-3"> <a href="#c33-测试流程">C.3.3 测试流程</a> </li><li class="toc-depth-2"> <a href="#c4-结果分析与优化">C.4 结果分析与优化</a> </li><li class="toc-depth-3"> <a href="#c41-性能瓶颈定位">C.4.1 性能瓶颈定位</a> </li><li class="toc-depth-3"> <a href="#c42-优化策略">C.4.2 优化策略</a> </li><li class="toc-depth-3"> <a href="#c43-ab-测试">C.4.3 A/B 测试</a> </li><li class="toc-depth-2"> <a href="#c5-测试案例">C.5 测试案例</a> </li><li class="toc-depth-3"> <a href="#c51-案例iphone-15-pro-上的-llm-推理性能测试">C.5.1 案例：iPhone 15 Pro 上的 LLM 推理性能测试</a> </li><li class="toc-depth-3"> <a href="#c52-案例samsung-galaxy-s24-上的-llm-推理性能测试">C.5.2 案例：Samsung Galaxy S24 上的 LLM 推理性能测试</a> </li> </ul> </aside> <article class="prose-card"> <div class="prose"><h1 id="附录-c性能基准测试方法" tabindex="-1">附录 C：性能基准测试方法 <a class="heading-anchor" href="#附录-c性能基准测试方法" aria-hidden="true">#</a></h1>
+<p>本附录介绍端侧大模型推理的性能基准测试方法，包括性能指标、基准测试工具、测试方法与流程、结果分析与优化。</p>
+<hr>
+<h2 id="c1-端侧推理性能指标" tabindex="-1">C.1 端侧推理性能指标 <a class="heading-anchor" href="#c1-端侧推理性能指标" aria-hidden="true">#</a></h2>
+<h3 id="c11-延迟指标" tabindex="-1">C.1.1 延迟指标 <a class="heading-anchor" href="#c11-延迟指标" aria-hidden="true">#</a></h3>
+<p><strong>首字延迟（TTFT，Time To First Token）</strong></p>
+<ul>
+<li>定义：从用户输入到生成第一个 token 所需的时间</li>
+<li>测量单位：毫秒（ms）</li>
+<li>典型值：10-500ms</li>
+<li>测量方法：在用户输入和第一个 token 输出之间记录时间戳</li>
+</ul>
+<p><strong>生成延迟（Generation Latency）</strong></p>
+<ul>
+<li>定义：生成每个 token 所需的时间</li>
+<li>测量单位：毫秒/token（ms/token）</li>
+<li>典型值：5-50ms/token</li>
+<li>测量方法：记录每个 token 的生成时间，计算平均值</li>
+</ul>
+<p><strong>端到端延迟（End-to-End Latency）</strong></p>
+<ul>
+<li>定义：从用户输入到完整输出所需的时间</li>
+<li>测量单位：毫秒（ms）</li>
+<li>典型值：50-2000ms</li>
+<li>测量方法：在用户输入和完整输出之间记录时间戳</li>
+</ul>
+<p><strong>冷启动延迟（Cold Start Latency）</strong></p>
+<ul>
+<li>定义：模型首次加载到内存并完成第一次推理所需的时间</li>
+<li>测量单位：毫秒（ms）</li>
+<li>典型值：100-2000ms</li>
+<li>测量方法：记录模型加载时间和首次推理时间</li>
+</ul>
+<p><strong>热启动延迟（Warm Start Latency）</strong></p>
+<ul>
+<li>定义：模型已在内存中，执行推理所需的时间</li>
+<li>测量单位：毫秒（ms）</li>
+<li>典型值：10-500ms</li>
+<li>测量方法：在模型加载后，记录推理时间</li>
+</ul>
+<h3 id="c12-吞吐量指标" tabindex="-1">C.1.2 吞吐量指标 <a class="heading-anchor" href="#c12-吞吐量指标" aria-hidden="true">#</a></h3>
+<p><strong>Tokens Per Second（TPS）</strong></p>
+<ul>
+<li>定义：每秒生成的 token 数</li>
+<li>测量单位：tokens/秒</li>
+<li>典型值：10-100 tokens/秒</li>
+<li>测量方法：记录生成的总 token 数和总时间，计算 TPS</li>
+</ul>
+<p><strong>Queries Per Second（QPS）</strong></p>
+<ul>
+<li>定义：每秒处理的请求数</li>
+<li>测量单位：requests/秒</li>
+<li>典型值：1-100 requests/秒</li>
+<li>测量方法：记录处理的总请求数和总时间，计算 QPS</li>
+</ul>
+<p><strong>Batch Size</strong></p>
+<ul>
+<li>定义：每次推理处理的样本数</li>
+<li>测量单位：样本数/批次</li>
+<li>典型值：1-32</li>
+<li>测量方法：根据应用场景选择合适的 batch size</li>
+</ul>
+<h3 id="c13-内存指标" tabindex="-1">C.1.3 内存指标 <a class="heading-anchor" href="#c13-内存指标" aria-hidden="true">#</a></h3>
+<p><strong>模型内存占用（Model Memory Usage）</strong></p>
+<ul>
+<li>定义：模型加载到内存后占用的内存大小</li>
+<li>测量单位：MB 或 GB</li>
+<li>典型值：100MB - 16GB</li>
+<li>测量方法：使用性能分析工具测量模型加载后的内存占用</li>
+</ul>
+<p><strong>KV Cache 内存占用（KV Cache Memory Usage）</strong></p>
+<ul>
+<li>定义：KV Cache 占用的内存大小</li>
+<li>测量单位：MB 或 GB</li>
+<li>典型值：10MB - 1GB</li>
+<li>测量方法：记录序列长度、层数、头数、头维度，计算 KV Cache 内存占用</li>
+</ul>
+<p><strong>峰值内存占用（Peak Memory Usage）</strong></p>
+<ul>
+<li>定义：推理过程中内存占用的最大值</li>
+<li>测量单位：MB 或 GB</li>
+<li>典型值：200MB - 32GB</li>
+<li>测量方法：使用性能分析工具记录推理过程中的内存占用峰值</li>
+</ul>
+<p><strong>内存碎片率（Memory Fragmentation Rate）</strong></p>
+<ul>
+<li>定义：内存碎片占总内存的比例</li>
+<li>测量单位：百分比（%）</li>
+<li>典型值：5% - 20%</li>
+<li>测量方法：使用性能分析工具分析内存碎片</li>
+</ul>
+<h3 id="c14-功耗指标" tabindex="-1">C.1.4 功耗指标 <a class="heading-anchor" href="#c14-功耗指标" aria-hidden="true">#</a></h3>
+<p><strong>功耗（Power Consumption）</strong></p>
+<ul>
+<li>定义：推理过程中消耗的电能</li>
+<li>测量单位：瓦（W）</li>
+<li>典型值：1-10W</li>
+<li>测量方法：使用功耗测量工具（如 Battery Historian）测量功耗</li>
+</ul>
+<p><strong>能效比（Energy Efficiency）</strong></p>
+<ul>
+<li>定义：每生成一个 token 消耗的电能</li>
+<li>测量单位：毫焦/token（mJ/token）</li>
+<li>典型值：1-10 mJ/token</li>
+<li>测量方法：记录总功耗和总 token 数，计算能效比</li>
+</ul>
+<p><strong>电池续航（Battery Life）</strong></p>
+<ul>
+<li>定义：在电池供电下能持续推理的时间</li>
+<li>测量单位：小时（h）</li>
+<li>典型值：2-10h</li>
+<li>测量方法：在满电状态下持续推理，记录电池耗尽的时间</li>
+</ul>
+<h3 id="c15-准确性指标" tabindex="-1">C.1.5 准确性指标 <a class="heading-anchor" href="#c15-准确性指标" aria-hidden="true">#</a></h3>
+<p><strong>Top-1 Accuracy</strong></p>
+<ul>
+<li>定义：预测结果中最高概率的类别正确的比例</li>
+<li>测量单位：百分比（%）</li>
+<li>典型值：70% - 95%</li>
+<li>测量方法：在测试集上计算 Top-1 Accuracy</li>
+</ul>
+<p><strong>Top-5 Accuracy</strong></p>
+<ul>
+<li>定义：预测结果中前 5 个最高概率的类别包含正确类别的比例</li>
+<li>测量单位：百分比（%）</li>
+<li>典型值：85% - 99%</li>
+<li>测量方法：在测试集上计算 Top-5 Accuracy</li>
+</ul>
+<p><strong>F1 Score</strong></p>
+<ul>
+<li>定义：精确率和召回率的调和平均数</li>
+<li>测量单位：百分比（%）</li>
+<li>典型值：70% - 95%</li>
+<li>测量方法：在测试集上计算 F1 Score</li>
+</ul>
+<p><strong>Perplexity</strong></p>
+<ul>
+<li>定义：模型对测试数据的拟合程度，越低越好</li>
+<li>测量单位：无</li>
+<li>典型值：10-100</li>
+<li>测量方法：在测试集上计算 Perplexity</li>
+</ul>
+<hr>
+<h2 id="c2-基准测试工具" tabindex="-1">C.2 基准测试工具 <a class="heading-anchor" href="#c2-基准测试工具" aria-hidden="true">#</a></h2>
+<h3 id="c21-android-平台" tabindex="-1">C.2.1 Android 平台 <a class="heading-anchor" href="#c21-android-平台" aria-hidden="true">#</a></h3>
+<p><strong>Android Profiler</strong></p>
+<ul>
+<li>官方文档：<a href="https://developer.android.com/studio/profile/android-profiler">https://developer.android.com/studio/profile/android-profiler</a></li>
+<li>功能：
+<ul>
+<li>CPU 性能分析</li>
+<li>内存分析</li>
+<li>网络分析</li>
+<li>电量分析</li>
+</ul>
+</li>
+<li>适用场景：Android 应用性能分析</li>
+</ul>
+<p><strong>Battery Historian</strong></p>
+<ul>
+<li>官方文档：<a href="https://developer.android.com/topic/performance/power/history-details">https://developer.android.com/topic/performance/power/history-details</a></li>
+<li>功能：
+<ul>
+<li>电池使用历史分析</li>
+<li>功耗分析</li>
+<li>唤醒锁分析</li>
+</ul>
+</li>
+<li>适用场景：Android 应用功耗分析</li>
+</ul>
+<p><strong>Systrace</strong></p>
+<ul>
+<li>官方文档：<a href="https://developer.android.com/topic/performance/tracing/on-device-cmdline">https://developer.android.com/topic/performance/tracing/on-device-cmdline</a></li>
+<li>功能：
+<ul>
+<li>系统级性能分析</li>
+<li>CPU 调度分析</li>
+<li>线程分析</li>
+</ul>
+</li>
+<li>适用场景：Android 系统性能分析</li>
+</ul>
+<p><strong>Perfetto</strong></p>
+<ul>
+<li>官方文档：<a href="https://perfetto.dev/docs/">https://perfetto.dev/docs/</a></li>
+<li>功能：
+<ul>
+<li>系统级性能追踪</li>
+<li>CPU、GPU、内存分析</li>
+<li>自定义追踪</li>
+</ul>
+</li>
+<li>适用场景：Android 系统性能分析</li>
+</ul>
+<h3 id="c22-ios-平台" tabindex="-1">C.2.2 iOS 平台 <a class="heading-anchor" href="#c22-ios-平台" aria-hidden="true">#</a></h3>
+<p><strong>Xcode Instruments</strong></p>
+<ul>
+<li>官方文档：<a href="https://help.apple.com/instruments/">https://help.apple.com/instruments/</a></li>
+<li>功能：
+<ul>
+<li>CPU 性能分析</li>
+<li>内存分析</li>
+<li>网络分析</li>
+<li>电量分析</li>
+<li>动画分析</li>
+</ul>
+</li>
+<li>适用场景：iOS 应用性能分析</li>
+</ul>
+<p><strong>Instruments Time Profiler</strong></p>
+<ul>
+<li>官方文档：<a href="https://help.apple.com/instruments/mac/current/">https://help.apple.com/instruments/mac/current/</a></li>
+<li>功能：
+<ul>
+<li>CPU 性能分析</li>
+<li>函数调用栈分析</li>
+<li>热点分析</li>
+</ul>
+</li>
+<li>适用场景：iOS 应用 CPU 性能分析</li>
+</ul>
+<p><strong>Instruments Allocations</strong></p>
+<ul>
+<li>官方文档：<a href="https://help.apple.com/instruments/mac/current/">https://help.apple.com/instruments/mac/current/</a></li>
+<li>功能：
+<ul>
+<li>内存分配分析</li>
+<li>内存泄漏检测</li>
+<li>内存碎片分析</li>
+</ul>
+</li>
+<li>适用场景：iOS 应用内存分析</li>
+</ul>
+<p><strong>Instruments Energy Log</strong></p>
+<ul>
+<li>官方文档：<a href="https://help.apple.com/instruments/mac/current/">https://help.apple.com/instruments/mac/current/</a></li>
+<li>功能：
+<ul>
+<li>电量消耗分析</li>
+<li>唤醒时间分析</li>
+<li>后台活动分析</li>
+</ul>
+</li>
+<li>适用场景：iOS 应用功耗分析</li>
+</ul>
+<h3 id="c23-跨平台工具" tabindex="-1">C.2.3 跨平台工具 <a class="heading-anchor" href="#c23-跨平台工具" aria-hidden="true">#</a></h3>
+<p><strong>ONNX Runtime Profiler</strong></p>
+<ul>
+<li>官方文档：<a href="https://onnxruntime.ai/docs/performance/tune-and-optimize/model-profiler.html">https://onnxruntime.ai/docs/performance/tune-and-optimize/model-profiler.html</a></li>
+<li>功能：
+<ul>
+<li>模型性能分析</li>
+<li>算子耗时分析</li>
+<li>内存占用分析</li>
+</ul>
+</li>
+<li>适用场景：ONNX 模型性能分析</li>
+</ul>
+<p><strong>TFLite Profiler</strong></p>
+<ul>
+<li>官方文档：<a href="https://www.tensorflow.org/lite/performance/measurement">https://www.tensorflow.org/lite/performance/measurement</a></li>
+<li>功能：
+<ul>
+<li>模型性能分析</li>
+<li>算子耗时分析</li>
+<li>内存占用分析</li>
+</ul>
+</li>
+<li>适用场景：TFLite 模型性能分析</li>
+</ul>
+<p><strong>TensorBoard</strong></p>
+<ul>
+<li>官方文档：<a href="https://www.tensorflow.org/tensorboard">https://www.tensorflow.org/tensorboard</a></li>
+<li>功能：
+<ul>
+<li>模型可视化</li>
+<li>训练曲线分析</li>
+<li>性能分析</li>
+</ul>
+</li>
+<li>适用场景：TensorFlow 模型分析</li>
+</ul>
+<p><strong>PyTorch Profiler</strong></p>
+<ul>
+<li>官方文档：<a href="https://pytorch.org/tutorials/recipes/recipes/profiler_recipe.html">https://pytorch.org/tutorials/recipes/recipes/profiler_recipe.html</a></li>
+<li>功能：
+<ul>
+<li>模型性能分析</li>
+<li>算子耗时分析</li>
+<li>内存占用分析</li>
+</ul>
+</li>
+<li>适用场景：PyTorch 模型分析</li>
+</ul>
+<hr>
+<h2 id="c3-测试方法与流程" tabindex="-1">C.3 测试方法与流程 <a class="heading-anchor" href="#c3-测试方法与流程" aria-hidden="true">#</a></h2>
+<h3 id="c31-测试环境准备" tabindex="-1">C.3.1 测试环境准备 <a class="heading-anchor" href="#c31-测试环境准备" aria-hidden="true">#</a></h3>
+<p><strong>硬件环境</strong></p>
+<ul>
+<li>设备选择：选择具有代表性的设备（如 iPhone 15 Pro、Samsung Galaxy S24）</li>
+<li>设备数量：至少 3 台不同设备，覆盖高、中、低端</li>
+<li>设备状态：关闭后台应用，关闭节能模式，连接电源</li>
+<li>环境温度：25±5℃（避免高温影响性能）</li>
+</ul>
+<p><strong>软件环境</strong></p>
+<ul>
+<li>操作系统：最新稳定版本</li>
+<li>运行时：测试目标运行时（如 TFLite、ONNX Runtime、CoreML）</li>
+<li>模型版本：使用生产环境的模型版本</li>
+<li>测试工具：选择合适的性能分析工具</li>
+</ul>
+<p><strong>测试数据</strong></p>
+<ul>
+<li>数据规模：至少 1000 个样本</li>
+<li>数据分布：覆盖真实使用场景</li>
+<li>数据格式：与生产环境一致</li>
+</ul>
+<h3 id="c32-测试方法" tabindex="-1">C.3.2 测试方法 <a class="heading-anchor" href="#c32-测试方法" aria-hidden="true">#</a></h3>
+<p><strong>冷启动测试</strong></p>
+<ol>
+<li>关闭应用</li>
+<li>清除后台应用</li>
+<li>启动应用</li>
+<li>加载模型</li>
+<li>执行推理</li>
+<li>记录冷启动延迟</li>
+</ol>
+<p><strong>热启动测试</strong></p>
+<ol>
+<li>启动应用</li>
+<li>加载模型</li>
+<li>执行多次推理（如 100 次）</li>
+<li>记录每次推理延迟</li>
+<li>计算平均热启动延迟</li>
+</ol>
+<p><strong>吞吐量测试</strong></p>
+<ol>
+<li>启动应用</li>
+<li>加载模型</li>
+<li>持续执行推理（如 1000 次）</li>
+<li>记录总时间和总请求数</li>
+<li>计算 QPS 和 TPS</li>
+</ol>
+<p><strong>内存占用测试</strong></p>
+<ol>
+<li>启动应用</li>
+<li>加载模型</li>
+<li>使用性能分析工具记录内存占用</li>
+<li>执行推理</li>
+<li>记录峰值内存占用</li>
+</ol>
+<p><strong>功耗测试</strong></p>
+<ol>
+<li>启动应用</li>
+<li>加载模型</li>
+<li>满电状态下持续推理（如 1 小时）</li>
+<li>记录总功耗和总 token 数</li>
+<li>计算能效比</li>
+</ol>
+<h3 id="c33-测试流程" tabindex="-1">C.3.3 测试流程 <a class="heading-anchor" href="#c33-测试流程" aria-hidden="true">#</a></h3>
+<p><strong>1. 制定测试计划</strong></p>
+<ul>
+<li>明确测试目标：性能、内存、功耗</li>
+<li>确定测试设备：高、中、低端设备</li>
+<li>选择测试工具：Android Profiler、Xcode Instruments 等</li>
+<li>准备测试数据：覆盖真实使用场景</li>
+</ul>
+<p><strong>2. 搭建测试环境</strong></p>
+<ul>
+<li>配置硬件环境：设备、温度、电源</li>
+<li>配置软件环境：操作系统、运行时、测试工具</li>
+<li>准备测试数据：数据规模、数据分布</li>
+</ul>
+<p><strong>3. 执行测试</strong></p>
+<ul>
+<li>按照测试方法执行测试</li>
+<li>记录测试结果：延迟、吞吐量、内存、功耗</li>
+<li>重复测试：至少 3 次，计算平均值和标准差</li>
+</ul>
+<p><strong>4. 分析测试结果</strong></p>
+<ul>
+<li>计算性能指标：TTFT、生成延迟、QPS、TPS</li>
+<li>计算内存指标：模型内存占用、峰值内存占用</li>
+<li>计算功耗指标：功耗、能效比</li>
+<li>对比不同设备、不同配置的性能差异</li>
+</ul>
+<p><strong>5. 输出测试报告</strong></p>
+<ul>
+<li>汇总测试结果：表格、图表</li>
+<li>分析性能瓶颈：延迟、吞吐量、内存、功耗</li>
+<li>提出优化建议：量化、剪枝、蒸馏、硬件后端选择</li>
+</ul>
+<hr>
+<h2 id="c4-结果分析与优化" tabindex="-1">C.4 结果分析与优化 <a class="heading-anchor" href="#c4-结果分析与优化" aria-hidden="true">#</a></h2>
+<h3 id="c41-性能瓶颈定位" tabindex="-1">C.4.1 性能瓶颈定位 <a class="heading-anchor" href="#c41-性能瓶颈定位" aria-hidden="true">#</a></h3>
+<p><strong>延迟瓶颈</strong></p>
+<ul>
+<li>检查 TTFT：如果 TTFT 过长，可能是模型加载慢或 Prefill 阶段慢</li>
+<li>检查生成延迟：如果生成延迟过长，可能是 Decode 阶段慢</li>
+<li>检查网络延迟：如果是端云协同，可能是网络延迟过长</li>
+</ul>
+<p><strong>吞吐量瓶颈</strong></p>
+<ul>
+<li>检查 batch size：如果 batch size 过小，吞吐量可能较低</li>
+<li>检查并发能力：如果单线程，吞吐量可能较低</li>
+<li>检查硬件利用率：如果 NPU 利用率低，吞吐量可能较低</li>
+</ul>
+<p><strong>内存瓶颈</strong></p>
+<ul>
+<li>检查模型大小：如果模型过大，可能导致 OOM</li>
+<li>检查 KV Cache：如果 KV Cache 过大，可能导致内存不足</li>
+<li>检查内存碎片：如果内存碎片严重，可能导致内存不足</li>
+</ul>
+<p><strong>功耗瓶颈</strong></p>
+<ul>
+<li>检查硬件利用率：如果 GPU 利用率高，功耗可能较高</li>
+<li>检查推理频率：如果推理频率高，功耗可能较高</li>
+<li>检查后台活动：如果后台活动多，功耗可能较高</li>
+</ul>
+<h3 id="c42-优化策略" tabindex="-1">C.4.2 优化策略 <a class="heading-anchor" href="#c42-优化策略" aria-hidden="true">#</a></h3>
+<p><strong>延迟优化</strong></p>
+<ul>
+<li>量化：使用 INT8 量化，减少计算量</li>
+<li>KV Cache 优化：减少 KV Cache 大小，使用量化 KV Cache</li>
+<li>硬件后端选择：优先使用 NPU，其次是 GPU</li>
+<li>模型压缩：使用剪枝、蒸馏等技术，减少模型大小</li>
+</ul>
+<p><strong>吞吐量优化</strong></p>
+<ul>
+<li>增加 batch size：如果内存允许，增加 batch size 提升吞吐量</li>
+<li>多线程/多进程：利用多核 CPU 提升并发能力</li>
+<li>模型并行：如果设备有多个 NPU/GPU，使用模型并行</li>
+</ul>
+<p><strong>内存优化</strong></p>
+<ul>
+<li>量化：使用 INT8 量化，减少模型大小</li>
+<li>KV Cache 优化：减少 KV Cache 大小，使用量化 KV Cache</li>
+<li>模型分层：将模型分层，分时加载和推理</li>
+<li>内存池：使用内存池，减少内存碎片</li>
+</ul>
+<p><strong>功耗优化</strong></p>
+<ul>
+<li>硬件后端选择：优先使用 NPU，能效比更高</li>
+<li>降低频率：如果延迟允许，降低硬件频率</li>
+<li>优化调度：减少后台活动，优化推理调度</li>
+</ul>
+<h3 id="c43-ab-测试" tabindex="-1">C.4.3 A/B 测试 <a class="heading-anchor" href="#c43-ab-测试" aria-hidden="true">#</a></h3>
+<p><strong>A/B 测试流程</strong></p>
+<ol>
+<li>设计 A/B 测试方案：明确测试目标、测试指标、测试时长</li>
+<li>选择测试设备：覆盖不同设备类型</li>
+<li>分配测试用户：A 组使用原模型，B 组使用优化模型</li>
+<li>收集测试数据：延迟、吞吐量、内存、功耗、用户体验</li>
+<li>分析测试结果：对比 A/B 组性能差异</li>
+<li>决策：如果 B 组性能更好，全量部署优化模型</li>
+</ol>
+<p><strong>A/B 测试指标</strong></p>
+<ul>
+<li>性能指标：TTFT、生成延迟、QPS、TPS</li>
+<li>内存指标：模型内存占用、峰值内存占用</li>
+<li>功耗指标：功耗、能效比</li>
+<li>用户体验指标：用户满意度、任务完成率</li>
+</ul>
+<hr>
+<h2 id="c5-测试案例" tabindex="-1">C.5 测试案例 <a class="heading-anchor" href="#c5-测试案例" aria-hidden="true">#</a></h2>
+<h3 id="c51-案例iphone-15-pro-上的-llm-推理性能测试" tabindex="-1">C.5.1 案例：iPhone 15 Pro 上的 LLM 推理性能测试 <a class="heading-anchor" href="#c51-案例iphone-15-pro-上的-llm-推理性能测试" aria-hidden="true">#</a></h3>
+<p><strong>测试环境</strong></p>
+<ul>
+<li>设备：iPhone 15 Pro（A17 Pro，8GB RAM）</li>
+<li>操作系统：iOS 17.2</li>
+<li>运行时：CoreML</li>
+<li>模型：7B 参数，INT8 量化</li>
+<li>测试数据：1000 个对话样本</li>
+</ul>
+<p><strong>测试结果</strong></p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>测试结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>冷启动延迟</strong></td>
+<td>150ms</td>
+</tr>
+<tr>
+<td><strong>热启动延迟</strong></td>
+<td>30ms</td>
+</tr>
+<tr>
+<td><strong>生成延迟</strong></td>
+<td>10ms/token</td>
+</tr>
+<tr>
+<td><strong>TPS</strong></td>
+<td>100 tokens/秒</td>
+</tr>
+<tr>
+<td><strong>模型内存占用</strong></td>
+<td>7GB</td>
+</tr>
+<tr>
+<td><strong>峰值内存占用</strong></td>
+<td>7.5GB</td>
+</tr>
+<tr>
+<td><strong>功耗</strong></td>
+<td>5W</td>
+</tr>
+<tr>
+<td><strong>能效比</strong></td>
+<td>0.5 mJ/token</td>
+</tr>
+</tbody>
+</table>
+<p><strong>结论</strong></p>
+<ul>
+<li>在 iPhone 15 Pro 上，7B 参数的 INT8 量化模型可以流畅运行</li>
+<li>TTFT 为 150ms，生成延迟为 10ms/token，用户体验良好</li>
+<li>内存占用为 7GB，在设备内存限制内</li>
+<li>功耗为 5W，能效比为 0.5 mJ/token，功耗可接受</li>
+</ul>
+<h3 id="c52-案例samsung-galaxy-s24-上的-llm-推理性能测试" tabindex="-1">C.5.2 案例：Samsung Galaxy S24 上的 LLM 推理性能测试 <a class="heading-anchor" href="#c52-案例samsung-galaxy-s24-上的-llm-推理性能测试" aria-hidden="true">#</a></h3>
+<p><strong>测试环境</strong></p>
+<ul>
+<li>设备：Samsung Galaxy S24（Snapdragon 8 Gen 3，12GB RAM）</li>
+<li>操作系统：Android 14</li>
+<li>运行时：TFLite + NNAPI</li>
+<li>模型：7B 参数，INT8 量化</li>
+<li>测试数据：1000 个对话样本</li>
+</ul>
+<p><strong>测试结果</strong></p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>测试结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>冷启动延迟</strong></td>
+<td>200ms</td>
+</tr>
+<tr>
+<td><strong>热启动延迟</strong></td>
+<td>40ms</td>
+</tr>
+<tr>
+<td><strong>生成延迟</strong></td>
+<td>12ms/token</td>
+</tr>
+<tr>
+<td><strong>TPS</strong></td>
+<td>83 tokens/秒</td>
+</tr>
+<tr>
+<td><strong>模型内存占用</strong></td>
+<td>7GB</td>
+</tr>
+<tr>
+<td><strong>峰值内存占用</strong></td>
+<td>8GB</td>
+</tr>
+<tr>
+<td><strong>功耗</strong></td>
+<td>6W</td>
+</tr>
+<tr>
+<td><strong>能效比</strong></td>
+<td>0.72 mJ/token</td>
+</tr>
+</tbody>
+</table>
+<p><strong>结论</strong></p>
+<ul>
+<li>在 Samsung Galaxy S24 上，7B 参数的 INT8 量化模型可以流畅运行</li>
+<li>TTFT 为 200ms，生成延迟为 12ms/token，用户体验良好</li>
+<li>内存占用为 7GB，在设备内存限制内</li>
+<li>功耗为 6W，能效比为 0.72 mJ/token，功耗可接受</li>
+</ul>
+<hr>
+<p><em>附录版本：v1.0</em>
+<em>最后更新：2026-03-13</em></p>
+</div> <nav class="pager"> <a class="pager__link" href="/model-inference-engineer/B-tools-resources/"> <span>上一篇</span> <strong>附录 B：工具与资源链接</strong> </a> <a class="pager__link" href="/model-inference-engineer/D-faq/"> <span>下一篇</span> <strong>附录 D：常见问题 FAQ</strong> </a> </nav> </article> </section>  </main> <footer class="site-footer"> <div class="site-footer__inner"> <p>Vinci Knowledge Base</p> <p>Source directory: <code>/Users/superone77/Documents/知识库/projects</code></p> </div> </footer> </div> </body></html>

@@ -1,0 +1,543 @@
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>第十一章：可观测性与排障（一） | Vinci Knowledge Base</title><meta name="description" content="第十一章：可观测性与排障（一） 端侧大模型推理的可观测性是保障推理服务质量和快速排障的基础。与云侧推理不同，端侧推理的资源受限、网络环境复杂、设备多样性高，因此需要设计适合端侧的日志系统和性能分析工具链。本章将介绍端侧日志与调试、性能分析工具的核心实践。 11.1 端侧日志与调试 11.1.1 推理日志记录规范 推理日志是端侧推理系统运行状态的最直接记录。合"><meta name="generator" content="Vinci Knowledge Base"><link rel="stylesheet" href="/_astro/_doc_.CY2v1inF.css"></head> <body> <div class="page-shell"> <header class="site-header"> <div class="site-header__inner"> <a class="brand" href="/"> <span class="brand__eyebrow">GitHub Pages Knowledge Site</span> <span class="brand__name">Vinci Knowledge Base</span> </a> <nav class="site-nav"> <a href="/">Projects</a> </nav> </div> </header> <main class="page-main">  <section class="article-hero"> <div> <p class="eyebrow">Knowledge Article</p> <h1>第十一章：可观测性与排障（一）</h1> <p class="article-hero__breadcrumbs"> <a href="/">Home</a> <span>/</span> <a href="/model-inference-engineer/">端侧大模型推理工程师知识库</a> </p> </div> <div class="meta-card"> <p><strong>Project</strong> 端侧大模型推理工程师知识库</p> <p><strong>Source</strong> <code>knowledge/17-observability-troubleshooting.md</code></p> <p><strong>Sections</strong> 12</p> </div> </section> <section class="content-grid"> <aside class="toc-card"> <p class="toc-card__title">本页目录</p> <ul class="toc-card__list"> <li class="toc-depth-1"> <a href="#第十一章可观测性与排障一">第十一章：可观测性与排障（一）</a> </li><li class="toc-depth-2"> <a href="#111-端侧日志与调试">11.1 端侧日志与调试</a> </li><li class="toc-depth-3"> <a href="#1111-推理日志记录规范">11.1.1 推理日志记录规范</a> </li><li class="toc-depth-3"> <a href="#1112-性能日志采样">11.1.2 性能日志采样</a> </li><li class="toc-depth-3"> <a href="#1113-错误日志分类">11.1.3 错误日志分类</a> </li><li class="toc-depth-3"> <a href="#1114-日志隐私脱敏">11.1.4 日志隐私脱敏</a> </li><li class="toc-depth-2"> <a href="#112-性能分析工具">11.2 性能分析工具</a> </li><li class="toc-depth-3"> <a href="#1121-端侧性能分析工具链">11.2.1 端侧性能分析工具链</a> </li><li class="toc-depth-3"> <a href="#1122-推理耗时分析">11.2.2 推理耗时分析</a> </li><li class="toc-depth-3"> <a href="#1123-内存分析工具">11.2.3 内存分析工具</a> </li><li class="toc-depth-3"> <a href="#1124-gpunpu-性能分析">11.2.4 GPU/NPU 性能分析</a> </li><li class="toc-depth-2"> <a href="#总结">总结</a> </li> </ul> </aside> <article class="prose-card"> <div class="prose"><h1 id="第十一章可观测性与排障一" tabindex="-1">第十一章：可观测性与排障（一） <a class="heading-anchor" href="#第十一章可观测性与排障一" aria-hidden="true">#</a></h1>
+<p>端侧大模型推理的可观测性是保障推理服务质量和快速排障的基础。与云侧推理不同，端侧推理的资源受限、网络环境复杂、设备多样性高，因此需要设计适合端侧的日志系统和性能分析工具链。本章将介绍端侧日志与调试、性能分析工具的核心实践。</p>
+<hr>
+<h2 id="111-端侧日志与调试" tabindex="-1">11.1 端侧日志与调试 <a class="heading-anchor" href="#111-端侧日志与调试" aria-hidden="true">#</a></h2>
+<h3 id="1111-推理日志记录规范" tabindex="-1">11.1.1 推理日志记录规范 <a class="heading-anchor" href="#1111-推理日志记录规范" aria-hidden="true">#</a></h3>
+<p>推理日志是端侧推理系统运行状态的最直接记录。合理的日志规范能够帮助工程师快速定位问题、分析性能瓶颈、优化推理服务。</p>
+<p><strong>日志级别</strong>：</p>
+<ul>
+<li><strong>Debug</strong>：详细的调试信息，如模型加载步骤、算子执行顺序</li>
+<li><strong>Info</strong>：关键的运行状态，如推理开始、推理完成、模型切换</li>
+<li><strong>Warning</strong>：潜在的问题，如内存预警、网络重试</li>
+<li><strong>Error</strong>：推理失败，如模型加载失败、推理超时、OOM</li>
+</ul>
+<p><strong>日志内容</strong>：</p>
+<ul>
+<li><strong>推理元数据</strong>：模型版本、设备型号、系统版本、推理时间戳</li>
+<li><strong>推理输入</strong>：输入 token 数、输入大小（已脱敏）</li>
+<li><strong>推理输出</strong>：输出 token 数、输出长度、输出大小（已脱敏）</li>
+<li><strong>性能指标</strong>：推理耗时、TTFT（首字延迟）、Decode 阶段耗时</li>
+<li><strong>资源使用</strong>：内存占用、CPU 占用、GPU 占用</li>
+<li><strong>错误信息</strong>：错误类型、错误堆栈、错误上下文</li>
+</ul>
+<p><strong>日志格式</strong>：</p>
+<ul>
+<li><strong>结构化日志</strong>：使用 JSON 或键值对格式，便于解析和分析</li>
+<li><strong>统一时间戳</strong>：使用 UTC 时间或设备本地时间，保持一致性</li>
+<li><strong>日志关联 ID</strong>：为每次推理生成唯一的 trace ID，便于追踪多步推理</li>
+</ul>
+<p><strong>示例</strong>（JSON 格式）：</p>
+<pre class="hljs"><code><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;timestamp&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2026-03-12T09:00:00Z&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;level&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;INFO&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;trace_id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;abc123&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;event&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;inference_complete&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;model_version&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;v1.2.3&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;device_model&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;iPhone 15 Pro&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;os_version&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;iOS 17.2&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;input_tokens&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">128</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;output_tokens&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">256</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;total_time_ms&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1523</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;ttft_ms&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">234</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;decode_time_ms&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1289</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;memory_mb&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">456</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;cpu_percent&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">78</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<h3 id="1112-性能日志采样" tabindex="-1">11.1.2 性能日志采样 <a class="heading-anchor" href="#1112-性能日志采样" aria-hidden="true">#</a></h3>
+<p>端侧推理的日志量可能非常大，尤其是高频推理场景（如实时语音识别）。合理的日志采样策略能够在保留关键信息的同时，降低日志存储和传输成本。</p>
+<p><strong>采样策略</strong>：</p>
+<ul>
+<li><strong>固定比例采样</strong>：按固定比例记录日志（如 1%、5%、10%）</li>
+<li><strong>时间窗口采样</strong>：在固定时间窗口内记录部分日志（如每分钟最多 10 条）</li>
+<li><strong>随机采样</strong>：随机选择部分推理记录日志</li>
+<li><strong>条件采样</strong>：只在特定条件下记录日志（如耗时超过阈值）</li>
+</ul>
+<p><strong>采样维度</strong>：</p>
+<ul>
+<li><strong>推理耗时</strong>：记录耗时最慢的 5% 或超过阈值的推理</li>
+<li><strong>错误推理</strong>：记录所有失败的推理</li>
+<li><strong>关键场景</strong>：记录首次推理、模型切换、灰度发布等关键场景</li>
+<li><strong>设备特征</strong>：按设备型号或系统版本分层采样</li>
+</ul>
+<p><strong>采样率选择</strong>：</p>
+<ul>
+<li><strong>高频场景</strong>：采样率 1%-5%，如实时语音识别</li>
+<li><strong>中频场景</strong>：采样率 5%-10%，如智能助手</li>
+<li><strong>低频场景</strong>：采样率 10%-20%，如离线翻译</li>
+<li><strong>关键场景</strong>：采样率 100%，如模型热更新、灰度发布</li>
+</ul>
+<p><strong>实现示例</strong>：</p>
+<pre class="hljs"><code><span class="hljs-comment">// iOS 端侧日志采样示例</span>
+<span class="hljs-keyword">func</span> <span class="hljs-title function_">shouldLogInference</span>() -&gt; <span class="hljs-type">Bool</span> {
+    <span class="hljs-keyword">let</span> random <span class="hljs-operator">=</span> <span class="hljs-type">Double</span>.random(in: <span class="hljs-number">0</span><span class="hljs-operator">...</span><span class="hljs-number">1</span>)
+    <span class="hljs-keyword">let</span> samplingRate <span class="hljs-operator">=</span> <span class="hljs-number">0.05</span> <span class="hljs-comment">// 5% 采样率</span>
+    <span class="hljs-keyword">return</span> random <span class="hljs-operator">&lt;</span> samplingRate
+}
+
+<span class="hljs-keyword">func</span> <span class="hljs-title function_">logInferenceComplete</span>(<span class="hljs-params">traceId</span>: <span class="hljs-type">String</span>, <span class="hljs-params">duration</span>: <span class="hljs-type">TimeInterval</span>) {
+    <span class="hljs-keyword">guard</span> shouldLogInference() <span class="hljs-operator">||</span> duration <span class="hljs-operator">&gt;</span> <span class="hljs-number">2000</span> <span class="hljs-keyword">else</span> { <span class="hljs-keyword">return</span> } <span class="hljs-comment">// 耗时超过 2s 时强制记录</span>
+    <span class="hljs-comment">// 记录日志</span>
+    logger.info(<span class="hljs-string">&quot;inference_complete&quot;</span>, [
+        <span class="hljs-string">&quot;trace_id&quot;</span>: traceId,
+        <span class="hljs-string">&quot;duration_ms&quot;</span>: <span class="hljs-type">Int</span>(duration <span class="hljs-operator">*</span> <span class="hljs-number">1000</span>)
+    ])
+}
+</code></pre>
+<h3 id="1113-错误日志分类" tabindex="-1">11.1.3 错误日志分类 <a class="heading-anchor" href="#1113-错误日志分类" aria-hidden="true">#</a></h3>
+<p>错误日志分类有助于快速定位问题类型，制定针对性的解决方案。端侧推理的错误类型多样，需要系统化的分类体系。</p>
+<p><strong>错误类型分类</strong>：</p>
+<p><strong>1. 模型相关错误</strong></p>
+<ul>
+<li><strong>模型加载失败</strong>：模型文件不存在、文件损坏、格式不支持</li>
+<li><strong>模型解析失败</strong>：算子不支持、参数不匹配、版本不兼容</li>
+<li><strong>模型切换失败</strong>：新模型下载失败、校验失败、加载失败</li>
+</ul>
+<p><strong>2. 资源相关错误</strong></p>
+<ul>
+<li><strong>OOM（Out of Memory）</strong>：内存不足，无法加载模型或推理</li>
+<li><strong>存储空间不足</strong>：磁盘空间不足，无法下载模型</li>
+<li><strong>GPU/NPU 不可用</strong>：硬件加速器被占用或不支持</li>
+</ul>
+<p><strong>3. 推理相关错误</strong></p>
+<ul>
+<li><strong>推理超时</strong>：推理时间超过预设阈值</li>
+<li><strong>推理中断</strong>：推理过程中被系统中断（如应用切到后台）</li>
+<li><strong>精度异常</strong>：输出结果异常（如 NaN、Inf）</li>
+</ul>
+<p><strong>4. 网络相关错误</strong></p>
+<ul>
+<li><strong>下载失败</strong>：模型下载失败、网络中断</li>
+<li><strong>校验失败</strong>：下载的模型文件校验失败（哈希不匹配）</li>
+<li><strong>更新失败</strong>：模型更新失败、回滚失败</li>
+</ul>
+<p><strong>5. 兼容性错误</strong></p>
+<ul>
+<li><strong>设备不支持</strong>：设备型号不支持当前模型</li>
+<li><strong>系统版本过低</strong>：系统版本不满足模型运行的最低要求</li>
+<li><strong>硬件不支持</strong>：NPU/GPU 不支持当前模型</li>
+</ul>
+<p><strong>错误日志格式</strong>：</p>
+<pre class="hljs"><code><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;timestamp&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2026-03-12T09:00:00Z&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;level&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;ERROR&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;trace_id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;abc123&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;event&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;inference_error&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;error_type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;OOM&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;error_message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Failed to allocate memory for KV cache&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;device_model&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;iPhone 12&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;os_version&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;iOS 16.0&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;model_version&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;v1.2.3&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;stack_trace&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;...&quot;</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<p><strong>错误处理策略</strong>：</p>
+<ul>
+<li><strong>自动重试</strong>：网络错误、临时资源不足时自动重试</li>
+<li><strong>降级策略</strong>：推理失败时降级使用旧模型或简化模型</li>
+<li><strong>错误上报</strong>：关键错误上报到服务端，便于全局分析</li>
+<li><strong>用户提示</strong>：错误影响用户体验时，给出友好提示</li>
+</ul>
+<h3 id="1114-日志隐私脱敏" tabindex="-1">11.1.4 日志隐私脱敏 <a class="heading-anchor" href="#1114-日志隐私脱敏" aria-hidden="true">#</a></h3>
+<p>端侧推理涉及用户数据，日志记录时必须进行隐私脱敏，防止敏感信息泄露。隐私保护是端侧推理的基本原则，必须严格遵守。</p>
+<p><strong>需要脱敏的信息</strong>：</p>
+<ul>
+<li><strong>用户输入</strong>：推理输入的文本内容（如用户消息、语音转文字）</li>
+<li><strong>推理输出</strong>：推理输出的文本内容（如 AI 回复）</li>
+<li><strong>用户 ID</strong>：用户标识符、设备 ID、会话 ID</li>
+<li><strong>敏感元数据</strong>：地理位置、联系人、短信等</li>
+</ul>
+<p><strong>脱敏策略</strong>：</p>
+<ul>
+<li><strong>完全脱敏</strong>：不记录任何敏感信息（推荐）</li>
+<li><strong>哈希脱敏</strong>：使用哈希值替代原始值（适合追踪）</li>
+<li><strong>掩码脱敏</strong>：部分遮盖敏感信息（如手机号脱敏为 <code>138****5678</code>）</li>
+<li><strong>抽样脱敏</strong>：只记录部分敏感信息（如前 10 个 token）</li>
+</ul>
+<p><strong>实现示例</strong>：</p>
+<pre class="hljs"><code><span class="hljs-comment">// iOS 端侧日志隐私脱敏示例</span>
+<span class="hljs-keyword">func</span> <span class="hljs-title function_">sanitizeInputText</span>(<span class="hljs-keyword">_</span> <span class="hljs-params">text</span>: <span class="hljs-type">String</span>) -&gt; <span class="hljs-type">String</span> {
+    <span class="hljs-comment">// 方式 1：完全脱敏，不记录输入内容</span>
+    <span class="hljs-comment">// return &quot;[REDACTED]&quot;</span>
+
+    <span class="hljs-comment">// 方式 2：哈希脱敏，使用 SHA256 哈希值</span>
+    <span class="hljs-comment">// return text.sha256()</span>
+
+    <span class="hljs-comment">// 方式 3：长度脱敏，只记录长度</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;[<span class="hljs-subst">\(text.count)</span> chars]&quot;</span>
+
+    <span class="hljs-comment">// 方式 4：抽样脱敏，只记录前 10 个字符</span>
+    <span class="hljs-comment">// return String(text.prefix(10)) + &quot;...&quot;</span>
+}
+
+<span class="hljs-keyword">func</span> <span class="hljs-title function_">logInferenceStart</span>(<span class="hljs-params">traceId</span>: <span class="hljs-type">String</span>, <span class="hljs-params">inputText</span>: <span class="hljs-type">String</span>) {
+    logger.info(<span class="hljs-string">&quot;inference_start&quot;</span>, [
+        <span class="hljs-string">&quot;trace_id&quot;</span>: traceId,
+        <span class="hljs-string">&quot;input_text&quot;</span>: sanitizeInputText(inputText) <span class="hljs-comment">// 脱敏后的输入</span>
+    ])
+}
+</code></pre>
+<p><strong>合规要求</strong>：</p>
+<ul>
+<li><strong>GDPR</strong>：欧盟数据保护法规，要求对用户数据进行脱敏</li>
+<li><strong>CCPA</strong>：加州消费者隐私法，要求保护用户隐私</li>
+<li><strong>国内法规</strong>：《个人信息保护法》等国内法规要求</li>
+</ul>
+<p><strong>最佳实践</strong>：</p>
+<ul>
+<li><strong>默认脱敏</strong>：默认对所有敏感信息进行脱敏</li>
+<li><strong>最小化收集</strong>：只收集必要的日志信息</li>
+<li><strong>用户同意</strong>：敏感信息收集前获取用户同意</li>
+<li><strong>加密传输</strong>：日志传输时使用 HTTPS 加密</li>
+</ul>
+<hr>
+<h2 id="112-性能分析工具" tabindex="-1">11.2 性能分析工具 <a class="heading-anchor" href="#112-性能分析工具" aria-hidden="true">#</a></h2>
+<h3 id="1121-端侧性能分析工具链" tabindex="-1">11.2.1 端侧性能分析工具链 <a class="heading-anchor" href="#1121-端侧性能分析工具链" aria-hidden="true">#</a></h3>
+<p>端侧推理性能分析需要多层次的工具链，从系统级到应用级，从全局监控到细粒度剖析。合理的工具链组合能够全面分析性能瓶颈。</p>
+<p><strong>iOS 性能分析工具</strong>：</p>
+<p><strong>1. Xcode Instruments</strong></p>
+<ul>
+<li><strong>Time Profiler</strong>：分析 CPU 占用，定位热点函数</li>
+<li><strong>Allocations</strong>：分析内存分配和释放，检测内存泄漏</li>
+<li><strong>Leaks</strong>：检测内存泄漏</li>
+<li><strong>System Trace</strong>：分析系统调用、线程调度、I/O 操作</li>
+<li><strong>Metal System Trace</strong>：分析 GPU 性能，渲染管线</li>
+</ul>
+<p><strong>2. os_log</strong></p>
+<ul>
+<li><strong>系统日志</strong>：记录系统级日志</li>
+<li><strong>性能计数器</strong>：记录 CPU、内存、I/O 性能数据</li>
+<li><strong>日志过滤</strong>：支持按子系统、类别过滤日志</li>
+</ul>
+<p><strong>3. Metal Performance Shaders (MPS)</strong></p>
+<ul>
+<li><strong>GPU 性能监控</strong>：监控 GPU 使用率、显存占用</li>
+<li><strong>Shader 性能分析</strong>：分析 Metal Shader 的执行时间</li>
+</ul>
+<p><strong>Android 性能分析工具</strong>：</p>
+<p><strong>1. Android Profiler</strong></p>
+<ul>
+<li><strong>CPU Profiler</strong>：分析 CPU 占用，线程状态</li>
+<li><strong>Memory Profiler</strong>：分析内存分配、堆转储</li>
+<li><strong>Network Profiler</strong>：分析网络请求</li>
+<li><strong>Energy Profiler</strong>：分析能耗</li>
+</ul>
+<p><strong>2. Systrace</strong></p>
+<ul>
+<li><strong>系统级追踪</strong>：记录系统调用、线程调度、中断</li>
+<li><strong>CPU 调度</strong>：分析 CPU 核心调度、频率变化</li>
+<li><strong>GPU 调度</strong>：分析 GPU 调度、渲染帧</li>
+</ul>
+<p><strong>3. Perfetto</strong></p>
+<ul>
+<li><strong>新一代系统级追踪工具</strong>：替代 Systrace，提供更强大的分析能力</li>
+<li><strong>可视化界面</strong>：提供 Web 可视化界面，方便分析</li>
+</ul>
+<p><strong>通用性能分析工具</strong>：</p>
+<p><strong>1. ONNX Runtime Profiler</strong></p>
+<ul>
+<li><strong>算子级性能分析</strong>：分析每个算子的执行时间</li>
+<li><strong>内存分析</strong>：分析模型内存占用</li>
+<li><strong>对比分析</strong>：对比不同优化策略的性能差异</li>
+</ul>
+<p><strong>2. TensorFlow Lite Profiler</strong></p>
+<ul>
+<li><strong>推理耗时分析</strong>：分析推理的各个阶段耗时</li>
+<li><strong>内存分析</strong>：分析模型内存占用</li>
+<li><strong>Delegate 性能</strong>：分析 GPU/NPU Delegate 的性能</li>
+</ul>
+<p><strong>3. CoreML Tools</strong></p>
+<ul>
+<li><strong>模型分析</strong>：分析模型大小、算子类型、优化建议</li>
+<li><strong>性能预测</strong>：预测推理性能</li>
+<li><strong>基准测试</strong>：运行基准测试，对比性能</li>
+</ul>
+<p><strong>工具链组合</strong>：</p>
+<ul>
+<li><strong>开发阶段</strong>：使用 Xcode Instruments / Android Profiler 进行全面分析</li>
+<li><strong>调试阶段</strong>：使用 ONNX Runtime Profiler / TFLite Profiler 分析推理性能</li>
+<li><strong>生产阶段</strong>：使用轻量级日志和性能计数器，降低开销</li>
+</ul>
+<h3 id="1122-推理耗时分析" tabindex="-1">11.2.2 推理耗时分析 <a class="heading-anchor" href="#1122-推理耗时分析" aria-hidden="true">#</a></h3>
+<p>推理耗时是端侧推理最重要的性能指标。合理的耗时分析能够定位性能瓶颈，优化推理服务。</p>
+<p><strong>推理耗时分解</strong>：</p>
+<p><strong>1. Prefill 阶段</strong></p>
+<ul>
+<li><strong>Tokenizer</strong>：文本编码耗时</li>
+<li><strong>模型初始化</strong>：加载模型、初始化推理上下文</li>
+<li><strong>KV Cache 生成</strong>：一次性处理历史上下文，生成完整 KV Cache</li>
+<li><strong>首字延迟（TTFT）</strong>：从开始推理到生成第一个 token 的时间</li>
+</ul>
+<p><strong>2. Decode 阶段</strong></p>
+<ul>
+<li><strong>逐 token 生成</strong>：每个 token 的生成时间</li>
+<li><strong>KV Cache 扩展</strong>：每轮对话扩展 KV Cache</li>
+<li><strong>输出解码</strong>：将 token ID 转换为文本</li>
+<li><strong>总推理时间</strong>：Prefill + Decode 阶段的耗时</li>
+</ul>
+<p><strong>性能指标</strong>：</p>
+<ul>
+<li><strong>TTFT（Time to First Token）</strong>：首字延迟，直接影响用户感知</li>
+<li><strong>TPS（Tokens Per Second）</strong>：每秒生成的 token 数</li>
+<li><strong>总推理时间</strong>：从开始推理到推理完成的总时间</li>
+<li><strong>P50/P95/P99</strong>：耗时分布的 50/95/99 分位数</li>
+</ul>
+<p><strong>分析工具</strong>：</p>
+<pre class="hljs"><code><span class="hljs-comment">// iOS 端侧推理耗时分析示例</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">InferenceProfiler</span> {
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">var</span> startTime: <span class="hljs-type">Date</span>?
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">var</span> prefillStartTime: <span class="hljs-type">Date</span>?
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">var</span> decodeStartTime: <span class="hljs-type">Date</span>?
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">var</span> ttft: <span class="hljs-type">TimeInterval</span>?
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">var</span> decodeTimes: [<span class="hljs-type">TimeInterval</span>] <span class="hljs-operator">=</span> []
+
+    <span class="hljs-keyword">func</span> <span class="hljs-title function_">startInference</span>() {
+        startTime <span class="hljs-operator">=</span> <span class="hljs-type">Date</span>()
+        prefillStartTime <span class="hljs-operator">=</span> <span class="hljs-type">Date</span>()
+    }
+
+    <span class="hljs-keyword">func</span> <span class="hljs-title function_">recordTTFT</span>() {
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">let</span> start <span class="hljs-operator">=</span> prefillStartTime {
+            ttft <span class="hljs-operator">=</span> <span class="hljs-type">Date</span>().timeIntervalSince(start)
+            decodeStartTime <span class="hljs-operator">=</span> <span class="hljs-type">Date</span>()
+        }
+    }
+
+    <span class="hljs-keyword">func</span> <span class="hljs-title function_">recordDecodeToken</span>() {
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">let</span> start <span class="hljs-operator">=</span> decodeStartTime {
+            <span class="hljs-keyword">let</span> decodeTime <span class="hljs-operator">=</span> <span class="hljs-type">Date</span>().timeIntervalSince(start)
+            decodeTimes.append(decodeTime)
+            decodeStartTime <span class="hljs-operator">=</span> <span class="hljs-type">Date</span>() <span class="hljs-comment">// 重置</span>
+        }
+    }
+
+    <span class="hljs-keyword">func</span> <span class="hljs-title function_">stopInference</span>() {
+        <span class="hljs-keyword">guard</span> <span class="hljs-keyword">let</span> start <span class="hljs-operator">=</span> startTime <span class="hljs-keyword">else</span> { <span class="hljs-keyword">return</span> }
+        <span class="hljs-keyword">let</span> totalTime <span class="hljs-operator">=</span> <span class="hljs-type">Date</span>().timeIntervalSince(start)
+
+        <span class="hljs-keyword">let</span> avgDecodeTime <span class="hljs-operator">=</span> decodeTimes.reduce(<span class="hljs-number">0</span>, <span class="hljs-operator">+</span>) <span class="hljs-operator">/</span> <span class="hljs-type">Double</span>(decodeTimes.count)
+
+        logger.info(<span class="hljs-string">&quot;inference_performance&quot;</span>, [
+            <span class="hljs-string">&quot;total_time_ms&quot;</span>: <span class="hljs-type">Int</span>(totalTime <span class="hljs-operator">*</span> <span class="hljs-number">1000</span>),
+            <span class="hljs-string">&quot;ttft_ms&quot;</span>: <span class="hljs-type">Int</span>((ttft <span class="hljs-operator">??</span> <span class="hljs-number">0</span>) <span class="hljs-operator">*</span> <span class="hljs-number">1000</span>),
+            <span class="hljs-string">&quot;avg_decode_time_ms&quot;</span>: <span class="hljs-type">Int</span>(avgDecodeTime <span class="hljs-operator">*</span> <span class="hljs-number">1000</span>),
+            <span class="hljs-string">&quot;token_count&quot;</span>: decodeTimes.count
+        ])
+    }
+}
+</code></pre>
+<p><strong>性能瓶颈定位</strong>：</p>
+<ul>
+<li><strong>TTFT 过高</strong>：检查模型初始化、KV Cache 生成、Tokenizer</li>
+<li><strong>Decode 过慢</strong>：检查算子优化、硬件加速器、内存访问</li>
+<li><strong>内存占用过高</strong>：检查模型大小、KV Cache 大小、激活内存</li>
+<li><strong>CPU/GPU 占用过高</strong>：检查算子优化、硬件加速器利用率</li>
+</ul>
+<h3 id="1123-内存分析工具" tabindex="-1">11.2.3 内存分析工具 <a class="heading-anchor" href="#1123-内存分析工具" aria-hidden="true">#</a></h3>
+<p>内存分析是端侧推理优化的关键。端侧设备内存有限，合理的内存分析能够发现内存泄漏、优化内存占用。</p>
+<p><strong>内存指标</strong>：</p>
+<ul>
+<li><strong>模型内存占用</strong>：模型权重占用的内存</li>
+<li><strong>激活内存占用</strong>：推理过程中激活占用的内存</li>
+<li><strong>KV Cache 内存占用</strong>：多轮对话的 KV Cache 占用</li>
+<li><strong>峰值内存</strong>：推理过程中的峰值内存</li>
+<li><strong>内存泄漏</strong>：推理完成后未释放的内存</li>
+</ul>
+<p><strong>iOS 内存分析工具</strong>：</p>
+<p><strong>1. Xcode Allocations</strong></p>
+<ul>
+<li><strong>实时内存监控</strong>：实时查看内存分配和释放</li>
+<li><strong>堆转储</strong>：生成堆转储文件，分析内存占用分布</li>
+<li><strong>内存泄漏检测</strong>：自动检测内存泄漏</li>
+<li><strong>内存图</strong>：可视化内存分配关系</li>
+</ul>
+<p><strong>2. Xcode Leaks</strong></p>
+<ul>
+<li><strong>自动检测</strong>：自动检测内存泄漏</li>
+<li><strong>泄漏报告</strong>：生成泄漏报告，定位泄漏对象</li>
+<li><strong>回溯分析</strong>：分析泄漏对象的创建路径</li>
+</ul>
+<p><strong>Android 内存分析工具</strong>：</p>
+<p><strong>1. Android Profiler - Memory</strong></p>
+<ul>
+<li><strong>实时内存监控</strong>：实时查看内存占用</li>
+<li><strong>堆转储</strong>：生成堆转储文件，分析内存分布</li>
+<li><strong>内存分配跟踪</strong>：跟踪内存分配</li>
+<li><strong>泄漏检测</strong>：自动检测内存泄漏</li>
+</ul>
+<p><strong>2. Memory Profiler</strong></p>
+<ul>
+<li><strong>详细分析</strong>：分析对象的引用关系</li>
+<li><strong>泄漏分析</strong>：自动检测泄漏</li>
+<li><strong>优化建议</strong>：提供内存优化建议</li>
+</ul>
+<p><strong>通用内存分析工具</strong>：</p>
+<p><strong>1. ONNX Runtime Profiler</strong></p>
+<ul>
+<li><strong>模型内存分析</strong>：分析模型权重和激活的内存占用</li>
+<li><strong>KV Cache 分析</strong>：分析 KV Cache 的内存占用</li>
+<li><strong>内存优化建议</strong>：提供内存优化建议</li>
+</ul>
+<p><strong>2. TensorFlow Lite Profiler</strong></p>
+<ul>
+<li><strong>内存占用分析</strong>：分析推理过程中的内存占用</li>
+<li><strong>内存优化</strong>：提供内存优化建议</li>
+</ul>
+<p><strong>3. CoreML Tools</strong></p>
+<ul>
+<li><strong>模型大小分析</strong>：分析模型大小和内存占用</li>
+<li><strong>优化建议</strong>：提供模型优化建议</li>
+</ul>
+<p><strong>实现示例</strong>：</p>
+<pre class="hljs"><code><span class="hljs-comment">// iOS 端侧内存分析示例</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">MemoryProfiler</span> {
+    <span class="hljs-keyword">func</span> <span class="hljs-title function_">recordMemoryUsage</span>(<span class="hljs-params">tag</span>: <span class="hljs-type">String</span>) {
+        <span class="hljs-keyword">var</span> info <span class="hljs-operator">=</span> mach_task_basic_info()
+        <span class="hljs-keyword">var</span> count <span class="hljs-operator">=</span> mach_msg_type_number_t(<span class="hljs-type">MemoryLayout</span>&lt;mach_task_basic_info&gt;.size)<span class="hljs-operator">/</span><span class="hljs-number">4</span>
+
+        <span class="hljs-keyword">let</span> kerr: kern_return_t <span class="hljs-operator">=</span> <span class="hljs-built_in">withUnsafeMutablePointer</span>(to: <span class="hljs-operator">&amp;</span>info) {
+            <span class="hljs-variable">$0</span>.withMemoryRebound(to: integer_t.<span class="hljs-keyword">self</span>, capacity: <span class="hljs-number">1</span>) {
+                task_info(mach_task_self_, task_flavor_t(<span class="hljs-type">MACH_TASK_BASIC_INFO</span>), <span class="hljs-variable">$0</span>, <span class="hljs-operator">&amp;</span>count)
+            }
+        }
+
+        <span class="hljs-keyword">if</span> kerr <span class="hljs-operator">==</span> <span class="hljs-type">KERN_SUCCESS</span> {
+            <span class="hljs-keyword">let</span> usedMB <span class="hljs-operator">=</span> <span class="hljs-type">Double</span>(info.resident_size) <span class="hljs-operator">/</span> <span class="hljs-number">1024</span> <span class="hljs-operator">/</span> <span class="hljs-number">1024</span>
+            logger.info(<span class="hljs-string">&quot;memory_usage&quot;</span>, [
+                <span class="hljs-string">&quot;tag&quot;</span>: tag,
+                <span class="hljs-string">&quot;used_mb&quot;</span>: usedMB
+            ])
+        }
+    }
+
+    <span class="hljs-keyword">func</span> <span class="hljs-title function_">checkMemoryPressure</span>() {
+        <span class="hljs-keyword">let</span> notification <span class="hljs-operator">=</span> <span class="hljs-type">Notification</span>.<span class="hljs-type">Name</span>.<span class="hljs-type">NSUIApplicationDidReceiveMemoryWarning</span>
+        <span class="hljs-type">NotificationCenter</span>.default.addObserver(forName: notification, object: <span class="hljs-literal">nil</span>, queue: <span class="hljs-literal">nil</span>) { <span class="hljs-keyword">_</span> <span class="hljs-keyword">in</span>
+            logger.warning(<span class="hljs-string">&quot;memory_warning&quot;</span>, [
+                <span class="hljs-string">&quot;message&quot;</span>: <span class="hljs-string">&quot;Received memory warning&quot;</span>
+            ])
+            <span class="hljs-comment">// 清理缓存、卸载不必要的模型</span>
+        }
+    }
+}
+</code></pre>
+<h3 id="1124-gpunpu-性能分析" tabindex="-1">11.2.4 GPU/NPU 性能分析 <a class="heading-anchor" href="#1124-gpunpu-性能分析" aria-hidden="true">#</a></h3>
+<p>GPU/NPU 是端侧推理的加速器，合理的性能分析能够充分利用硬件加速器，提升推理性能。</p>
+<p><strong>GPU 性能指标</strong>：</p>
+<ul>
+<li><strong>GPU 占用率</strong>：GPU 的使用率</li>
+<li><strong>显存占用</strong>：GPU 显存的使用量</li>
+<li><strong>Shader 耗时</strong>：Metal Shader 或 CUDA Kernel 的执行时间</li>
+<li><strong>带宽利用率</strong>：GPU 内存带宽的利用率</li>
+</ul>
+<p><strong>NPU 性能指标</strong>：</p>
+<ul>
+<li><strong>NPU 占用率</strong>：NPU 的使用率</li>
+<li><strong>NPU 算力利用率</strong>：NPU 算力的利用率</li>
+<li><strong>NPU 内存占用</strong>：NPU 内存的占用</li>
+</ul>
+<p><strong>iOS GPU 分析工具</strong>：</p>
+<p><strong>1. Xcode Metal System Trace</strong></p>
+<ul>
+<li><strong>GPU 性能监控</strong>：监控 GPU 使用率、显存占用</li>
+<li><strong>Shader 性能</strong>：分析 Metal Shader 的执行时间</li>
+<li><strong>渲染管线分析</strong>：分析渲染管线的各个阶段</li>
+</ul>
+<p><strong>2. Metal Performance Shaders</strong></p>
+<ul>
+<li><strong>性能监控</strong>：监控 MPS 算子的性能</li>
+<li><strong>性能对比</strong>：对比不同算子实现的性能</li>
+</ul>
+<p><strong>Android GPU 分析工具</strong>：</p>
+<p><strong>1. GPU Debugger</strong></p>
+<ul>
+<li><strong>GPU 性能分析</strong>：分析 GPU 性能</li>
+<li><strong>Shader 调试</strong>：调试 GPU Shader</li>
+</ul>
+<p><strong>2. RenderDoc</strong></p>
+<ul>
+<li><strong>帧捕获</strong>：捕获渲染帧，分析性能</li>
+<li><strong>Shader 分析</strong>：分析 Shader 性能</li>
+</ul>
+<p><strong>通用 NPU 分析工具</strong>：</p>
+<p><strong>1. TensorFlow Lite - GPU Delegate</strong></p>
+<ul>
+<li><strong>GPU 性能监控</strong>：监控 GPU Delegate 的性能</li>
+<li><strong>性能对比</strong>：对比 CPU 和 GPU 的性能差异</li>
+</ul>
+<p><strong>2. CoreML - Neural Engine</strong></p>
+<ul>
+<li><strong>NPU 性能监控</strong>：监控 Neural Engine 的性能</li>
+<li><strong>性能分析</strong>：分析 NPU 的使用情况</li>
+</ul>
+<p><strong>实现示例</strong>：</p>
+<pre class="hljs"><code><span class="hljs-comment">// iOS 端侧 GPU 性能分析示例</span>
+<span class="hljs-keyword">import</span> Metal
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">GPUProfiler</span> {
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">let</span> device: <span class="hljs-type">MTLDevice</span>
+
+    <span class="hljs-keyword">init</span>() {
+        <span class="hljs-keyword">self</span>.device <span class="hljs-operator">=</span> <span class="hljs-type">MTLCreateSystemDefaultDevice</span>()<span class="hljs-operator">!</span>
+    }
+
+    <span class="hljs-keyword">func</span> <span class="hljs-title function_">recordGPUUsage</span>() {
+        <span class="hljs-comment">// Metal 不直接提供 GPU 占用率 API</span>
+        <span class="hljs-comment">// 可以通过 Metal Performance Shaders 的统计信息估算</span>
+        logger.info(<span class="hljs-string">&quot;gpu_info&quot;</span>, [
+            <span class="hljs-string">&quot;device_name&quot;</span>: device.name,
+            <span class="hljs-string">&quot;max_texture_size&quot;</span>: device.maxTextureWidth
+        ])
+    }
+
+    <span class="hljs-keyword">func</span> <span class="hljs-title function_">measureShaderExecution</span>(<span class="hljs-params">commandBuffer</span>: <span class="hljs-type">MTLCommandBuffer</span>, <span class="hljs-params">label</span>: <span class="hljs-type">String</span>) {
+        commandBuffer.addCompletedHandler { buffer <span class="hljs-keyword">in</span>
+            <span class="hljs-keyword">let</span> gpuTime <span class="hljs-operator">=</span> buffer.gpuEndTime <span class="hljs-operator">-</span> buffer.gpuStartTime
+            logger.info(<span class="hljs-string">&quot;shader_execution&quot;</span>, [
+                <span class="hljs-string">&quot;label&quot;</span>: label,
+                <span class="hljs-string">&quot;gpu_time_ms&quot;</span>: <span class="hljs-type">Int</span>(gpuTime <span class="hljs-operator">*</span> <span class="hljs-number">1000</span>)
+            ])
+        }
+    }
+}
+</code></pre>
+<p><strong>性能优化建议</strong>：</p>
+<ul>
+<li><strong>使用硬件加速器</strong>：优先使用 GPU/NPU，而不是 CPU</li>
+<li><strong>算子融合</strong>：融合多个算子，减少内存访问</li>
+<li><strong>批量处理</strong>：批量处理多个输入，提高硬件利用率</li>
+<li><strong>减少数据传输</strong>：减少 CPU 和 GPU 之间的数据传输</li>
+</ul>
+<hr>
+<h2 id="总结" tabindex="-1">总结 <a class="heading-anchor" href="#总结" aria-hidden="true">#</a></h2>
+<p>本章介绍了端侧日志与调试、性能分析工具的核心实践。端侧推理的可观测性是保障推理服务质量和快速排障的基础，需要设计适合端侧的日志系统和性能分析工具链。</p>
+<p><strong>关键要点</strong>：</p>
+<ol>
+<li><strong>日志规范</strong>：使用结构化日志，合理设置日志级别，确保日志内容完整</li>
+<li><strong>日志采样</strong>：合理的日志采样策略，在保留关键信息的同时降低成本</li>
+<li><strong>错误分类</strong>：系统化的错误分类体系，便于快速定位问题</li>
+<li><strong>隐私脱敏</strong>：对所有敏感信息进行脱敏，遵守隐私法规</li>
+<li><strong>性能分析工具</strong>：使用多层级的工具链，全面分析性能瓶颈</li>
+<li><strong>推理耗时分析</strong>：分解推理耗时，定位性能瓶颈</li>
+<li><strong>内存分析</strong>：使用内存分析工具，发现内存泄漏、优化内存占用</li>
+<li><strong>GPU/NPU 分析</strong>：分析硬件加速器的性能，充分利用硬件加速</li>
+</ol>
+<p><strong>最佳实践</strong>：</p>
+<ul>
+<li>使用结构化日志，便于解析和分析</li>
+<li>合理设置日志采样率，平衡信息量和成本</li>
+<li>对所有敏感信息进行脱敏，遵守隐私法规</li>
+<li>使用多层级的性能分析工具，全面分析性能瓶颈</li>
+<li>在开发阶段使用全面的分析工具，在生产阶段使用轻量级监控</li>
+<li>定期进行性能分析和优化，持续提升推理性能</li>
+</ul>
+<p>端侧推理的可观测性是一个持续优化的过程，需要根据产品需求和技术演进不断调整策略。通过科学的日志系统和性能分析工具链，可以确保端侧大模型推理服务的高可用性和高性能。</p>
+<hr>
+<p><strong>参考来源</strong>：</p>
+<ul>
+<li>本章节内容基于 <a href="http://RESEARCH.md">RESEARCH.md</a> 中的内存分析工具（Android Profiler、Xcode Instruments、ONNX Runtime Profiler、TFLite Profiler、CoreML Tools）的结论</li>
+<li>参考 iOS 和 Android 官方文档（os_log、Xcode Instruments、Android Profiler、Systrace、Perfetto）</li>
+<li>参考移动端应用的日志记录和性能分析的最佳实践</li>
+<li>参考 GDPR、CCPA、《个人信息保护法》等隐私法规的要求</li>
+</ul>
+</div> <nav class="pager"> <a class="pager__link" href="/model-inference-engineer/16-deployment-updating/"> <span>上一篇</span> <strong>第十章：端侧部署与更新</strong> </a> <a class="pager__link" href="/model-inference-engineer/18-troubleshooting-optimization/"> <span>下一篇</span> <strong>第十一章：可观测性与排障（二）</strong> </a> </nav> </article> </section>  </main> <footer class="site-footer"> <div class="site-footer__inner"> <p>Vinci Knowledge Base</p> <p>Source directory: <code>/Users/superone77/Documents/知识库/projects</code></p> </div> </footer> </div> </body></html>
