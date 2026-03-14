@@ -83,3 +83,34 @@ GITHUB_PAGES_CNAME=your.domain.com
 - GitHub Actions 无法直接读取你本机的 `~/Documents/知识库/projects/`
 - 因此当前方案采用“本地构建 + 本地部署”
 - 知识库内容更新后，重新执行 `npm run deploy` 即可发布最新静态页面
+
+## 一键更新 App
+
+当前仓库支持生成一个可双击的 macOS app：
+
+```bash
+./scripts/build-update-app.sh
+```
+
+生成物：
+
+- `Vinci Knowledge Base Update.app`
+
+工作方式：
+
+- 双击 app
+- app 打开内部 `.command` 启动器
+- Terminal 自动拉起该启动器
+- 启动器执行仓库内 `scripts/run-manual-deploy.sh`
+- 调用 `npm run deploy`
+- 完成后保留终端结果页，方便查看日志
+
+日志位置：
+
+- `~/Library/Logs/vinci-knowledge-base/manual-deploy.log`
+
+macOS 权限注意事项：
+
+- app 通过 Terminal 运行发布流程，以降低访问 `~/Documents/知识库/projects` 时的权限问题
+- 如果首次运行时 macOS 弹出访问 `Documents` 的授权提示，请允许
+- 如果日志中出现 “node cannot access ... Documents”，请重新从 Terminal 运行一次或给 Terminal / Node 授予相应权限后再试

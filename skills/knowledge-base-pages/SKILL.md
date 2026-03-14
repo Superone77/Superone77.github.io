@@ -39,6 +39,21 @@ Maintain the Astro site in this repository and republish it to GitHub Pages. Tre
 - Push `main` separately only when the user wants the source branch updated on GitHub
 - Verify `git status --short` after deploy-related work so no unintended repo changes remain
 
+## Manual Update App
+
+- Treat the clickable macOS app as the default local update entrypoint
+- Keep the runtime shell entrypoint in `scripts/run-manual-deploy.sh`
+- Keep the `.command` launcher in `app/Vinci Knowledge Base Update.command`
+- Keep the app source in `app/Vinci Knowledge Base Update.applescript`
+- Keep the app builder in `scripts/build-update-app.sh`
+- Keep the expected runtime environment explicit:
+  - `SITE_URL=https://superone77.github.io`
+  - `KB_SOURCE_DIR=/Users/superone77/Documents/知识库/projects`
+  - Node/NPM from `/Users/superone77/.nvm/versions/node/v22.22.0/bin/`
+- Launch the deploy through Terminal via the `.command` wrapper so the user can see live logs and handle macOS Documents permission prompts
+- Leave the Terminal result page open after the deploy completes
+- If the user asks for “点一下 app 就更新”， rebuild the `.app` and verify that it opens Terminal and runs `scripts/run-manual-deploy.sh`
+
 ## Guardrails
 
 - Keep the default site URL at `https://superone77.github.io` unless the user changes domains

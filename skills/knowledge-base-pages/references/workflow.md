@@ -44,8 +44,28 @@ Inspect and edit:
 Inspect and edit:
 
 - `scripts/deploy.mjs`
+- `scripts/run-manual-deploy.sh`
+- `scripts/build-update-app.sh`
+- `app/Vinci Knowledge Base Update.applescript`
 - `astro.config.mjs`
 - `README.md` only if the user wants the workflow documentation updated too
+
+### Maintain The Clickable Update App
+
+Use the app build flow:
+
+```bash
+./scripts/build-update-app.sh
+open "Vinci Knowledge Base Update.app"
+```
+
+Current policy:
+
+- Use the `.app` as the preferred local trigger instead of `launchd`
+- Open Terminal and show live logs while deploying
+- Write logs to `~/Library/Logs/vinci-knowledge-base/manual-deploy.log`
+- Use `scripts/run-manual-deploy.sh` as the only app runtime entrypoint
+- If the app cannot read `~/Documents/知识库/projects`, diagnose macOS Documents permissions for Terminal or Node before changing the workflow
 
 ## Branch Model
 
