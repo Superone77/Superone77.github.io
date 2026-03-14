@@ -1,0 +1,140 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getSiteContent } from "../lib/content";
+import { buildProjectUrl, buildDocUrl, formatDate, labelStatus } from "../lib/site";
+
+const site = getSiteContent();
+const searchJson = JSON.stringify(site.searchEntries);
+---
+
+<BaseLayout description="自动从本地知识库项目生成并部署的静态网页。" title="Projects">
+  <section class="hero">
+    <div class="hero__content">
+      <p class="eyebrow">Local Markdown to Static Site</p>
+      <h1>Vinci Knowledge Base</h1>
+      <p class="hero__lead">
+        自动读取 <code>~/Documents/知识库/projects/</code> 下的项目目录，生成结构化知识站点并部署到 GitHub Pages。
+      </p>
+      <div class="hero__meta">
+        <span>{site.projects.length} 个项目</span>
+        <span>{site.searchEntries.filter((entry) => entry.kind === "doc").length} 篇文章</span>
+        <span>最近构建 {formatDate(site.generatedAt)}</span>
+      </div>
+    </div>
+    <div class="search-panel">
+      <label class="search-panel__label" for="site-search">搜索项目和文章标题</label>
+      <input
+        class="search-panel__input"
+        id="site-search"
+        name="site-search"
+        placeholder="例如：Agent、推理、量化、memory"
+        type="search"
+      />
+      <div class="search-results" id="search-results">
+        <p class="search-results__hint">输入关键字后，会在当前站点的项目名和文档标题中即时筛选。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-header">
+    <div>
+      <p class="eyebrow">Published Projects</p>
+      <h2>全部项目</h2>
+    </div>
+  </section>
+
+  <section class="project-grid" id="project-grid">
+    {
+      site.projects.map((project) => (
+        <article
+          class="project-card"
+          data-search={[
+            project.displayName,
+            project.slug,
+            project.description,
+            ...project.docs.map((doc) => doc.title)
+          ]
+            .join(" ")
+            .toLowerCase()}
+        >
+          <div class="project-card__header">
+            <p class="project-card__status">{labelStatus(project.status)}</p>
+            <h3>
+              <a href={buildProjectUrl(project.slug)}>{project.displayName}</a>
+            </h3>
+            <p class="project-card__date">更新于 {formatDate(project.updatedAt)}</p>
+          </div>
+          <p class="project-card__summary">{project.description}</p>
+          <ul class="compact-list">
+            {project.docs.slice(0, 5).map((doc) => (
+              <li>
+                <a href={buildDocUrl(project.slug, doc.slug)}>{doc.title}</a>
+              </li>
+            ))}
+          </ul>
+          {project.docCount > 5 && <p class="project-card__more">还有 {project.docCount - 5} 篇文章</p>}
+        </article>
+      ))
+    }
+  </section>
+
+  <script id="search-data" set:html={searchJson} type="application/json"></script>
+  <script is:inline>
+    const input = document.getElementById("site-search");
+    const projectGrid = document.getElementById("project-grid");
+    const results = document.getElementById("search-results");
+    const searchDataNode = document.getElementById("search-data");
+    const entries = searchDataNode ? JSON.parse(searchDataNode.textContent || "[]") : [];
+
+    function renderResults(items, query) {
+      if (!results) return;
+
+      if (!query) {
+        results.innerHTML =
+          '<p class="search-results__hint">输入关键字后，会在当前站点的项目名和文档标题中即时筛选。</p>';
+        return;
+      }
+
+      if (!items.length) {
+        results.innerHTML = '<p class="search-results__hint">没有匹配结果。</p>';
+        return;
+      }
+
+      const html = items
+        .slice(0, 8)
+        .map(
+          (item) => `
+            <a class="search-result" href="${item.url}">
+              <span class="search-result__kind">${item.kind === "project" ? "Project" : "Doc"}</span>
+              <span class="search-result__title">${item.title}</span>
+              <span class="search-result__subtitle">${item.subtitle}</span>
+            </a>
+          `
+        )
+        .join("");
+
+      results.innerHTML = html;
+    }
+
+    function filterProjects(query) {
+      if (!projectGrid) return;
+
+      const cards = projectGrid.querySelectorAll(".project-card");
+      cards.forEach((card) => {
+        const haystack = (card.getAttribute("data-search") || "").toLowerCase();
+        const matched = !query || haystack.includes(query);
+        card.style.display = matched ? "" : "none";
+      });
+    }
+
+    input?.addEventListener("input", (event) => {
+      const query = String(event.target.value || "").trim().toLowerCase();
+      const matched = entries.filter((entry) =>
+        `${entry.title} ${entry.subtitle} ${entry.projectSlug}`.toLowerCase().includes(query)
+      );
+
+      filterProjects(query);
+      renderResults(matched, query);
+    });
+  </script>
+</BaseLayout>

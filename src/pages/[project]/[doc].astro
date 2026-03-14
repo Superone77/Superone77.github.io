@@ -1,0 +1,85 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getSiteContent, type DocPage, type ProjectPage } from "../../lib/content";
+import { buildDocUrl, buildProjectUrl } from "../../lib/site";
+
+export function getStaticPaths() {
+  const site = getSiteContent();
+
+  return site.projects.flatMap((project) =>
+    project.docs.map((doc, index) => ({
+      params: { doc: doc.slug, project: project.slug },
+      props: {
+        doc,
+        nextDoc: project.docs[index + 1] ?? null,
+        previousDoc: project.docs[index - 1] ?? null,
+        project
+      }
+    }))
+  );
+}
+
+interface Props {
+  doc: DocPage;
+  nextDoc: DocPage | null;
+  previousDoc: DocPage | null;
+  project: ProjectPage;
+}
+
+const { doc, nextDoc, previousDoc, project } = Astro.props;
+const tocItems = doc.headings.filter((heading) => heading.depth <= 3);
+---
+
+<BaseLayout description={doc.description} title={doc.title}>
+  <section class="article-hero">
+    <div>
+      <p class="eyebrow">Knowledge Article</p>
+      <h1>{doc.title}</h1>
+      <p class="article-hero__breadcrumbs">
+        <a href="/">Home</a>
+        <span>/</span>
+        <a href={buildProjectUrl(project.slug)}>{project.displayName}</a>
+      </p>
+    </div>
+    <div class="meta-card">
+      <p><strong>Project</strong> {project.displayName}</p>
+      <p><strong>Source</strong> <code>{doc.relativePath}</code></p>
+      <p><strong>Sections</strong> {tocItems.length}</p>
+    </div>
+  </section>
+
+  <section class="content-grid">
+    <aside class="toc-card">
+      <p class="toc-card__title">本页目录</p>
+      <ul class="toc-card__list">
+        {tocItems.map((heading) => (
+          <li class={`toc-depth-${heading.depth}`}>
+            <a href={`#${heading.id}`}>{heading.text}</a>
+          </li>
+        ))}
+      </ul>
+    </aside>
+
+    <article class="prose-card">
+      <div class="prose" set:html={doc.html}></div>
+      <nav class="pager">
+        {previousDoc ? (
+          <a class="pager__link" href={buildDocUrl(project.slug, previousDoc.slug)}>
+            <span>上一篇</span>
+            <strong>{previousDoc.title}</strong>
+          </a>
+        ) : (
+          <span class="pager__link pager__link--empty">已经是第一篇</span>
+        )}
+        {nextDoc ? (
+          <a class="pager__link" href={buildDocUrl(project.slug, nextDoc.slug)}>
+            <span>下一篇</span>
+            <strong>{nextDoc.title}</strong>
+          </a>
+        ) : (
+          <span class="pager__link pager__link--empty">已经是最后一篇</span>
+        )}
+      </nav>
+    </article>
+  </section>
+</BaseLayout>

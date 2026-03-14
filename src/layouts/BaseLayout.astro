@@ -1,0 +1,47 @@
+---
+import "../../src/styles/global.css";
+import { kbConfig } from "../../kb.config";
+
+interface Props {
+  description?: string;
+  title?: string;
+}
+
+const { description = kbConfig.siteDescription, title } = Astro.props;
+const pageTitle = title ? `${title} | ${kbConfig.siteTitle}` : kbConfig.siteTitle;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="generator" content={kbConfig.siteTitle} />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="site-header">
+        <div class="site-header__inner">
+          <a class="brand" href="/">
+            <span class="brand__eyebrow">GitHub Pages Knowledge Site</span>
+            <span class="brand__name">{kbConfig.siteTitle}</span>
+          </a>
+          <nav class="site-nav">
+            <a href="/">Projects</a>
+          </nav>
+        </div>
+      </header>
+      <main class="page-main">
+        <slot />
+      </main>
+      <footer class="site-footer">
+        <div class="site-footer__inner">
+          <p>{kbConfig.siteTitle}</p>
+          <p>Source directory: <code>{kbConfig.sourceDir}</code></p>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,77 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getSiteContent, type ProjectPage } from "../../lib/content";
+import { buildDocUrl, buildProjectUrl, formatDate, labelStatus } from "../../lib/site";
+
+export function getStaticPaths() {
+  return getSiteContent().projects.map((project) => ({
+    params: { project: project.slug },
+    props: { project }
+  }));
+}
+
+interface Props {
+  project: ProjectPage;
+}
+
+const { project } = Astro.props;
+---
+
+<BaseLayout description={project.description} title={project.displayName}>
+  <section class="page-hero">
+    <div>
+      <p class="eyebrow">Project</p>
+      <h1>{project.displayName}</h1>
+      <p class="page-hero__lead">{project.description}</p>
+    </div>
+    <div class="meta-card">
+      <p><strong>Status</strong> {labelStatus(project.status)}</p>
+      <p><strong>Docs</strong> {project.docCount}</p>
+      <p><strong>Updated</strong> {formatDate(project.updatedAt)}</p>
+      <p><strong>Path</strong> <code>{project.slug}</code></p>
+    </div>
+  </section>
+
+  <section class="content-grid">
+    <aside class="toc-card">
+      <p class="toc-card__title">文章目录</p>
+      <ul class="toc-card__list">
+        {project.docs.map((doc) => (
+          <li>
+            <a href={buildDocUrl(project.slug, doc.slug)}>{doc.title}</a>
+          </li>
+        ))}
+      </ul>
+    </aside>
+
+    <div class="content-stack">
+      {project.readme && (
+        <article class="prose-card">
+          <div class="prose-card__meta">
+            <a href={buildProjectUrl(project.slug)}>项目首页</a>
+          </div>
+          <div class="prose" set:html={project.readme.html}></div>
+        </article>
+      )}
+
+      {project.knowledgeIndex && (
+        <article class="prose-card">
+          <div class="prose-card__meta">Knowledge Index</div>
+          <div class="prose" set:html={project.knowledgeIndex.html}></div>
+        </article>
+      )}
+
+      <section class="doc-grid">
+        {project.docs.map((doc) => (
+          <article class="doc-card">
+            <p class="doc-card__eyebrow">{doc.fileName}</p>
+            <h2>
+              <a href={buildDocUrl(project.slug, doc.slug)}>{doc.title}</a>
+            </h2>
+            <p>{doc.excerpt}</p>
+          </article>
+        ))}
+      </section>
+    </div>
+  </section>
+</BaseLayout>
