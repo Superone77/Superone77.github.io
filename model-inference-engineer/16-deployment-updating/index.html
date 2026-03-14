@@ -1,0 +1,426 @@
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>第十章：端侧部署与更新 | Vinci Knowledge Base</title><meta name="description" content="第十章：端侧部署与更新 端侧大模型推理的部署与更新是产品化的关键环节。与云侧推理不同，端侧模型部署需要考虑设备资源限制、网络环境、版本管理、灰度发布等多方面因素。本章将系统介绍模型打包与分发、热更新机制、版本管理、A/B 测试与灰度发布的核心实践。 10.1 模型打包与分发 10.1.1 模型与应用打包方式 端侧模型部署通常有两种打包方式：静态打包和动态下载"><meta name="generator" content="Vinci Knowledge Base"><link rel="stylesheet" href="/_astro/_doc_.CY2v1inF.css"></head> <body> <div class="page-shell"> <header class="site-header"> <div class="site-header__inner"> <a class="brand" href="/"> <span class="brand__eyebrow">GitHub Pages Knowledge Site</span> <span class="brand__name">Vinci Knowledge Base</span> </a> <nav class="site-nav"> <a href="/">Projects</a> </nav> </div> </header> <main class="page-main">  <section class="article-hero"> <div> <p class="eyebrow">Knowledge Article</p> <h1>第十章：端侧部署与更新</h1> <p class="article-hero__breadcrumbs"> <a href="/">Home</a> <span>/</span> <a href="/model-inference-engineer/">端侧大模型推理工程师知识库</a> </p> </div> <div class="meta-card"> <p><strong>Project</strong> 端侧大模型推理工程师知识库</p> <p><strong>Source</strong> <code>knowledge/16-deployment-updating.md</code></p> <p><strong>Sections</strong> 22</p> </div> </section> <section class="content-grid"> <aside class="toc-card"> <p class="toc-card__title">本页目录</p> <ul class="toc-card__list"> <li class="toc-depth-1"> <a href="#第十章端侧部署与更新">第十章：端侧部署与更新</a> </li><li class="toc-depth-2"> <a href="#101-模型打包与分发">10.1 模型打包与分发</a> </li><li class="toc-depth-3"> <a href="#1011-模型与应用打包方式">10.1.1 模型与应用打包方式</a> </li><li class="toc-depth-3"> <a href="#1012-模型文件大小优化">10.1.2 模型文件大小优化</a> </li><li class="toc-depth-3"> <a href="#1013-动态模型下载机制">10.1.3 动态模型下载机制</a> </li><li class="toc-depth-3"> <a href="#1014-cdn-与缓存策略">10.1.4 CDN 与缓存策略</a> </li><li class="toc-depth-2"> <a href="#102-热更新机制">10.2 热更新机制</a> </li><li class="toc-depth-3"> <a href="#1021-应用内模型更新">10.2.1 应用内模型更新</a> </li><li class="toc-depth-3"> <a href="#1022-灰度更新策略">10.2.2 灰度更新策略</a> </li><li class="toc-depth-3"> <a href="#1023-更新失败处理">10.2.3 更新失败处理</a> </li><li class="toc-depth-3"> <a href="#1024-回滚机制">10.2.4 回滚机制</a> </li><li class="toc-depth-2"> <a href="#103-版本管理">10.3 版本管理</a> </li><li class="toc-depth-3"> <a href="#1031-多版本共存管理">10.3.1 多版本共存管理</a> </li><li class="toc-depth-3"> <a href="#1032-版本兼容性处理">10.3.2 版本兼容性处理</a> </li><li class="toc-depth-3"> <a href="#1033-版本降级策略">10.3.3 版本降级策略</a> </li><li class="toc-depth-3"> <a href="#1034-版本清理机制">10.3.4 版本清理机制</a> </li><li class="toc-depth-2"> <a href="#104-ab-测试与灰度发布">10.4 A/B 测试与灰度发布</a> </li><li class="toc-depth-3"> <a href="#1041-端侧-ab-测试设计">10.4.1 端侧 A/B 测试设计</a> </li><li class="toc-depth-3"> <a href="#1042-实验指标追踪">10.4.2 实验指标追踪</a> </li><li class="toc-depth-3"> <a href="#1043-灰度发布策略">10.4.3 灰度发布策略</a> </li><li class="toc-depth-3"> <a href="#1044-实验终止与决策">10.4.4 实验终止与决策</a> </li><li class="toc-depth-2"> <a href="#总结">总结</a> </li> </ul> </aside> <article class="prose-card"> <div class="prose"><h1 id="第十章端侧部署与更新" tabindex="-1">第十章：端侧部署与更新 <a class="heading-anchor" href="#第十章端侧部署与更新" aria-hidden="true">#</a></h1>
+<p>端侧大模型推理的部署与更新是产品化的关键环节。与云侧推理不同，端侧模型部署需要考虑设备资源限制、网络环境、版本管理、灰度发布等多方面因素。本章将系统介绍模型打包与分发、热更新机制、版本管理、A/B 测试与灰度发布的核心实践。</p>
+<hr>
+<h2 id="101-模型打包与分发" tabindex="-1">10.1 模型打包与分发 <a class="heading-anchor" href="#101-模型打包与分发" aria-hidden="true">#</a></h2>
+<h3 id="1011-模型与应用打包方式" tabindex="-1">10.1.1 模型与应用打包方式 <a class="heading-anchor" href="#1011-模型与应用打包方式" aria-hidden="true">#</a></h3>
+<p>端侧模型部署通常有两种打包方式：静态打包和动态下载。</p>
+<p><strong>静态打包</strong>：将模型文件直接嵌入应用包中，随应用一起分发。这是最简单的方式，适用于模型较小（&lt; 50MB）且更新频率低的场景。</p>
+<ul>
+<li><strong>iOS</strong>：将 <code>.mlmodelc</code> 文件添加到 Xcode 项目中，编译时自动打包到应用 Bundle 中</li>
+<li><strong>Android</strong>：将 <code>.tflite</code> 文件放入 <code>assets</code> 目录，随 APK 一起分发</li>
+</ul>
+<p><strong>静态打包的优势</strong>：</p>
+<ul>
+<li>部署简单，无需额外网络请求</li>
+<li>模型立即可用，无加载延迟</li>
+<li>适合对离线可用性要求高的场景</li>
+</ul>
+<p><strong>静态打包的劣势</strong>：</p>
+<ul>
+<li>应用体积增大，影响下载和安装</li>
+<li>模型更新需要发布新版本应用，审核周期长</li>
+<li>无法实现灰度发布和 A/B 测试</li>
+</ul>
+<p><strong>动态下载</strong>：模型文件托管在云端，应用首次运行或需要时动态下载。这是主流方式，适用于模型较大（&gt; 50MB）或需要频繁更新的场景。</p>
+<ul>
+<li><strong>模型托管</strong>：CDN（如阿里云 OSS、腾讯云 COS、AWS S3）</li>
+<li><strong>版本管理</strong>：使用版本号或哈希值标识不同版本</li>
+<li><strong>下载策略</strong>：首次运行下载、后台静默下载、按需下载</li>
+</ul>
+<p><strong>动态下载的优势</strong>：</p>
+<ul>
+<li>应用体积小，下载和安装快</li>
+<li>模型更新无需发布新版本应用</li>
+<li>可实现灰度发布和 A/B 测试</li>
+<li>可根据设备特征选择合适版本</li>
+</ul>
+<p><strong>动态下载的劣势</strong>：</p>
+<ul>
+<li>首次使用需要下载，增加加载延迟</li>
+<li>依赖网络，影响离线可用性</li>
+<li>需要处理下载失败、网络中断等异常</li>
+</ul>
+<h3 id="1012-模型文件大小优化" tabindex="-1">10.1.2 模型文件大小优化 <a class="heading-anchor" href="#1012-模型文件大小优化" aria-hidden="true">#</a></h3>
+<p>模型文件大小直接影响应用体积和下载时间。端侧推理通常使用量化、剪枝、蒸馏等技术压缩模型，但即使压缩后，大模型仍可能超过 100MB。以下是模型文件大小优化的策略。</p>
+<p><strong>量化</strong>：将模型权重从 FP32 量化为 INT8 或 INT4，可减少模型大小 4 倍或 8 倍。</p>
+<ul>
+<li><strong>权重量化</strong>：减少权重内存占用，最常见的量化方式</li>
+<li><strong>激活量化</strong>：减少推理时的计算量和内存带宽</li>
+<li><strong>混合精度</strong>：关键层使用高精度（如 FP16），非关键层使用低精度（如 INT8）</li>
+</ul>
+<p><strong>模型分片</strong>：将大模型拆分为多个小文件，按需加载。</p>
+<ul>
+<li><strong>分层加载</strong>：将模型按层分片，推理时逐层加载</li>
+<li><strong>分块加载</strong>：将模型按参数块分片，推理时按需加载</li>
+<li><strong>权重压缩</strong>：使用 ZIP、GZIP 等算法压缩模型文件</li>
+</ul>
+<p><strong>模型格式优化</strong>：选择合适的模型格式，减少文件大小。</p>
+<ul>
+<li><strong>TFLite</strong>：支持 flatbuffer 格式，文件紧凑</li>
+<li><strong>ONNX</strong>：支持多种压缩选项</li>
+<li><strong>CoreML</strong>：使用 <code>.mlmodelc</code> 格式，优化存储</li>
+</ul>
+<p><strong>案例</strong>：一个 7B 参数的 LLM：</p>
+<ul>
+<li>FP32 格式：约 28GB（端侧不可行）</li>
+<li>INT8 量化：约 7GB（仍较大）</li>
+<li>INT4 量化：约 3.5GB（可接受）</li>
+<li>使用模型分片后，每片约 500MB，可按需加载</li>
+</ul>
+<h3 id="1013-动态模型下载机制" tabindex="-1">10.1.3 动态模型下载机制 <a class="heading-anchor" href="#1013-动态模型下载机制" aria-hidden="true">#</a></h3>
+<p>动态模型下载需要设计健壮的下载机制，处理网络中断、下载失败、版本管理等问题。</p>
+<p><strong>下载流程</strong>：</p>
+<ol>
+<li><strong>版本检查</strong>：应用启动或需要模型时，向服务端请求最新模型版本</li>
+<li><strong>本地校验</strong>：检查本地是否有可用模型，版本是否符合要求</li>
+<li><strong>下载触发</strong>：如果本地模型过旧或不存在，触发下载</li>
+<li><strong>断点续传</strong>：使用 HTTP Range 请求支持断点续传</li>
+<li><strong>完整性校验</strong>：下载完成后校验文件哈希（如 SHA256）</li>
+<li><strong>解压与加载</strong>：解压模型文件并加载到内存</li>
+</ol>
+<p><strong>下载策略</strong>：</p>
+<ul>
+<li><strong>同步下载</strong>：阻塞界面，下载完成后才继续（适合首次启动）</li>
+<li><strong>异步下载</strong>：后台下载，不阻塞界面（适合更新）</li>
+<li><strong>静默下载</strong>：在 WiFi 环境下自动下载（推荐）</li>
+<li><strong>按需下载</strong>：用户主动触发下载（适合可选模型）</li>
+</ul>
+<p><strong>异常处理</strong>：</p>
+<ul>
+<li><strong>网络中断</strong>：自动重试，支持断点续传</li>
+<li><strong>下载失败</strong>：降级使用旧版本或本地缓存</li>
+<li><strong>存储空间不足</strong>：提示用户清理空间或使用旧版本</li>
+<li><strong>版本冲突</strong>：服务端控制版本兼容性，客户端校验</li>
+</ul>
+<h3 id="1014-cdn-与缓存策略" tabindex="-1">10.1.4 CDN 与缓存策略 <a class="heading-anchor" href="#1014-cdn-与缓存策略" aria-hidden="true">#</a></h3>
+<p>CDN（内容分发网络）加速模型下载，缓存策略减少重复下载。</p>
+<p><strong>CDN 部署</strong>：</p>
+<ul>
+<li><strong>全球分发</strong>：使用 CDN 的全球节点，就近下载</li>
+<li><strong>压缩算法</strong>：启用 GZIP、Brotli 等压缩算法</li>
+<li><strong>边缘缓存</strong>：CDN 边缘节点缓存模型文件，减少源站压力</li>
+<li><strong>预加载</strong>：在低峰期预加载模型到 CDN 节点</li>
+</ul>
+<p><strong>缓存策略</strong>：</p>
+<ul>
+<li><strong>强缓存</strong>：使用 Cache-Control: max-age=31536000，长期缓存</li>
+<li><strong>版本化 URL</strong>：在 URL 中加入版本号或哈希值（如 <code>model_v1.tflite?sha=abc123</code>）</li>
+<li><strong>ETag 校验</strong>：使用 ETag 检查文件是否变化</li>
+<li><strong>本地缓存</strong>：下载后缓存到本地磁盘，避免重复下载</li>
+</ul>
+<p><strong>缓存失效</strong>：</p>
+<ul>
+<li><strong>版本更新</strong>：新版本发布后，更新 URL 中的版本号</li>
+<li><strong>强制刷新</strong>：在紧急情况下，可强制客户端刷新缓存</li>
+<li><strong>灰度发布</strong>：通过服务端控制，只对部分用户返回新版本</li>
+</ul>
+<hr>
+<h2 id="102-热更新机制" tabindex="-1">10.2 热更新机制 <a class="heading-anchor" href="#102-热更新机制" aria-hidden="true">#</a></h2>
+<h3 id="1021-应用内模型更新" tabindex="-1">10.2.1 应用内模型更新 <a class="heading-anchor" href="#1021-应用内模型更新" aria-hidden="true">#</a></h3>
+<p>热更新是指无需发布新版本应用，直接在应用内更新模型文件的能力。端侧模型热更新需要考虑更新时机、更新策略、异常处理等问题。</p>
+<p><strong>更新触发</strong>：</p>
+<ul>
+<li><strong>主动更新</strong>：服务端推送更新通知，客户端下载新模型</li>
+<li><strong>自动更新</strong>：应用启动时自动检查并下载新模型</li>
+<li><strong>静默更新</strong>：在 WiFi 环境下后台下载新模型</li>
+<li><strong>按需更新</strong>：用户主动触发更新（如设置中&quot;检查更新&quot;）</li>
+</ul>
+<p><strong>更新流程</strong>：</p>
+<ol>
+<li><strong>版本检查</strong>：向服务端请求最新模型版本（版本号、下载 URL、哈希值）</li>
+<li><strong>版本比对</strong>：比对本地模型版本与服务端版本</li>
+<li><strong>下载模型</strong>：如果需要更新，下载新模型文件</li>
+<li><strong>完整性校验</strong>：下载完成后校验文件哈希</li>
+<li><strong>原子替换</strong>：确保模型替换是原子操作，避免替换一半导致损坏</li>
+<li><strong>重启推理</strong>：卸载旧模型，加载新模型，恢复推理服务</li>
+</ol>
+<p><strong>原子替换策略</strong>：</p>
+<ul>
+<li><strong>临时文件</strong>：下载到临时文件（如 <code>model_v2.tflite.tmp</code>），校验通过后重命名</li>
+<li><strong>多文件共存</strong>：新旧模型文件共存，切换时直接切换文件引用</li>
+<li><strong>数据库记录</strong>：使用数据库记录当前激活的模型版本，支持回滚</li>
+</ul>
+<h3 id="1022-灰度更新策略" tabindex="-1">10.2.2 灰度更新策略 <a class="heading-anchor" href="#1022-灰度更新策略" aria-hidden="true">#</a></h3>
+<p>灰度更新是指逐步将新模型发布给部分用户，观察效果后再全量发布。灰度更新可以降低风险，快速发现问题。</p>
+<p><strong>灰度维度</strong>：</p>
+<ul>
+<li><strong>设备特征</strong>：设备型号、系统版本、内存大小等</li>
+<li><strong>用户分组</strong>：用户 ID 分组、地区、使用频率等</li>
+<li><strong>随机抽样</strong>：随机抽取一定比例的用户</li>
+</ul>
+<p><strong>灰度策略</strong>：</p>
+<ul>
+<li><strong>百分比灰度</strong>：按百分比分配用户（如 1%、5%、10%、50%、100%）</li>
+<li><strong>设备灰度</strong>：只对特定设备（如 iPhone 15）发布新模型</li>
+<li><strong>地区灰度</strong>：只对特定地区（如中国、美国）发布新模型</li>
+<li><strong>实验组对比</strong>：新模型作为实验组，旧模型作为对照组，对比指标</li>
+</ul>
+<p><strong>灰度监控</strong>：</p>
+<ul>
+<li><strong>下载成功率</strong>：监控新模型下载成功率</li>
+<li><strong>加载成功率</strong>：监控新模型加载成功率</li>
+<li><strong>推理性能</strong>：监控推理延迟、内存占用</li>
+<li><strong>业务指标</strong>：监控用户活跃度、转化率等业务指标</li>
+<li><strong>错误率</strong>：监控推理错误率、崩溃率</li>
+</ul>
+<h3 id="1023-更新失败处理" tabindex="-1">10.2.3 更新失败处理 <a class="heading-anchor" href="#1023-更新失败处理" aria-hidden="true">#</a></h3>
+<p>更新过程中可能出现各种异常，需要设计健壮的失败处理机制。</p>
+<p><strong>常见失败场景</strong>：</p>
+<ul>
+<li><strong>网络中断</strong>：下载过程中网络断开</li>
+<li><strong>存储空间不足</strong>：设备存储空间不足，无法保存新模型</li>
+<li><strong>下载文件损坏</strong>：下载过程中文件损坏，哈希校验失败</li>
+<li><strong>加载失败</strong>：模型文件下载成功，但加载失败（格式不支持、算子不支持）</li>
+<li><strong>性能下降</strong>：新模型推理性能不如旧模型</li>
+</ul>
+<p><strong>失败处理策略</strong>：</p>
+<ul>
+<li><strong>自动重试</strong>：网络中断时自动重试（如最多重试 3 次）</li>
+<li><strong>降级使用</strong>：更新失败时降级使用旧版本或本地缓存</li>
+<li><strong>错误上报</strong>：将失败信息上报到服务端，便于排查问题</li>
+<li><strong>用户提示</strong>：关键更新失败时提示用户（如存储空间不足）</li>
+<li><strong>回滚机制</strong>：新模型有问题时自动回滚到旧版本</li>
+</ul>
+<h3 id="1024-回滚机制" tabindex="-1">10.2.4 回滚机制 <a class="heading-anchor" href="#1024-回滚机制" aria-hidden="true">#</a></h3>
+<p>回滚机制是指在新模型出现问题时，快速切换回旧版本的能力。回滚是灰度发布和 A/B 测试的重要保障。</p>
+<p><strong>回滚触发</strong>：</p>
+<ul>
+<li><strong>自动回滚</strong>：监控到错误率飙升、性能下降等异常时自动回滚</li>
+<li><strong>手动回滚</strong>：运营人员手动触发回滚</li>
+<li><strong>用户回滚</strong>：用户反馈问题后，快速回滚到稳定版本</li>
+</ul>
+<p><strong>回滚策略</strong>：</p>
+<ul>
+<li><strong>多版本共存</strong>：新旧模型文件共存，回滚时直接切换文件引用</li>
+<li><strong>版本记录</strong>：记录每个设备使用的模型版本，支持精确回滚</li>
+<li><strong>批量回滚</strong>：对灰度发布的设备批量回滚</li>
+<li><strong>选择性回滚</strong>：只回滚有问题的设备或用户组</li>
+</ul>
+<p><strong>回滚保障</strong>：</p>
+<ul>
+<li><strong>数据一致性</strong>：确保回滚后数据一致，不会出现版本混乱</li>
+<li><strong>原子切换</strong>：确保回滚是原子操作，避免切换过程中出现问题</li>
+<li><strong>快速响应</strong>：回滚应该能够在几分钟内完成，降低影响范围</li>
+<li><strong>事后分析</strong>：回滚后分析问题原因，避免再次发生</li>
+</ul>
+<hr>
+<h2 id="103-版本管理" tabindex="-1">10.3 版本管理 <a class="heading-anchor" href="#103-版本管理" aria-hidden="true">#</a></h2>
+<h3 id="1031-多版本共存管理" tabindex="-1">10.3.1 多版本共存管理 <a class="heading-anchor" href="#1031-多版本共存管理" aria-hidden="true">#</a></h3>
+<p>端侧推理可能需要同时维护多个模型版本，以支持不同的功能或场景。多版本共存管理需要解决版本隔离、资源占用、版本切换等问题。</p>
+<p><strong>版本隔离</strong>：</p>
+<ul>
+<li><strong>文件命名</strong>：使用版本号或哈希值命名模型文件（如 <code>model_v1.tflite</code>、<code>model_v2.tflite</code>）</li>
+<li><strong>目录隔离</strong>：将不同版本的模型放在不同目录（如 <code>/models/v1/</code>、<code>/models/v2/</code>）</li>
+<li><strong>配置隔离</strong>：为每个版本配置独立的推理上下文（如 Runtime 实例）</li>
+</ul>
+<p><strong>版本切换</strong>：</p>
+<ul>
+<li><strong>软切换</strong>：通过配置切换版本，无需重新加载模型</li>
+<li><strong>硬切换</strong>：卸载旧模型，加载新模型（适合大版本更新）</li>
+<li><strong>灰度切换</strong>：逐步切换部分用户到新版本</li>
+</ul>
+<p><strong>资源占用</strong>：</p>
+<ul>
+<li><strong>内存占用</strong>：同时加载多个模型会增加内存占用，需要控制并发版本数量</li>
+<li><strong>存储占用</strong>：多个版本文件会占用较多存储，需要定期清理</li>
+<li><strong>加载时间</strong>：切换版本时需要加载新模型，会增加切换延迟</li>
+</ul>
+<p><strong>使用场景</strong>：</p>
+<ul>
+<li><strong>A/B 测试</strong>：同时运行多个版本，对比效果</li>
+<li><strong>功能灰度</strong>：新功能使用新模型，旧功能使用旧模型</li>
+<li><strong>兼容性</strong>：旧设备使用轻量模型，新设备使用完整模型</li>
+</ul>
+<h3 id="1032-版本兼容性处理" tabindex="-1">10.3.2 版本兼容性处理 <a class="heading-anchor" href="#1032-版本兼容性处理" aria-hidden="true">#</a></h3>
+<p>版本兼容性是指新旧版本之间的兼容性问题。如果新版本模型的输入输出格式、推理接口发生变化，可能导致旧版本应用无法使用新模型。</p>
+<p><strong>兼容性类型</strong>：</p>
+<ul>
+<li><strong>向后兼容</strong>：新版本兼容旧版本的接口，旧版本应用可以使用新模型</li>
+<li><strong>向前兼容</strong>：旧版本兼容新版本的接口，新版本应用可以使用旧模型</li>
+<li><strong>不兼容</strong>：新旧版本互不兼容，需要强制升级</li>
+</ul>
+<p><strong>兼容性设计</strong>：</p>
+<ul>
+<li><strong>接口稳定</strong>：保持推理接口稳定，避免频繁变化</li>
+<li><strong>版本协商</strong>：客户端和服务端协商版本，选择兼容版本</li>
+<li><strong>降级策略</strong>：新版本模型不可用时，降级使用旧版本</li>
+<li><strong>适配层</strong>：在客户端实现适配层，兼容不同版本</li>
+</ul>
+<p><strong>版本号规范</strong>：</p>
+<ul>
+<li><strong>语义化版本号</strong>：使用 <code>主版本.次版本.修订号</code> 格式（如 <code>1.2.3</code>）</li>
+<li><strong>主版本号</strong>：不兼容的 API 变更（如 <code>1.0.0</code> → <code>2.0.0</code>）</li>
+<li><strong>次版本号</strong>：向后兼容的功能性新增（如 <code>1.0.0</code> → <code>1.1.0</code>）</li>
+<li><strong>修订号</strong>：向后兼容的问题修正（如 <code>1.0.0</code> → <code>1.0.1</code>）</li>
+</ul>
+<h3 id="1033-版本降级策略" tabindex="-1">10.3.3 版本降级策略 <a class="heading-anchor" href="#1033-版本降级策略" aria-hidden="true">#</a></h3>
+<p>版本降级是指在新版本出现问题时，将设备回退到旧版本。版本降级是保障服务稳定的重要手段。</p>
+<p><strong>降级触发</strong>：</p>
+<ul>
+<li><strong>自动降级</strong>：监控到异常时自动降级</li>
+<li><strong>手动降级</strong>：运营人员手动触发降级</li>
+<li><strong>用户降级</strong>：用户反馈问题后，运营人员降级</li>
+</ul>
+<p><strong>降级策略</strong>：</p>
+<ul>
+<li><strong>全局降级</strong>：所有设备都降级到旧版本</li>
+<li><strong>部分降级</strong>：只降级有问题的设备或用户组</li>
+<li><strong>选择性降级</strong>：只降级特定版本的用户</li>
+</ul>
+<p><strong>降级保障</strong>：</p>
+<ul>
+<li><strong>可用性</strong>：降级后服务应该立即可用，避免影响用户体验</li>
+<li><strong>数据一致性</strong>：确保降级后数据一致，不会出现版本混乱</li>
+<li><strong>快速响应</strong>：降级应该能够在几分钟内完成，降低影响范围</li>
+<li><strong>事后分析</strong>：降级后分析问题原因，避免再次发生</li>
+</ul>
+<p><strong>降级风险</strong>：</p>
+<ul>
+<li><strong>功能缺失</strong>：旧版本可能缺少新功能，影响用户体验</li>
+<li><strong>性能下降</strong>：旧版本可能性能较差</li>
+<li><strong>兼容性问题</strong>：旧版本可能与新版本应用不兼容</li>
+</ul>
+<h3 id="1034-版本清理机制" tabindex="-1">10.3.4 版本清理机制 <a class="heading-anchor" href="#1034-版本清理机制" aria-hidden="true">#</a></h3>
+<p>版本清理是指定期清理不再使用的旧版本，释放存储空间。版本清理是长期维护的重要环节。</p>
+<p><strong>清理策略</strong>：</p>
+<ul>
+<li><strong>时间清理</strong>：定期清理（如每月清理一次）</li>
+<li><strong>存储清理</strong>：存储空间不足时清理</li>
+<li><strong>版本清理</strong>：只保留最近 N 个版本（如最近 3 个版本）</li>
+<li><strong>灰度清理</strong>：灰度发布完成后清理旧版本</li>
+</ul>
+<p><strong>清理规则</strong>：</p>
+<ul>
+<li><strong>删除旧版本</strong>：删除不再使用的旧版本文件</li>
+<li><strong>保留最新版本</strong>：保留最新版本的文件</li>
+<li><strong>保留稳定版本</strong>：保留经过验证的稳定版本</li>
+<li><strong>删除临时文件</strong>：删除下载过程中的临时文件</li>
+</ul>
+<p><strong>清理触发</strong>：</p>
+<ul>
+<li><strong>自动清理</strong>：应用启动时检查并清理</li>
+<li><strong>手动清理</strong>：用户在设置中手动清理</li>
+<li><strong>存储预警</strong>：系统存储空间不足时清理</li>
+</ul>
+<hr>
+<h2 id="104-ab-测试与灰度发布" tabindex="-1">10.4 A/B 测试与灰度发布 <a class="heading-anchor" href="#104-ab-测试与灰度发布" aria-hidden="true">#</a></h2>
+<h3 id="1041-端侧-ab-测试设计" tabindex="-1">10.4.1 端侧 A/B 测试设计 <a class="heading-anchor" href="#1041-端侧-ab-测试设计" aria-hidden="true">#</a></h3>
+<p>A/B 测试是指将用户分成多个组，每组使用不同的模型版本，对比效果。端侧 A/B 测试需要考虑分组策略、实验隔离、指标采集等问题。</p>
+<p><strong>分组策略</strong>：</p>
+<ul>
+<li><strong>随机分组</strong>：随机分配用户到不同组（如 A 组、B 组）</li>
+<li><strong>特征分组</strong>：根据用户特征分组（如设备型号、地区、使用频率）</li>
+<li><strong>哈希分组</strong>：使用用户 ID 的哈希值分组，确保同一用户始终在同一组</li>
+</ul>
+<p><strong>实验隔离</strong>：</p>
+<ul>
+<li><strong>版本隔离</strong>：不同组使用不同的模型版本</li>
+<li><strong>数据隔离</strong>：不同组的推理数据分开存储和分析</li>
+<li><strong>结果隔离</strong>：不同组的实验结果独立统计和分析</li>
+</ul>
+<p><strong>实验设计</strong>：</p>
+<ul>
+<li><strong>对照组</strong>：使用旧模型，作为基准</li>
+<li><strong>实验组</strong>：使用新模型，对比效果</li>
+<li><strong>多组对比</strong>：可以设计多个实验组，对比不同策略</li>
+</ul>
+<h3 id="1042-实验指标追踪" tabindex="-1">10.4.2 实验指标追踪 <a class="heading-anchor" href="#1042-实验指标追踪" aria-hidden="true">#</a></h3>
+<p>实验指标是评估模型效果的关键。端侧 A/B 测试需要采集多种指标，全面评估模型效果。</p>
+<p><strong>性能指标</strong>：</p>
+<ul>
+<li><strong>推理延迟</strong>：平均推理时间、P50、P95、P99</li>
+<li><strong>内存占用</strong>：模型加载后的内存占用</li>
+<li><strong>CPU 占用</strong>：推理时的 CPU 占用率</li>
+<li><strong>功耗</strong>：推理时的功耗</li>
+</ul>
+<p><strong>质量指标</strong>：</p>
+<ul>
+<li><strong>精度</strong>：模型在任务上的精度（如准确率、F1 分数）</li>
+<li><strong>BLEU/ROUGE</strong>：生成任务的质量指标</li>
+<li><strong>用户评分</strong>：用户对生成结果的评分</li>
+</ul>
+<p><strong>业务指标</strong>：</p>
+<ul>
+<li><strong>用户活跃度</strong>：DAU、MAU</li>
+<li><strong>转化率</strong>：核心功能的转化率</li>
+<li><strong>留存率</strong>：用户留存率</li>
+<li><strong>使用时长</strong>：用户使用时长</li>
+</ul>
+<p><strong>异常指标</strong>：</p>
+<ul>
+<li><strong>错误率</strong>：推理错误率</li>
+<li><strong>崩溃率</strong>：应用崩溃率</li>
+<li><strong>超时率</strong>：推理超时率</li>
+</ul>
+<h3 id="1043-灰度发布策略" tabindex="-1">10.4.3 灰度发布策略 <a class="heading-anchor" href="#1043-灰度发布策略" aria-hidden="true">#</a></h3>
+<p>灰度发布是指逐步将新模型发布给部分用户，观察效果后再全量发布。灰度发布可以降低风险，快速发现问题。</p>
+<p><strong>灰度阶段</strong>：</p>
+<ul>
+<li><strong>小范围灰度</strong>：先发布给 1%-5% 的用户，观察效果</li>
+<li><strong>中范围灰度</strong>：如果效果良好，扩大到 10%-20% 的用户</li>
+<li><strong>大范围灰度</strong>：继续扩大到 50%-80% 的用户</li>
+<li><strong>全量发布</strong>：如果效果稳定，发布给 100% 的用户</li>
+</ul>
+<p><strong>灰度策略</strong>：</p>
+<ul>
+<li><strong>时间灰度</strong>：逐步增加发布时间窗口</li>
+<li><strong>比例灰度</strong>：逐步增加发布用户比例</li>
+<li><strong>地域灰度</strong>：先在特定地区发布，再扩大到全球</li>
+<li><strong>设备灰度</strong>：先在特定设备发布，再扩大到所有设备</li>
+</ul>
+<p><strong>灰度监控</strong>：</p>
+<ul>
+<li><strong>实时监控</strong>：实时监控指标，及时发现异常</li>
+<li><strong>告警机制</strong>：设置阈值，触发告警</li>
+<li><strong>快速回滚</strong>：发现问题时快速回滚</li>
+</ul>
+<h3 id="1044-实验终止与决策" tabindex="-1">10.4.4 实验终止与决策 <a class="heading-anchor" href="#1044-实验终止与决策" aria-hidden="true">#</a></h3>
+<p>实验终止是指结束 A/B 测试，做出最终决策。实验终止需要基于数据和经验，做出科学决策。</p>
+<p><strong>终止条件</strong>：</p>
+<ul>
+<li><strong>达到显著性</strong>：实验指标达到统计学显著性（如 p &lt; 0.05）</li>
+<li><strong>样本量充足</strong>：实验样本量足够大（如每组至少 1000 个用户）</li>
+<li><strong>时间足够长</strong>：实验时间足够长（如至少 7 天）</li>
+<li><strong>出现严重问题</strong>：新模型出现严重问题，需要立即终止</li>
+</ul>
+<p><strong>决策类型</strong>：</p>
+<ul>
+<li><strong>发布新版本</strong>：新模型效果显著优于旧模型，全量发布</li>
+<li><strong>保持旧版本</strong>：新模型效果不明显，保持旧版本</li>
+<li><strong>优化后再发布</strong>：新模型有潜力但需要优化，优化后再发布</li>
+<li><strong>终止实验</strong>：新模型效果不佳，终止实验</li>
+</ul>
+<p><strong>决策依据</strong>：</p>
+<ul>
+<li><strong>数据驱动</strong>：基于实验指标和数据做出决策</li>
+<li><strong>用户反馈</strong>：结合用户反馈做出决策</li>
+<li><strong>成本收益</strong>：评估发布新模型的成本和收益</li>
+<li><strong>风险评估</strong>：评估发布新模型的风险</li>
+</ul>
+<hr>
+<h2 id="总结" tabindex="-1">总结 <a class="heading-anchor" href="#总结" aria-hidden="true">#</a></h2>
+<p>端侧部署与更新是端侧大模型推理产品化的关键环节。本章介绍了模型打包与分发、热更新机制、版本管理、A/B 测试与灰度发布的核心实践。</p>
+<p><strong>关键要点</strong>：</p>
+<ol>
+<li><strong>模型打包</strong>：选择静态打包或动态下载，权衡应用体积和更新灵活性</li>
+<li><strong>模型优化</strong>：使用量化、剪枝、蒸馏等技术优化模型文件大小</li>
+<li><strong>热更新</strong>：设计健壮的更新机制，支持灰度更新和自动回滚</li>
+<li><strong>版本管理</strong>：支持多版本共存，处理版本兼容性，定期清理旧版本</li>
+<li><strong>A/B 测试</strong>：设计科学的实验，采集多维指标，基于数据做出决策</li>
+</ol>
+<p><strong>最佳实践</strong>：</p>
+<ul>
+<li>使用 CDN 加速模型下载，缓存策略减少重复下载</li>
+<li>实现原子替换和多版本共存，确保更新和回滚的稳定性</li>
+<li>设计灰度发布策略，降低风险，快速发现问题</li>
+<li>基于数据驱动决策，避免主观臆断</li>
+</ul>
+<p>端侧部署与更新是一个持续优化的过程，需要根据产品需求和技术演进不断调整策略。通过科学的部署和更新机制，可以确保端侧大模型推理服务的高可用性和高质量。</p>
+<hr>
+<p><strong>参考来源</strong>：</p>
+<ul>
+<li>本章节内容基于 <a href="http://RESEARCH.md">RESEARCH.md</a> 中的端侧部署独特性、端云协同价值等结论，结合 iOS CoreML、Android TensorFlow Lite 的官方文档和工程实践经验撰写</li>
+<li>模型打包与分发、热更新机制、版本管理、A/B 测试与灰度发布等内容参考了移动端应用的通用工程实践</li>
+<li>模型文件大小优化章节引用了 <a href="http://RESEARCH.md">RESEARCH.md</a> 中的量化、模型分片等技术</li>
+</ul>
+</div> <nav class="pager"> <a class="pager__link" href="/model-inference-engineer/15-memory-pool-best-practices/"> <span>上一篇</span> <strong>端侧推理的内存管理进阶：内存池、复用与最佳实践</strong> </a> <a class="pager__link" href="/model-inference-engineer/17-observability-troubleshooting/"> <span>下一篇</span> <strong>第十一章：可观测性与排障（一）</strong> </a> </nav> </article> </section>  </main> <footer class="site-footer"> <div class="site-footer__inner"> <p>Vinci Knowledge Base</p> <p>Source directory: <code>/Users/superone77/Documents/知识库/projects</code></p> </div> </footer> </div> </body></html>
