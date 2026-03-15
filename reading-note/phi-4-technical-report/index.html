@@ -1,0 +1,164 @@
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Phi-4-Mini 技术报告：通过 LoRA 混合实现的小巧而强大的多模态语言模型 | Vinci Knowledge Base</title><meta name="description" content="https://www.alphaxiv.org/abs/2503.01743?chatId=019ccdd6 ce1e 74fe a814 20e2f54f39ac Phi 4 Mini 技术报告：通过 LoRA 混合实现的小巧而强大的多模态语言模型 概述 Phi 4 技术报告介绍了微软 Phi 系列的两款新模型：Phi 4 Mini，一个拥有 38 亿参"><meta name="generator" content="Vinci Knowledge Base"><link rel="stylesheet" href="/_astro/_doc_.CY2v1inF.css"></head> <body> <div class="page-shell"> <header class="site-header"> <div class="site-header__inner"> <a class="brand" href="/"> <span class="brand__eyebrow">GitHub Pages Knowledge Site</span> <span class="brand__name">Vinci Knowledge Base</span> </a> <nav class="site-nav"> <a href="/">Projects</a> </nav> </div> </header> <main class="page-main">  <section class="article-hero"> <div> <p class="eyebrow">Knowledge Article</p> <h1>Phi-4-Mini 技术报告：通过 LoRA 混合实现的小巧而强大的多模态语言模型</h1> <p class="article-hero__breadcrumbs"> <a href="/">Home</a> <span>/</span> <a href="/reading-note/">Reading Note</a> </p> </div> <div class="meta-card"> <p><strong>Project</strong> Reading Note</p> <p><strong>Source</strong> <code>knowledge/phi-4-technical-report.md</code></p> <p><strong>Sections</strong> 22</p> </div> </section> <section class="content-grid"> <aside class="toc-card"> <p class="toc-card__title">本页目录</p> <ul class="toc-card__list"> <li class="toc-depth-1"> <a href="#phi-4-mini-技术报告通过-lora-混合实现的小巧而强大的多模态语言模型">Phi-4-Mini 技术报告：通过 LoRA 混合实现的小巧而强大的多模态语言模型</a> </li><li class="toc-depth-1"> <a href="#qa">Q&amp;A</a> </li><li class="toc-depth-1"> <a href="#chat-transcript-phi-4多模态ocr">Chat Transcript: Phi\-4多模态OCR</a> </li><li class="toc-depth-2"> <a href="#user">User</a> </li><li class="toc-depth-2"> <a href="#aurelle">Aurelle</a> </li><li class="toc-depth-3"> <a href="#ocr-相关基准测试结果">OCR 相关基准测试结果</a> </li><li class="toc-depth-3"> <a href="#核心技术改进">核心技术改进</a> </li><li class="toc-depth-2"> <a href="#user-1">User</a> </li><li class="toc-depth-2"> <a href="#aurelle-1">Aurelle</a> </li><li class="toc-depth-3"> <a href="#1-动态多切片策略-dynamic-multi-crop">1. 动态多切片策略 (Dynamic Multi-crop)</a> </li><li class="toc-depth-3"> <a href="#2-与传统方法的优势对比">2. 与传统方法的优势对比</a> </li><li class="toc-depth-3"> <a href="#3-高分辨率支持">3. 高分辨率支持</a> </li><li class="toc-depth-2"> <a href="#user-2">User</a> </li><li class="toc-depth-2"> <a href="#aurelle-2">Aurelle</a> </li><li class="toc-depth-3"> <a href="#1-实现逻辑参考">1. 实现逻辑参考</a> </li><li class="toc-depth-3"> <a href="#2-关键组件">2. 关键组件</a> </li><li class="toc-depth-3"> <a href="#3-获取渠道建议">3. 获取渠道建议</a> </li><li class="toc-depth-2"> <a href="#user-3">User</a> </li><li class="toc-depth-2"> <a href="#aurelle-3">Aurelle</a> </li><li class="toc-depth-3"> <a href="#1-避免极端比例失真">1. 避免极端比例失真</a> </li><li class="toc-depth-3"> <a href="#2-高效处理多样化分辨率">2. 高效处理多样化分辨率</a> </li><li class="toc-depth-3"> <a href="#3-增强视觉推理能力">3. 增强视觉推理能力</a> </li> </ul> </aside> <article class="prose-card"> <div class="prose"><p><a href="https://www.alphaxiv.org/abs/2503.01743?chatId=019ccdd6-ce1e-74fe-a814-20e2f54f39ac">https://www.alphaxiv.org/abs/2503.01743?chatId=019ccdd6-ce1e-74fe-a814-20e2f54f39ac</a></p>
+<h1 id="phi-4-mini-技术报告通过-lora-混合实现的小巧而强大的多模态语言模型" tabindex="-1">Phi-4-Mini 技术报告：通过 LoRA 混合实现的小巧而强大的多模态语言模型 <a class="heading-anchor" href="#phi-4-mini-技术报告通过-lora-混合实现的小巧而强大的多模态语言模型" aria-hidden="true">#</a></h1>
+<p>概述
+Phi-4 技术报告介绍了微软 Phi 系列的两款新模型：Phi-4-Mini，一个拥有 38 亿参数的语言模型；以及 Phi-4-Multimodal，一个拥有 56 亿参数的多模态模型，结合了文本、视觉和语音功能。这些模型体现了微软持续致力于证明高质量、精心策划的训练数据能够产生显著优于大型替代品的模型，挑战了人工智能发展中普遍存在的“越大越好”范式。</p>
+<p>Phi-4-Multimodal 架构</p>
+<p>Phi-4-Multimodal 的架构创新核心在于其“LoRA 混合体”（Mixture-of-LoRAs）设计，该设计在保持基础语言模型冻结的同时，使用针对模态的低秩适应（LoRA）适配器进行视觉和音频处理。这种方法允许模型在单个检查点内支持多种输入模态，而不会降低原始的纯文本性能。</p>
+<p>模型架构与设计
+Phi-4-Mini 作为这两个模型的基础，采用 38 亿参数的纯解码器 Transformer 架构。该模型融入了多项注重效率的设计选择，包括具有 24 个查询头和 8 个键/值头的分组查询注意力（GQA），将 KV 缓存消耗减少了三分之二。该架构使用 LongRoPE 支持 128K 的上下文长度，并采用新的 o200k_base tiktoken 分词器，包含 200,064 个词元，以提高多语言和多模态效率。</p>
+<p>多模态扩展引入了一种独特的架构方法，解决了多模态模型开发中常见的挑战。Phi-4-Multimodal 没有对整个语言模型进行微调——这通常会降低纯文本性能——而是冻结基础模型，并通过 LoRA 适配器集成特定模态的组件。</p>
+<p>对于视觉能力，该模型使用一个通过 LLM2CLIP 微调的 SigLIP-400M 图像编码器，后接一个 2 层 MLP 视觉投影仪。视觉 LoRA 适配器（LoRA_V）应用于语言解码器中的所有线性层，增加了 3.7 亿参数，而图像编码器和投影仪贡献了 4.4 亿参数。</p>
+<p>语音和音频处理流水线通过一个音频编码器处理 80 维的对数梅尔滤波器组特征，该编码器包含 3 个卷积层和 24 个 Conformer 块。一个音频投影仪将 1024 维的语音特征映射到 3072 维的文本嵌入空间。音频 LoRA 适配器（LoRA_A）应用于所有注意力层和 MLP 层，秩为 320，增加了 4.6 亿参数，同时编码器和投影仪也贡献了 4.6 亿参数。</p>
+<p>训练方法
+Phi-4-Mini 的训练方法强调相对于之前的 Phi-3.5-Mini 模型在数据质量方面的改进。预训练使用了 5 万亿词元语料库，通过改进的质量分类器增强了数据过滤，扩充了基于指令的数学和编码数据集，并重新调整了数据混合，增加了推理导向内容的比例。后训练阶段为函数调用、摘要和指令遵循任务整合了显著更大和更多样化的数据集。</p>
+<p>Phi-4-Multimodal 采用针对每种模态量身定制的多阶段训练策略。视觉训练经历四个阶段：使用标注数据进行投影仪对齐，在完整预训练数据集上进行联合视觉训练，部署 LoRA_V 进行生成式视觉-语言训练，以及用于时间理解的多帧训练。语音和音频训练涉及对大约 200 万小时的语音-文本对进行预训练，随后对 1 亿个精心策划的监督微调样本进行后训练，以完成各种语音任务。</p>
+<p>Phi-4-Mini 的一个实验性推理增强版本展示了先进的训练技术，包括在 600 亿个思维链（Chain-of-Thought）标记上进行蒸馏预训练，在 20 万个高质量样本上进行蒸馏微调，以及使用 30 万个偏好对进行直接偏好优化。</p>
+<p>关键性能结果
+视觉-语言能力</p>
+<p>Phi-4-Mini 在语言理解、数学推理和编码任务中展现出卓越的性能。该模型始终优于同等大小的竞争对手，并且常常能与两倍大小的模型相媲美或超越它们。在数学推理基准测试中，Phi-4-Mini 比同等大小的模型提高了 20 多分，而在编码任务中，它在九个不同的基准测试中超越了所有 3B 大小的模型以及大多数 8B 大小的模型。</p>
+<p>多模态能力同样令人印象深刻。Phi-4-Multimodal 在其尺寸类别中，在视觉-语言、语音识别和音频理解任务上均达到了最先进的性能。尤其值得注意的是其自动语音识别性能，它在 HuggingFace OpenASR 排行榜上名列第一，比之前的最佳模型相对词错误率降低了 5.5%。该模型还展示了强大的语音翻译能力，超越了 Gemini-2.0-Flash 等大型模型，并在某些基准测试中与 GPT-4o 媲美。</p>
+<p>语音处理能力</p>
+<p>“Mixture-of-LoRAs”架构在实践中被证明是有效的，它可以在一个单一检查点内实现多种推理模式，包括纯文本、文本加图像、语音/音频以及语音加图像。这种设计成功地最大限度地减少了模态间的干扰，同时保留了原始语言模型的性能。</p>
+<p>技术创新
+最重要的技术贡献在于用于多模态集成的“Mixture-of-LoRAs”方法。这种设计解决了多模态人工智能中的一个根本性挑战：如何在不损害现有性能的情况下增加新功能。通过冻结基础语言模型并使用特定于模态的 LoRA 适配器，该架构在保持原始文本能力的同时，实现了视觉和音频处理的无缝集成。</p>
+<p>训练方法也引入了几项创新，包括用于高效处理不同分辨率图像的动态多裁剪策略，以及在联合训练之前独立优化每种模态的多阶段训练方法。实验性推理增强展示了蒸馏技术与偏好优化相结合如何显著提高紧凑模型的推理能力。</p>
+<p>局限性和安全考量
+报告承认了模型大小和训练方法固有的若干局限性。Phi-4-Mini 由于其紧凑的参数数量，无法记住奥林匹克比赛结果等具体事实，并且与大型模型相比，其多语言性能有限。训练过程中对编码数据的侧重也影响了其在非英语语言中的表现。</p>
+<p>安全评估显示，在文本、音频和视觉模态方面，模型表现出具有竞争力的性能，特别关注有害内容检测、越狱鲁棒性以及从语音推断敏感属性。与前代模型相比，这些模型的安全性有所提高，但在音频特定越狱和生物识别分类等领域仍面临挑战。</p>
+<p>意义和影响
+Phi-4 模型代表了对以数据为中心的 AI 开发方法的重大验证，表明战略性的架构选择和高质量的训练数据能够实现显著的效率提升。该多模态架构的模块化和可扩展性为未来的多模态 AI 开发提供了一个有前景的框架，有可能加速新模态的整合，而无需进行完整的模型再训练。</p>
+<p>这些模型紧凑的尺寸，结合其强大的性能，使得先进的 AI 能力更易于在消费级硬件上部署。这种强大 AI 的普及化可以在边缘计算、移动设备和资源受限环境中催生新的应用，同时降低与 AI 推理相关的计算和能源成本。</p>
+<p>这项工作也为关于负责任的 AI 开发的更广泛讨论做出了贡献，其全面的安全评估和对齐程序为未来的模型开发设定了标准。对效率和可访问性的强调，结合强大的安全措施，将这些模型定位为跨越不同领域的实际 AI 应用的实用解决方案。</p>
+<h1 id="qa" tabindex="-1">Q&amp;A <a class="heading-anchor" href="#qa" aria-hidden="true">#</a></h1>
+<h1 id="chat-transcript-phi-4多模态ocr" tabindex="-1">Chat Transcript: Phi-4多模态OCR <a class="heading-anchor" href="#chat-transcript-phi-4多模态ocr" aria-hidden="true">#</a></h1>
+<h2 id="user" tabindex="-1">User <a class="heading-anchor" href="#user" aria-hidden="true">#</a></h2>
+<p>该模型在OCR上的测试</p>
+<h2 id="aurelle" tabindex="-1">Aurelle <a class="heading-anchor" href="#aurelle" aria-hidden="true">#</a></h2>
+<p>根据技术报告，<strong>Phi-4-Multimodal</strong> 在 OCR（光学字符识别）和文档理解任务上表现出色，甚至在某些指标上超越了 Gemini 和 GPT-4o 等闭源模型。</p>
+<p>以下是该模型在 OCR 相关基准测试中的具体表现：</p>
+<h3 id="ocr-相关基准测试结果" tabindex="-1">OCR 相关基准测试结果 <a class="heading-anchor" href="#ocr-相关基准测试结果" aria-hidden="true">#</a></h3>
+<p>在报告的表 1 中，Phi-4-Multimodal 在多项专注于 OCR 和文档解析的测试中取得了优异成绩：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">评估基准</th>
+<th style="text-align:left">Phi-4-Multimodal 分数</th>
+<th style="text-align:left">备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>OCRBench</strong></td>
+<td style="text-align:left"><strong>84.4</strong></td>
+<td style="text-align:left">超过了 Qwen2.5-VL-7B (82.2) 和 GPT-4o (77.7)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>DocVQA (test)</strong></td>
+<td style="text-align:left"><strong>93.2</strong></td>
+<td style="text-align:left">专注于文档问答，表现优于 Phi-3.5-Vision (69.3)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>TextVQA (test)</strong></td>
+<td style="text-align:left"><strong>75.6</strong></td>
+<td style="text-align:left">专注于自然场景中的文本读取</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>InfoVQA (test)</strong></td>
+<td style="text-align:left"><strong>72.7</strong></td>
+<td style="text-align:left">专注于信息图表中的数据提取</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h3 id="核心技术改进" tabindex="-1">核心技术改进 <a class="heading-anchor" href="#核心技术改进" aria-hidden="true">#</a></h3>
+<p>模型在 OCR 能力上的提升主要源于以下几个方面：</p>
+<ul>
+<li><strong>视觉训练阶段</strong>：在视觉训练的第二阶段（联合视觉训练），模型在全量视觉预训练数据集上进行训练，专门增强了 <strong>OCR</strong> 和密集理解（dense understanding）能力。</li>
+<li><strong>训练数据</strong>：预训练阶段包含了大量从 <strong>PDF OCR</strong>、真实图像 OCR 以及图表合成数据中提取的视觉和文本元素，总计约 0.5T token。</li>
+<li><strong>高分辨率支持</strong>：模型支持最高 <strong>1344x1344</strong> 的图像分辨率，这对于识别文档中的微小文字至关重要。</li>
+</ul>
+<blockquote>
+<p>“Joint Vision Training stage: Next, the projector and vision encoder are jointly trained on the full vision pretraining dataset to enhance key vision capabilities, such as OCR and dense understanding.”
+<a href="https://alphaxiv.org/abs/2503.01743?page=5">Vision Training</a></p>
+</blockquote>
+<h2 id="user-1" tabindex="-1">User <a class="heading-anchor" href="#user-1" aria-hidden="true">#</a></h2>
+<p>图片预处理有什么讲究吗</p>
+<h2 id="aurelle-1" tabindex="-1">Aurelle <a class="heading-anchor" href="#aurelle-1" aria-hidden="true">#</a></h2>
+<p>根据技术报告，<strong>Phi-4-Multimodal</strong> 在图片预处理方面采用了一种创新的<strong>动态多切片（Dynamic Multi-crop）策略</strong>，旨在更高效地处理各种分辨率和长宽比的图像，同时避免传统方法中的失真问题。</p>
+<p>以下是其预处理的核心要点：</p>
+<h3 id="1-动态多切片策略-dynamic-multi-crop" tabindex="-1">1. 动态多切片策略 (Dynamic Multi-crop) <a class="heading-anchor" href="#1-动态多切片策略-dynamic-multi-crop" aria-hidden="true">#</a></h3>
+<p>为了处理高分辨率图像，模型不是简单地将图片缩放到固定尺寸，而是根据原始图片的长宽比进行智能切片：</p>
+<ul>
+<li><strong>计算切片数量</strong>：系统通过原始尺寸除以基本切片大小（Crop-size），计算出高度和宽度方向所需的切片数：$\lceil \frac{H}{C} \rceil \times \lceil \frac{W}{C} \rceil$。</li>
+<li><strong>切片上限控制</strong>：在预训练阶段最多支持 <strong>16个切片</strong>，在 SFT（监督微调）阶段则扩展到 <strong>36个切片</strong>。</li>
+<li><strong>灵活调整</strong>：如果切片总数在限制内，模型会轻微调整图像大小以适配切片；如果超过限制，则采用类似 InternVL2 的策略，寻找最匹配的长宽比。</li>
+</ul>
+<h3 id="2-与传统方法的优势对比" tabindex="-1">2. 与传统方法的优势对比 <a class="heading-anchor" href="#2-与传统方法的优势对比" aria-hidden="true">#</a></h3>
+<p>该报告强调了其策略相比于 InternVL2 等现有方法的改进：</p>
+<ul>
+<li><strong>防止极端拉伸</strong>：避免了将一张极小的图片（例如 $28 \times 448$）在匹配长宽比时缩放到不合理的大尺寸。</li>
+<li><strong>保留细节</strong>：这种动态切片能够捕捉图像中的精细特征，这对于 <strong>OCR</strong> 和密集理解任务至关重要。</li>
+</ul>
+<h3 id="3-高分辨率支持" tabindex="-1">3. 高分辨率支持 <a class="heading-anchor" href="#3-高分辨率支持" aria-hidden="true">#</a></h3>
+<ul>
+<li><strong>最大分辨率</strong>：模型在预训练和微调中能够有效利用高分辨率信息，最高支持到 <strong>$1344 \times 1344$</strong>。</li>
+<li><strong>编码器基础</strong>：视觉编码器基于 <strong>SigLIP-400M</strong>，输入分辨率为 $448 \times 448$，通过投影器（Projector）将视觉特征对齐到文本嵌入空间。</li>
+</ul>
+<blockquote>
+<p>“Compared to InternVL2, the key benefits of our strategy is to avoid resizing one small image (e.g., 28 × 448) to unreasonable large size when looking for the closest image aspect ratio.”
+<a href="https://alphaxiv.org/abs/2503.01743?page=4">Image Preprocessing</a></p>
+</blockquote>
+<h2 id="user-2" tabindex="-1">User <a class="heading-anchor" href="#user-2" aria-hidden="true">#</a></h2>
+<p>这个预处理有源码吗</p>
+<h2 id="aurelle-2" tabindex="-1">Aurelle <a class="heading-anchor" href="#aurelle-2" aria-hidden="true">#</a></h2>
+<p>在该技术报告（arXiv:2503.01743）中，官方<strong>并未直接提供</strong>动态多切片（Dynamic Multi-crop）策略的源代码。报告主要侧重于模型架构、训练数据和性能评估的描述。</p>
+<p>不过，基于报告第 4 页的描述，你可以参考以下信息来理解其实现逻辑或寻找相似的开源实现：</p>
+<h3 id="1-实现逻辑参考" tabindex="-1">1. 实现逻辑参考 <a class="heading-anchor" href="#1-实现逻辑参考" aria-hidden="true">#</a></h3>
+<p>报告明确提到其策略是对 <strong>InternVL2</strong> 方案的改进。如果你需要实现类似的功能，可以参考 InternVL2 的开源代码库，并根据 Phi-4 的改进点进行调整：</p>
+<ul>
+<li><strong>核心逻辑</strong>：
+<ol>
+<li>计算高度和宽度的切片数：$n_H = \lceil H/C \rceil$，$n_W = \lceil W/C \rceil$。</li>
+<li>检查总切片数 $n_H \times n_W$ 是否在阈值内（预训练 16，SFT 36）。</li>
+<li><strong>Phi-4 的改进点</strong>：在寻找最佳长宽比时，增加了对小图（如 $28 \times 448$）的特殊处理，防止其被过度拉伸。</li>
+</ol>
+</li>
+</ul>
+<h3 id="2-关键组件" tabindex="-1">2. 关键组件 <a class="heading-anchor" href="#2-关键组件" aria-hidden="true">#</a></h3>
+<p>虽然没有源码，但报告披露了预处理涉及的关键组件：</p>
+<ul>
+<li><strong>Vision Encoder</strong>: 使用了 <strong>SigLIP-400M</strong>，并结合 <strong>LLM2CLIP</strong> 进行了微调。</li>
+<li><strong>Projector</strong>: 一个 <strong>2层 MLP</strong>，用于将视觉特征维度映射到文本嵌入维度。</li>
+</ul>
+<h3 id="3-获取渠道建议" tabindex="-1">3. 获取渠道建议 <a class="heading-anchor" href="#3-获取渠道建议" aria-hidden="true">#</a></h3>
+<ul>
+<li><strong>GitHub 官方仓库</strong>：Microsoft 通常会在 <a href="https://github.com/microsoft/Phi-3CookBook">Microsoft Phi GitHub</a> 或其 Azure 模型库中发布相关推理代码。建议关注是否有 <code>phi-4-multimodal</code> 的专用示例。</li>
+<li><strong>Hugging Face</strong>：Phi 系列模型通常会托管在 Hugging Face 上，其 <code>processing_phi4_multimodal.py</code> 文件通常会包含图像预处理（切片和缩放）的具体 Python 实现。</li>
+</ul>
+<blockquote>
+<p>“Compared to InternVL2, the key benefits of our strategy is to avoid resizing one small image (e.g., 28 × 448) to unreasonable large size when looking for the closest image aspect ratio.”
+<a href="https://alphaxiv.org/abs/2503.01743?page=4">Dynamic Multi-crop</a></p>
+</blockquote>
+<h2 id="user-3" tabindex="-1">User <a class="heading-anchor" href="#user-3" aria-hidden="true">#</a></h2>
+<p>论文中有说明这种预处理能带来多大的优势吗</p>
+<h2 id="aurelle-3" tabindex="-1">Aurelle <a class="heading-anchor" href="#aurelle-3" aria-hidden="true">#</a></h2>
+<p>技术报告中<strong>没有通过消融实验（Ablation Study）给出具体的量化百分比</strong>来对比这种预处理策略带来的性能提升，但它在逻辑上阐述了该策略带来的<strong>显著优势</strong>，尤其是在处理特定类型图像时的健壮性。</p>
+<p>以下是报告中提到的核心优势：</p>
+<h3 id="1-避免极端比例失真" tabindex="-1">1. 避免极端比例失真 <a class="heading-anchor" href="#1-避免极端比例失真" aria-hidden="true">#</a></h3>
+<p>这是 Phi-4 策略相比于 InternVL2 最直接的改进点。</p>
+<ul>
+<li><strong>问题所在</strong>：传统的动态长宽比匹配策略（如 InternVL2）在处理极窄或极小的图像（例如 $28 \times 448$）时，可能会为了匹配预设的长宽比而将其缩放到不合理的大尺寸，导致图像内容严重失真或产生伪影。</li>
+<li><strong>Phi-4 的改进</strong>：通过先计算切片数并在阈值内进行轻微调整（Resize），有效地避免了这种过度缩放。</li>
+</ul>
+<h3 id="2-高效处理多样化分辨率" tabindex="-1">2. 高效处理多样化分辨率 <a class="heading-anchor" href="#2-高效处理多样化分辨率" aria-hidden="true">#</a></h3>
+<p>报告指出，该策略使模型能够“<strong>有效且高效地（effectively and efficiently）</strong>”处理具有不同分辨率的图像。</p>
+<ul>
+<li><strong>OCR 与细节捕捉</strong>：在 <strong>OCRBench (84.4)</strong> 和 <strong>DocVQA (93.2)</strong> 等高分表现中可以推断，这种保留原始长宽比特性的预处理对于识别文档中的密集文字和精细结构起到了关键作用。</li>
+</ul>
+<h3 id="3-增强视觉推理能力" tabindex="-1">3. 增强视觉推理能力 <a class="heading-anchor" href="#3-增强视觉推理能力" aria-hidden="true">#</a></h3>
+<p>通过在不同训练阶段动态调整切片上限（从预训练的 <strong>16 个</strong> 扩展到 SFT 阶段的 <strong>36 个</strong>），模型能够在大尺寸、复杂的视觉任务中（如 PPT 分析、长图表理解）保持强大的解析能力。</p>
+<blockquote>
+<p>“In order to enable the model to process images with diverse resolution effectively and efficiently, we proposed a new dynamic multi-crop strategy. … Compared to InternVL2, the key benefits of our strategy is to avoid resizing one small image (e.g., 28 × 448) to unreasonable large size…”
+<a href="https://alphaxiv.org/abs/2503.01743?page=4">Image Strategy</a></p>
+</blockquote>
+</div> <nav class="pager"> <a class="pager__link" href="/reading-note/openclaw-rl/"> <span>上一篇</span> <strong>OpenClaw-RL：只需对话即可训练任意智能体</strong> </a> <a class="pager__link" href="/reading-note/qwen3.5-quantization/"> <span>下一篇</span> <strong>Qwen3.5量化研究</strong> </a> </nav> </article> </section>  </main> <footer class="site-footer"> <div class="site-footer__inner"> <p>Vinci Knowledge Base</p> <p>Source directory: <code>/Users/superone77/Documents/知识库/projects</code></p> </div> </footer> </div> </body></html>
