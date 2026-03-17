@@ -1,0 +1,1168 @@
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>第三章：Agent 开发框架入门 | Vinci Knowledge Base</title><meta name="description" content="第三章：Agent 开发框架入门 本章介绍主流的 AI Agent 开发框架，包括 LangChain、AutoGPT、BabyAGI 和 CrewAI，帮助开发者快速上手 Agent 开发。 3.1 LangChain 基础入门 3.1.1 LangChain 核心概念 LangChain 是一个强大的 LLM 应用开发框架，提供了丰富的组件和工具，用于构"><meta name="generator" content="Vinci Knowledge Base"><link rel="stylesheet" href="/_astro/_doc_.CY2v1inF.css"></head> <body> <div class="page-shell"> <header class="site-header"> <div class="site-header__inner"> <a class="brand" href="/"> <span class="brand__eyebrow">GitHub Pages Knowledge Site</span> <span class="brand__name">Vinci Knowledge Base</span> </a> <nav class="site-nav"> <a href="/">Projects</a> </nav> </div> </header> <main class="page-main">  <section class="article-hero"> <div> <p class="eyebrow">Knowledge Article</p> <h1>第三章：Agent 开发框架入门</h1> <p class="article-hero__breadcrumbs"> <a href="/">Home</a> <span>/</span> <a href="/ai-agent-development/">AI Agent 智能体开发知识库</a> </p> </div> <div class="meta-card"> <p><strong>Project</strong> AI Agent 智能体开发知识库</p> <p><strong>Source</strong> <code>knowledge/03-agent-frameworks.md</code></p> <p><strong>Sections</strong> 83</p> </div> </section> <section class="content-grid"> <aside class="toc-card"> <p class="toc-card__title">本页目录</p> <ul class="toc-card__list"> <li class="toc-depth-1"> <a href="#第三章agent-开发框架入门">第三章：Agent 开发框架入门</a> </li><li class="toc-depth-2"> <a href="#31-langchain-基础入门">3.1 LangChain 基础入门</a> </li><li class="toc-depth-3"> <a href="#311-langchain-核心概念">3.1.1 LangChain 核心概念</a> </li><li class="toc-depth-3"> <a href="#312-langchain-安装与配置">3.1.2 LangChain 安装与配置</a> </li><li class="toc-depth-3"> <a href="#313-langchain-基础用法">3.1.3 LangChain 基础用法</a> </li><li class="toc-depth-3"> <a href="#314-langchain-代码示例">3.1.4 LangChain 代码示例</a> </li><li class="toc-depth-1"> <a href="#创建-llm">创建 LLM</a> </li><li class="toc-depth-1"> <a href="#定义工具">定义工具</a> </li><li class="toc-depth-1"> <a href="#创建-agent">创建 Agent</a> </li><li class="toc-depth-1"> <a href="#运行-agent">运行 Agent</a> </li><li class="toc-depth-2"> <a href="#32-autogpt-基础入门">3.2 AutoGPT 基础入门</a> </li><li class="toc-depth-3"> <a href="#321-autogpt-核心概念">3.2.1 AutoGPT 核心概念</a> </li><li class="toc-depth-3"> <a href="#322-autogpt-安装与配置">3.2.2 AutoGPT 安装与配置</a> </li><li class="toc-depth-1"> <a href="#克隆仓库">克隆仓库</a> </li><li class="toc-depth-1"> <a href="#安装依赖">安装依赖</a> </li><li class="toc-depth-1"> <a href="#配置环境变量">配置环境变量</a> </li><li class="toc-depth-1"> <a href="#编辑-env-文件填入你的-api-key">编辑 .env 文件，填入你的 API Key</a> </li><li class="toc-depth-1"> <a href="#env-文件示例">.env 文件示例</a> </li><li class="toc-depth-1"> <a href="#配置记忆">配置记忆</a> </li><li class="toc-depth-1"> <a href="#或-memorybackendredis-memorybackendpinecone">或 MEMORY_BACKEND=redis, MEMORY_BACKEND=pinecone</a> </li><li class="toc-depth-1"> <a href="#配置模型">配置模型</a> </li><li class="toc-depth-3"> <a href="#323-autogpt-基础用法">3.2.3 AutoGPT 基础用法</a> </li><li class="toc-depth-1"> <a href="#运行-autogpt-1">运行 AutoGPT</a> </li><li class="toc-depth-1"> <a href="#命令参数说明">命令参数说明：</a> </li><li class="toc-depth-1"> <a href="#-gpt4only-仅使用-gpt-4">--gpt4only: 仅使用 GPT-4</a> </li><li class="toc-depth-1"> <a href="#-continuous-连续模式自动执行任务">--continuous: 连续模式，自动执行任务</a> </li><li class="toc-depth-1"> <a href="#-speak-语音输出">--speak: 语音输出</a> </li><li class="toc-depth-1"> <a href="#-debug-调试模式">--debug: 调试模式</a> </li><li class="toc-depth-3"> <a href="#324-autogpt-代码示例">3.2.4 AutoGPT 代码示例</a> </li><li class="toc-depth-1"> <a href="#autogpt-配置示例">AutoGPT 配置示例</a> </li><li class="toc-depth-1"> <a href="#初始化-autogpt">初始化 AutoGPT</a> </li><li class="toc-depth-1"> <a href="#运行-autogpt-2">运行 AutoGPT</a> </li><li class="toc-depth-2"> <a href="#33-babyagi-基础入门">3.3 BabyAGI 基础入门</a> </li><li class="toc-depth-3"> <a href="#331-babyagi-核心概念">3.3.1 BabyAGI 核心概念</a> </li><li class="toc-depth-3"> <a href="#332-babyagi-安装与配置">3.3.2 BabyAGI 安装与配置</a> </li><li class="toc-depth-1"> <a href="#克隆仓库-1">克隆仓库</a> </li><li class="toc-depth-1"> <a href="#安装依赖-1">安装依赖</a> </li><li class="toc-depth-1"> <a href="#配置环境变量-1">配置环境变量</a> </li><li class="toc-depth-1"> <a href="#编辑-env-文件填入你的-api-key-1">编辑 .env 文件，填入你的 API Key</a> </li><li class="toc-depth-1"> <a href="#env-文件示例-1">.env 文件示例</a> </li><li class="toc-depth-1"> <a href="#配置向量数据库">配置向量数据库</a> </li><li class="toc-depth-1"> <a href="#或-vectordbpinecone-vectordbweaviate">或 VECTOR_DB=pinecone, VECTOR_DB=weaviate</a> </li><li class="toc-depth-1"> <a href="#配置模型-1">配置模型</a> </li><li class="toc-depth-3"> <a href="#333-babyagi-基础用法">3.3.3 BabyAGI 基础用法</a> </li><li class="toc-depth-1"> <a href="#运行-babyagi-1">运行 BabyAGI</a> </li><li class="toc-depth-1"> <a href="#命令参数说明-1">命令参数说明：</a> </li><li class="toc-depth-1"> <a href="#-objective-目标描述">--objective: 目标描述</a> </li><li class="toc-depth-1"> <a href="#-llm-使用的-llm">--llm: 使用的 LLM</a> </li><li class="toc-depth-1"> <a href="#-temperature-温度参数">--temperature: 温度参数</a> </li><li class="toc-depth-3"> <a href="#334-babyagi-代码示例">3.3.4 BabyAGI 代码示例</a> </li><li class="toc-depth-1"> <a href="#初始化-babyagi">初始化 BabyAGI</a> </li><li class="toc-depth-1"> <a href="#运行-babyagi-2">运行 BabyAGI</a> </li><li class="toc-depth-2"> <a href="#34-crewai-多-agent-协作">3.4 CrewAI 多 Agent 协作</a> </li><li class="toc-depth-3"> <a href="#341-crewai-核心概念">3.4.1 CrewAI 核心概念</a> </li><li class="toc-depth-3"> <a href="#342-crewai-架构模式">3.4.2 CrewAI 架构模式</a> </li><li class="toc-depth-1"> <a href="#定义-agent">定义 Agent</a> </li><li class="toc-depth-1"> <a href="#定义任务">定义任务</a> </li><li class="toc-depth-1"> <a href="#创建-crew">创建 Crew</a> </li><li class="toc-depth-1"> <a href="#运行-crew">运行 Crew</a> </li><li class="toc-depth-1"> <a href="#定义-manager-agent">定义 Manager Agent</a> </li><li class="toc-depth-1"> <a href="#定义-worker-agents">定义 Worker Agents</a> </li><li class="toc-depth-1"> <a href="#定义任务-1">定义任务</a> </li><li class="toc-depth-1"> <a href="#创建-crew-1">创建 Crew</a> </li><li class="toc-depth-1"> <a href="#运行-crew-1">运行 Crew</a> </li><li class="toc-depth-3"> <a href="#343-crewai-使用方法">3.4.3 CrewAI 使用方法</a> </li><li class="toc-depth-1"> <a href="#定义-agent-1">定义 Agent</a> </li><li class="toc-depth-1"> <a href="#定义任务-2">定义任务</a> </li><li class="toc-depth-1"> <a href="#创建-crew-2">创建 Crew</a> </li><li class="toc-depth-1"> <a href="#运行-crew-2">运行 Crew</a> </li><li class="toc-depth-3"> <a href="#344-crewai-代码示例">3.4.4 CrewAI 代码示例</a> </li><li class="toc-depth-1"> <a href="#定义-llm">定义 LLM</a> </li><li class="toc-depth-1"> <a href="#定义多个-agents">定义多个 Agents</a> </li><li class="toc-depth-1"> <a href="#定义多个-tasks">定义多个 Tasks</a> </li><li class="toc-depth-1"> <a href="#创建-crew-3">创建 Crew</a> </li><li class="toc-depth-1"> <a href="#运行-crew-3">运行 Crew</a> </li><li class="toc-depth-2"> <a href="#35-其他框架对比与选型">3.5 其他框架对比与选型</a> </li><li class="toc-depth-3"> <a href="#351-主流框架对比">3.5.1 主流框架对比</a> </li><li class="toc-depth-3"> <a href="#352-框架选型指南">3.5.2 框架选型指南</a> </li><li class="toc-depth-3"> <a href="#353-框架对比代码示例">3.5.3 框架对比代码示例</a> </li><li class="toc-depth-1"> <a href="#langchain-crewai-集成示例">LangChain + CrewAI 集成示例</a> </li><li class="toc-depth-1"> <a href="#使用-langchain-的-llm">使用 LangChain 的 LLM</a> </li><li class="toc-depth-1"> <a href="#在-crewai-中使用-langchain-的-llm">在 CrewAI 中使用 LangChain 的 LLM</a> </li><li class="toc-depth-2"> <a href="#小结">小结</a> </li> </ul> </aside> <article class="prose-card"> <div class="prose"><h1 id="第三章agent-开发框架入门" tabindex="-1">第三章：Agent 开发框架入门 <a class="heading-anchor" href="#第三章agent-开发框架入门" aria-hidden="true">#</a></h1>
+<p>本章介绍主流的 AI Agent 开发框架，包括 LangChain、AutoGPT、BabyAGI 和 CrewAI，帮助开发者快速上手 Agent 开发。</p>
+<h2 id="31-langchain-基础入门" tabindex="-1">3.1 LangChain 基础入门 <a class="heading-anchor" href="#31-langchain-基础入门" aria-hidden="true">#</a></h2>
+<h3 id="311-langchain-核心概念" tabindex="-1">3.1.1 LangChain 核心概念 <a class="heading-anchor" href="#311-langchain-核心概念" aria-hidden="true">#</a></h3>
+<p>LangChain 是一个强大的 LLM 应用开发框架，提供了丰富的组件和工具，用于构建复杂的 Agent 应用。</p>
+<h4>LangChain 的核心组件</h4>
+<p>LangChain 的核心组件包括：</p>
+<p><strong>1. LLMs（大语言模型）</strong></p>
+<p>LLM 是 LangChain 的核心，支持多种大语言模型提供商，包括 OpenAI GPT 系列、Anthropic Claude、Google Gemini 等。</p>
+<p><strong>2. Prompts（提示词）</strong></p>
+<p>Prompts 是与 LLM 交互的核心，LangChain 提供了丰富的提示词管理工具。</p>
+<p><strong>3. Memory（记忆）</strong></p>
+<p>Memory 是 LangChain 的记忆组件，用于存储和检索对话历史和上下文信息。</p>
+<p><strong>4. Tools（工具）</strong></p>
+<p>Tools 是 LangChain 的工具组件，允许 Agent 调用外部工具完成操作。</p>
+<p><strong>5. Chains（链）</strong></p>
+<p>Chains 是 LangChain 的链式组件，用于构建复杂的处理流程。</p>
+<p><strong>6. Agents（智能体）</strong></p>
+<p>Agents 是 LangChain 的智能体组件，能够自主决策并调用工具完成任务。</p>
+<p><strong>7. Expression Language（表达式语言）</strong></p>
+<p>LCEL（LangChain Expression Language）是 LangChain 的表达式语言，提供了一种灵活的链式编程方式。</p>
+<h4>LangChain Agent 的特点</h4>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong>Leanware（2026）</strong>：LangChain Agent 是一个基于 LLM 的系统，能够动态决定使用哪些工具以及以什么顺序完成任务。</li>
+</ul>
+<h4>LangChain 核心组件对比表</h4>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>功能</th>
+<th>特点</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LLMs</strong></td>
+<td>大语言模型接口</td>
+<td>统一接口、多模型支持</td>
+<td>文本生成、对话、分析</td>
+</tr>
+<tr>
+<td><strong>Prompts</strong></td>
+<td>提示词管理</td>
+<td>模板化、变量插值</td>
+<td>提示词工程、少样本学习</td>
+</tr>
+<tr>
+<td><strong>Memory</strong></td>
+<td>记忆管理</td>
+<td>缓冲、摘要、向量检索</td>
+<td>对话历史、上下文维护</td>
+</tr>
+<tr>
+<td><strong>Tools</strong></td>
+<td>工具集成</td>
+<td>内置工具、自定义扩展</td>
+<td>工具调用、外部集成</td>
+</tr>
+<tr>
+<td><strong>Chains</strong></td>
+<td>链式处理</td>
+<td>顺序、路由、映射归约</td>
+<td>流程编排、批量处理</td>
+</tr>
+<tr>
+<td><strong>Agents</strong></td>
+<td>智能体</td>
+<td>动态决策、工具编排</td>
+<td>自主任务、复杂决策</td>
+</tr>
+<tr>
+<td><strong>LCEL</strong></td>
+<td>表达式语言</td>
+<td>管道操作、可组合</td>
+<td>灵活组合、链式编程</td>
+</tr>
+</tbody>
+</table>
+<h3 id="312-langchain-安装与配置" tabindex="-1">3.1.2 LangChain 安装与配置 <a class="heading-anchor" href="#312-langchain-安装与配置" aria-hidden="true">#</a></h3>
+<h4>安装 LangChain</h4>
+<pre class="hljs"><code>pip install langchain
+pip install langchain-openai
+pip install langchain-community
+</code></pre>
+<h4>配置 API Key</h4>
+<pre class="hljs"><code><span class="hljs-built_in">export</span> OPENAI_API_KEY=<span class="hljs-string">&quot;your-openai-api-key&quot;</span>
+</code></pre>
+<h3 id="313-langchain-基础用法" tabindex="-1">3.1.3 LangChain 基础用法 <a class="heading-anchor" href="#313-langchain-基础用法" aria-hidden="true">#</a></h3>
+<p>详见代码示例部分。</p>
+<h3 id="314-langchain-代码示例" tabindex="-1">3.1.4 LangChain 代码示例 <a class="heading-anchor" href="#314-langchain-代码示例" aria-hidden="true">#</a></h3>
+<p>基础 Agent 示例：</p>
+<pre class="hljs"><code><span class="hljs-keyword">from</span> langchain_openai <span class="hljs-keyword">import</span> ChatOpenAI
+<span class="hljs-keyword">from</span> langchain.agents <span class="hljs-keyword">import</span> create_tool_calling_agent, AgentExecutor
+<span class="hljs-keyword">from</span> langchain.tools <span class="hljs-keyword">import</span> Tool
+<span class="hljs-keyword">from</span> langchain.prompts <span class="hljs-keyword">import</span> ChatPromptTemplate, MessagesPlaceholder
+
+<span class="hljs-comment"># 创建 LLM</span>
+llm = ChatOpenAI(model=<span class="hljs-string">&quot;gpt-4&quot;</span>, temperature=<span class="hljs-number">0</span>)
+
+<span class="hljs-comment"># 定义工具</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">search_web</span>(<span class="hljs-params">query: <span class="hljs-built_in">str</span></span>) -&gt; <span class="hljs-built_in">str</span>:
+    <span class="hljs-string">&quot;&quot;&quot;搜索网络&quot;&quot;&quot;</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-string">f&quot;搜索结果：<span class="hljs-subst">{query}</span> 的相关信息&quot;</span>
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">calculate</span>(<span class="hljs-params">expression: <span class="hljs-built_in">str</span></span>) -&gt; <span class="hljs-built_in">str</span>:
+    <span class="hljs-string">&quot;&quot;&quot;计算表达式&quot;&quot;&quot;</span>
+    <span class="hljs-keyword">try</span>:
+        result = <span class="hljs-built_in">eval</span>(expression)
+        <span class="hljs-keyword">return</span> <span class="hljs-string">f&quot;计算结果：<span class="hljs-subst">{result}</span>&quot;</span>
+    <span class="hljs-keyword">except</span>:
+        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;计算错误：表达式无效&quot;</span>
+
+tools = [
+    Tool(name=<span class="hljs-string">&quot;search&quot;</span>, func=search_web, description=<span class="hljs-string">&quot;用于搜索网络信息&quot;</span>),
+    Tool(name=<span class="hljs-string">&quot;calculate&quot;</span>, func=calculate, description=<span class="hljs-string">&quot;用于计算数学表达式&quot;</span>)
+]
+
+<span class="hljs-comment"># 创建 Agent</span>
+prompt = ChatPromptTemplate.from_messages([
+    (<span class="hljs-string">&quot;system&quot;</span>, <span class="hljs-string">&quot;你是一个有用的助手，可以使用工具完成任务。&quot;</span>),
+    (<span class="hljs-string">&quot;user&quot;</span>, <span class="hljs-string">&quot;{input}&quot;</span>),
+    MessagesPlaceholder(variable_name=<span class="hljs-string">&quot;agent_scratchpad&quot;</span>)
+])
+
+agent = create_tool_calling_agent(llm=llm, tools=tools, prompt=prompt)
+agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=<span class="hljs-literal">True</span>)
+
+<span class="hljs-comment"># 运行 Agent</span>
+result = agent_executor.invoke({<span class="hljs-string">&quot;input&quot;</span>: <span class="hljs-string">&quot;帮我搜索 AI Agent 的相关信息&quot;</span>})
+<span class="hljs-built_in">print</span>(result[<span class="hljs-string">&#x27;output&#x27;</span>])
+</code></pre>
+<hr>
+<h2 id="32-autogpt-基础入门" tabindex="-1">3.2 AutoGPT 基础入门 <a class="heading-anchor" href="#32-autogpt-基础入门" aria-hidden="true">#</a></h2>
+<h3 id="321-autogpt-核心概念" tabindex="-1">3.2.1 AutoGPT 核心概念 <a class="heading-anchor" href="#321-autogpt-核心概念" aria-hidden="true">#</a></h3>
+<p>AutoGPT 是一个自主的 AI Agent，能够将高层目标分解为任务，自动执行并迭代优化。</p>
+<h4>AutoGPT 的定义</h4>
+<p>AutoGPT 是一个基于 GPT-4 的自主 AI Agent，能够在最少人工干预的情况下完成复杂任务。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong>AutoGPT（2025）</strong>：AutoGPT 是一个 AI Agent，能够在无人监管的情况下执行完整的总体目标。</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，AutoGPT 具有以下特点：</p>
+<ol>
+<li><strong>自主性</strong>：能够自主完成任务，无需人工干预</li>
+<li><strong>目标导向</strong>：接收高层目标，自动分解为任务</li>
+<li><strong>迭代优化</strong>：通过迭代执行和反思，持续优化任务</li>
+<li><strong>工具集成</strong>：支持多种工具和外部系统</li>
+<li><strong>记忆管理</strong>：支持长期记忆和任务管理</li>
+</ol>
+<h4>AutoGPT 的架构</h4>
+<p>AutoGPT 的架构包括：</p>
+<ul>
+<li><strong>Task Manager</strong>：任务管理器，管理任务队列和优先级</li>
+<li><strong>Agent</strong>：Agent 核心，执行任务和决策</li>
+<li><strong>Memory</strong>：记忆系统，存储对话历史和任务结果</li>
+<li><strong>Tools</strong>：工具集成，支持外部工具调用</li>
+<li><strong>Reflection</strong>：反思机制，评估任务执行效果</li>
+</ul>
+<h4>AutoGPT vs 其他 Agent 对比表</h4>
+<table>
+<thead>
+<tr>
+<th>特点</th>
+<th>AutoGPT</th>
+<th>BabyAGI</th>
+<th>CrewAI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>自主性</strong></td>
+<td>高</td>
+<td>中</td>
+<td>低</td>
+</tr>
+<tr>
+<td><strong>目标管理</strong></td>
+<td>强</td>
+<td>强</td>
+<td>中</td>
+</tr>
+<tr>
+<td><strong>多 Agent</strong></td>
+<td>单 Agent</td>
+<td>单 Agent</td>
+<td>多 Agent</td>
+</tr>
+<tr>
+<td><strong>工具集成</strong></td>
+<td>丰富</td>
+<td>丰富</td>
+<td>丰富</td>
+</tr>
+<tr>
+<td><strong>易用性</strong></td>
+<td>低</td>
+<td>中</td>
+<td>高</td>
+</tr>
+</tbody>
+</table>
+<h3 id="322-autogpt-安装与配置" tabindex="-1">3.2.2 AutoGPT 安装与配置 <a class="heading-anchor" href="#322-autogpt-安装与配置" aria-hidden="true">#</a></h3>
+<h4>安装 AutoGPT</h4>
+<pre class="hljs"><code><span class="hljs-comment"># 克隆仓库</span>
+git <span class="hljs-built_in">clone</span> https://github.com/Significant-Gravitas/Auto-GPT.git
+<span class="hljs-built_in">cd</span> Auto-GPT
+
+<span class="hljs-comment"># 安装依赖</span>
+pip install -r requirements.txt
+
+<span class="hljs-comment"># 配置环境变量</span>
+<span class="hljs-built_in">cp</span> .env.template .<span class="hljs-built_in">env</span>
+<span class="hljs-comment"># 编辑 .env 文件，填入你的 API Key</span>
+</code></pre>
+<h4>配置文件</h4>
+<pre class="hljs"><code><span class="hljs-comment"># .env 文件示例</span>
+<span class="hljs-attr">OPENAI_API_KEY</span>=your-openai-api-key
+<span class="hljs-attr">ANTHROPIC_API_KEY</span>=your-anthropic-api-key
+
+<span class="hljs-comment"># 配置记忆</span>
+<span class="hljs-attr">MEMORY_BACKEND</span>=local
+<span class="hljs-comment"># 或 MEMORY_BACKEND=redis, MEMORY_BACKEND=pinecone</span>
+
+<span class="hljs-comment"># 配置模型</span>
+<span class="hljs-attr">FAST_LLM_MODEL</span>=gpt-<span class="hljs-number">4</span>
+<span class="hljs-attr">SMART_LLM_MODEL</span>=gpt-<span class="hljs-number">4</span>
+<span class="hljs-attr">EMBEDDING_MODEL</span>=text-embedding-ada-<span class="hljs-number">002</span>
+</code></pre>
+<h3 id="323-autogpt-基础用法" tabindex="-1">3.2.3 AutoGPT 基础用法 <a class="heading-anchor" href="#323-autogpt-基础用法" aria-hidden="true">#</a></h3>
+<h4>运行 AutoGPT</h4>
+<pre class="hljs"><code><span class="hljs-comment"># 运行 AutoGPT</span>
+python -m autogpt --gpt4only --continuous
+
+<span class="hljs-comment"># 命令参数说明：</span>
+<span class="hljs-comment"># --gpt4only: 仅使用 GPT-4</span>
+<span class="hljs-comment"># --continuous: 连续模式，自动执行任务</span>
+<span class="hljs-comment"># --speak: 语音输出</span>
+<span class="hljs-comment"># --debug: 调试模式</span>
+</code></pre>
+<h4>定义目标</h4>
+<p>AutoGPT 启动后会提示输入目标：</p>
+<pre class="hljs"><code>Enter your AI&#39;s name: AutoGPT
+Enter your AI&#39;s role: An AI that helps with tasks
+
+Describe your AI&#39;s role in 3-5 words: Task helper
+Enter up to 5 goals for your AI:
+1. Help with research
+2. Write code
+3. Debug issues
+4. Optimize performance
+5. Deploy applications
+</code></pre>
+<h3 id="324-autogpt-代码示例" tabindex="-1">3.2.4 AutoGPT 代码示例 <a class="heading-anchor" href="#324-autogpt-代码示例" aria-hidden="true">#</a></h3>
+<p>基础用法示例：</p>
+<pre class="hljs"><code><span class="hljs-comment"># AutoGPT 配置示例</span>
+<span class="hljs-keyword">import</span> autogpt
+
+<span class="hljs-comment"># 初始化 AutoGPT</span>
+agent = autogpt.AutoGPT(
+    ai_name=<span class="hljs-string">&quot;AutoGPT&quot;</span>,
+    ai_role=<span class="hljs-string">&quot;Task helper&quot;</span>,
+    ai_goals=[
+        <span class="hljs-string">&quot;Help with research&quot;</span>,
+        <span class="hljs-string">&quot;Write code&quot;</span>,
+        <span class="hljs-string">&quot;Debug issues&quot;</span>
+    ],
+    constraints=[
+        <span class="hljs-string">&quot;Do not break laws&quot;</span>,
+        <span class="hljs-string">&quot;Do not harm others&quot;</span>
+    ],
+    llm_provider=<span class="hljs-string">&quot;openai&quot;</span>,
+    llm_model=<span class="hljs-string">&quot;gpt-4&quot;</span>
+)
+
+<span class="hljs-comment"># 运行 AutoGPT</span>
+agent.run()
+</code></pre>
+<hr>
+<h2 id="33-babyagi-基础入门" tabindex="-1">3.3 BabyAGI 基础入门 <a class="heading-anchor" href="#33-babyagi-基础入门" aria-hidden="true">#</a></h2>
+<h3 id="331-babyagi-核心概念" tabindex="-1">3.3.1 BabyAGI 核心概念 <a class="heading-anchor" href="#331-babyagi-核心概念" aria-hidden="true">#</a></h3>
+<p>BabyAGI 是一个基于任务管理的 AI Agent，能够自动生成、执行和管理任务列表。</p>
+<h4>BabyAGI 的定义</h4>
+<p>BabyAGI 是一个智能的任务管理和问题解决工具，结合了 OpenAI 的 GPT-4、LangChain 和向量数据库的力量来自动完成和管理一系列任务。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong>IBM（2025）</strong>：作为自主 AI Agent，BabyAGI 持续迭代，使用完成的任务结果来通知新任务，重新确定任务列表优先级并运行子任务。</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，BabyAGI 具有以下特点：</p>
+<ol>
+<li><strong>任务生成</strong>：自动生成任务列表</li>
+<li><strong>任务优先级</strong>：动态调整任务优先级</li>
+<li><strong>任务执行</strong>：执行任务并记录结果</li>
+<li><strong>任务反思</strong>：根据结果生成新任务</li>
+<li><strong>向量检索</strong>：使用向量数据库检索相关任务</li>
+</ol>
+<h4>BabyAGI 的工作流程</h4>
+<p>BabyAGI 的工作流程包括：</p>
+<ol>
+<li><strong>任务生成</strong>：根据目标生成初始任务列表</li>
+<li><strong>任务优先级</strong>：评估任务优先级</li>
+<li><strong>任务执行</strong>：执行优先级最高的任务</li>
+<li><strong>结果评估</strong>：评估任务执行结果</li>
+<li><strong>新任务生成</strong>：根据结果生成新任务</li>
+<li><strong>循环迭代</strong>：循环执行，直到目标完成</li>
+</ol>
+<h4>BabyAGI vs 其他 Agent 对比表</h4>
+<table>
+<thead>
+<tr>
+<th>特点</th>
+<th>BabyAGI</th>
+<th>AutoGPT</th>
+<th>CrewAI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>任务管理</strong></td>
+<td>强</td>
+<td>中</td>
+<td>弱</td>
+</tr>
+<tr>
+<td><strong>自主性</strong></td>
+<td>中</td>
+<td>高</td>
+<td>低</td>
+</tr>
+<tr>
+<td><strong>多 Agent</strong></td>
+<td>单 Agent</td>
+<td>单 Agent</td>
+<td>多 Agent</td>
+</tr>
+<tr>
+<td><strong>易用性</strong></td>
+<td>中</td>
+<td>低</td>
+<td>高</td>
+</tr>
+<tr>
+<td><strong>任务透明度</strong></td>
+<td>高</td>
+<td>低</td>
+<td>中</td>
+</tr>
+</tbody>
+</table>
+<h3 id="332-babyagi-安装与配置" tabindex="-1">3.3.2 BabyAGI 安装与配置 <a class="heading-anchor" href="#332-babyagi-安装与配置" aria-hidden="true">#</a></h3>
+<h4>安装 BabyAGI</h4>
+<pre class="hljs"><code><span class="hljs-comment"># 克隆仓库</span>
+git <span class="hljs-built_in">clone</span> https://github.com/yoheinak/BabyAGI.git
+<span class="hljs-built_in">cd</span> BabyAGI
+
+<span class="hljs-comment"># 安装依赖</span>
+pip install -r requirements.txt
+
+<span class="hljs-comment"># 配置环境变量</span>
+<span class="hljs-built_in">cp</span> .env.template .<span class="hljs-built_in">env</span>
+<span class="hljs-comment"># 编辑 .env 文件，填入你的 API Key</span>
+</code></pre>
+<h4>配置文件</h4>
+<pre class="hljs"><code><span class="hljs-comment"># .env 文件示例</span>
+<span class="hljs-attr">OPENAI_API_KEY</span>=your-openai-api-key
+
+<span class="hljs-comment"># 配置向量数据库</span>
+<span class="hljs-attr">VECTOR_DB</span>=chroma
+<span class="hljs-comment"># 或 VECTOR_DB=pinecone, VECTOR_DB=weaviate</span>
+
+<span class="hljs-comment"># 配置模型</span>
+<span class="hljs-attr">MODEL_NAME</span>=gpt-<span class="hljs-number">4</span>
+<span class="hljs-attr">TEMPERATURE</span>=<span class="hljs-number">0.7</span>
+</code></pre>
+<h3 id="333-babyagi-基础用法" tabindex="-1">3.3.3 BabyAGI 基础用法 <a class="heading-anchor" href="#333-babyagi-基础用法" aria-hidden="true">#</a></h3>
+<h4>运行 BabyAGI</h4>
+<pre class="hljs"><code><span class="hljs-comment"># 运行 BabyAGI</span>
+python babyagi.py --objective <span class="hljs-string">&quot;完成一个数据分析项目&quot;</span>
+
+<span class="hljs-comment"># 命令参数说明：</span>
+<span class="hljs-comment"># --objective: 目标描述</span>
+<span class="hljs-comment"># --llm: 使用的 LLM</span>
+<span class="hljs-comment"># --temperature: 温度参数</span>
+</code></pre>
+<h3 id="334-babyagi-代码示例" tabindex="-1">3.3.4 BabyAGI 代码示例 <a class="heading-anchor" href="#334-babyagi-代码示例" aria-hidden="true">#</a></h3>
+<p>基础用法示例：</p>
+<pre class="hljs"><code><span class="hljs-keyword">from</span> babyagi <span class="hljs-keyword">import</span> BabyAGI
+
+<span class="hljs-comment"># 初始化 BabyAGI</span>
+baby_agi = BabyAGI(
+    objective=<span class="hljs-string">&quot;完成一个数据分析项目&quot;</span>,
+    llm=<span class="hljs-string">&quot;gpt-4&quot;</span>,
+    vector_store=<span class="hljs-string">&quot;chroma&quot;</span>
+)
+
+<span class="hljs-comment"># 运行 BabyAGI</span>
+baby_agi.run()
+</code></pre>
+<hr>
+<h2 id="34-crewai-多-agent-协作" tabindex="-1">3.4 CrewAI 多 Agent 协作 <a class="heading-anchor" href="#34-crewai-多-agent-协作" aria-hidden="true">#</a></h2>
+<h3 id="341-crewai-核心概念" tabindex="-1">3.4.1 CrewAI 核心概念 <a class="heading-anchor" href="#341-crewai-核心概念" aria-hidden="true">#</a></h3>
+<p>CrewAI 是一个多 Agent 协作框架，支持多个 Agent 协作完成复杂任务。</p>
+<h4>CrewAI 的定义</h4>
+<p>CrewAI 是一个用于编排角色扮演、自主 AI Agent 的框架，通过培养协作智能，使 Agent 能够无缝协作，处理复杂任务。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong>CrewAI（2025）</strong>：CrewAI 赋能构建能够在没有编写代码的情况下与自主企业应用程序交互并使用工具来自动化工作流和任务的 AI Agent 团队。</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，CrewAI 具有以下特点：</p>
+<ol>
+<li><strong>多 Agent 协作</strong>：支持多个 Agent 协作</li>
+<li><strong>角色定义</strong>：每个 Agent 有明确的角色和目标</li>
+<li><strong>任务管理</strong>：支持任务的分配和依赖</li>
+<li><strong>流程管理</strong>：支持顺序、层次和自定义流程</li>
+<li><strong>结果整合</strong>：自动整合 Agent 的结果</li>
+</ol>
+<h4>CrewAI 的核心概念</h4>
+<p><strong>1. Agents（智能体）</strong></p>
+<p>Agents 是 CrewAI 的智能体，每个 Agent 有明确的角色、目标和背景故事。</p>
+<ul>
+<li><strong>Role（角色）</strong>：Agent 的角色定义</li>
+<li><strong>Goal（目标）</strong>：Agent 的目标</li>
+<li><strong>Backstory（背景故事）</strong>：Agent 的背景和动机</li>
+<li><strong>Tools（工具）</strong>：Agent 可以使用的工具</li>
+</ul>
+<p><strong>2. Tasks（任务）</strong></p>
+<p>Tasks 是 CrewAI 的任务，每个任务有明确的描述、Agent 分配和工具需求。</p>
+<ul>
+<li><strong>Description（描述）</strong>：任务的详细描述</li>
+<li><strong>Agent（Agent）</strong>：负责执行任务的 Agent</li>
+<li><strong>Tools（工具）</strong>：任务所需的工具</li>
+<li><strong>Dependencies（依赖）</strong>：任务的依赖关系</li>
+</ul>
+<p><strong>3. Crews（团队）</strong></p>
+<p>Crews 是 CrewAI 的团队，包含多个 Agent 和任务。</p>
+<ul>
+<li><strong>Agents（Agent 列表）</strong>：团队中的 Agent</li>
+<li><strong>Tasks（任务列表）</strong>：团队需要完成的任务</li>
+<li><strong>Process（流程）</strong>：任务的执行流程</li>
+</ul>
+<p><strong>4. Tools（工具）</strong></p>
+<p>Tools 是 CrewAI 的工具，Agent 可以调用工具完成任务。</p>
+<p><strong>5. Processes（流程）</strong></p>
+<p>Processes 是 CrewAI 的流程，定义任务的执行顺序。</p>
+<ul>
+<li><strong>Sequential Process</strong>：顺序流程，Agent 顺序执行任务</li>
+<li><strong>Hierarchical Process</strong>：层次流程，Manager Agent 分配任务给 Worker Agent</li>
+</ul>
+<p><strong>6. LLMs（大语言模型）</strong></p>
+<p>LLMs 是 CrewAI 支持的大语言模型，包括 GPT-4、Claude、LLaMA 等。</p>
+<p><strong>7. Output Parsers（输出解析）</strong></p>
+<p>Output Parsers 是 CrewAI 的输出解析器，用于解析结构化输出。</p>
+<h4>CrewAI 核心概念对比表</h4>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>功能</th>
+<th>特点</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Agents</strong></td>
+<td>智能体</td>
+<td>角色定义、目标设置</td>
+<td>多 Agent 协作</td>
+</tr>
+<tr>
+<td><strong>Tasks</strong></td>
+<td>任务</td>
+<td>描述、分配、依赖</td>
+<td>任务管理</td>
+</tr>
+<tr>
+<td><strong>Crews</strong></td>
+<td>团队</td>
+<td>Agent 集合、任务集合</td>
+<td>团队协作</td>
+</tr>
+<tr>
+<td><strong>Tools</strong></td>
+<td>工具</td>
+<td>工具库、工具使用</td>
+<td>工具集成</td>
+</tr>
+<tr>
+<td><strong>Processes</strong></td>
+<td>流程</td>
+<td>顺序、层次、自定义</td>
+<td>流程编排</td>
+</tr>
+<tr>
+<td><strong>LLMs</strong></td>
+<td>大语言模型</td>
+<td>GPT-4、Claude、LLaMA</td>
+<td>模型选择</td>
+</tr>
+<tr>
+<td><strong>Output Parsers</strong></td>
+<td>输出解析</td>
+<td>结构化输出</td>
+<td>输出处理</td>
+</tr>
+</tbody>
+</table>
+<h3 id="342-crewai-架构模式" tabindex="-1">3.4.2 CrewAI 架构模式 <a class="heading-anchor" href="#342-crewai-架构模式" aria-hidden="true">#</a></h3>
+<h4>Sequential Process（顺序流程）</h4>
+<p>Sequential Process 中，Agent 按照预定义的顺序执行任务。</p>
+<pre class="hljs"><code><span class="hljs-keyword">from</span> crewai <span class="hljs-keyword">import</span> Crew, Agent, Task
+
+<span class="hljs-comment"># 定义 Agent</span>
+researcher = Agent(
+    role=<span class="hljs-string">&quot;研究员&quot;</span>,
+    goal=<span class="hljs-string">&quot;收集信息&quot;</span>,
+    backstory=<span class="hljs-string">&quot;你是一个专业的信息收集者&quot;</span>
+)
+
+writer = Agent(
+    role=<span class="hljs-string">&quot;写作者&quot;</span>,
+    goal=<span class="hljs-string">&quot;撰写文章&quot;</span>,
+    backstory=<span class="hljs-string">&quot;你是一个专业的文章撰写者&quot;</span>
+)
+
+<span class="hljs-comment"># 定义任务</span>
+task1 = Task(
+    description=<span class="hljs-string">&quot;收集 AI Agent 的相关信息&quot;</span>,
+    agent=researcher
+)
+
+task2 = Task(
+    description=<span class="hljs-string">&quot;根据收集的信息撰写文章&quot;</span>,
+    agent=writer,
+    context=[task1]
+)
+
+<span class="hljs-comment"># 创建 Crew</span>
+crew = Crew(
+    agents=[researcher, writer],
+    tasks=[task1, task2],
+    process=<span class="hljs-string">&quot;sequential&quot;</span>
+)
+
+<span class="hljs-comment"># 运行 Crew</span>
+result = crew.kickoff()
+</code></pre>
+<h4>Hierarchical Process（层次流程）</h4>
+<p>Hierarchical Process 中，Manager Agent 分配任务给 Worker Agent。</p>
+<pre class="hljs"><code><span class="hljs-keyword">from</span> crewai <span class="hljs-keyword">import</span> Crew, Agent, Task
+
+<span class="hljs-comment"># 定义 Manager Agent</span>
+manager = Agent(
+    role=<span class="hljs-string">&quot;项目经理&quot;</span>,
+    goal=<span class="hljs-string">&quot;管理和协调任务&quot;</span>,
+    backstory=<span class="hljs-string">&quot;你是一个专业的项目经理&quot;</span>,
+    allow_delegation=<span class="hljs-literal">True</span>  <span class="hljs-comment"># 允许任务委托</span>
+)
+
+<span class="hljs-comment"># 定义 Worker Agents</span>
+researcher = Agent(
+    role=<span class="hljs-string">&quot;研究员&quot;</span>,
+    goal=<span class="hljs-string">&quot;收集信息&quot;</span>,
+    backstory=<span class="hljs-string">&quot;你是一个专业的信息收集者&quot;</span>
+)
+
+writer = Agent(
+    role=<span class="hljs-string">&quot;写作者&quot;</span>,
+    goal=<span class="hljs-string">&quot;撰写文章&quot;</span>,
+    backstory=<span class="hljs-string">&quot;你是一个专业的文章撰写者&quot;</span>
+)
+
+<span class="hljs-comment"># 定义任务</span>
+task = Task(
+    description=<span class="hljs-string">&quot;完成一个 AI Agent 的研究项目&quot;</span>,
+    agent=manager
+)
+
+<span class="hljs-comment"># 创建 Crew</span>
+crew = Crew(
+    agents=[manager, researcher, writer],
+    tasks=[task],
+    process=<span class="hljs-string">&quot;hierarchical&quot;</span>
+)
+
+<span class="hljs-comment"># 运行 Crew</span>
+result = crew.kickoff()
+</code></pre>
+<h4>CrewAI 架构模式对比表</h4>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>特点</th>
+<th>优势</th>
+<th>劣势</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Sequential Process</strong></td>
+<td>顺序执行</td>
+<td>简单易用、可控</td>
+<td>灵活性低</td>
+<td>简单任务、线性流程</td>
+</tr>
+<tr>
+<td><strong>Hierarchical Process</strong></td>
+<td>层次执行</td>
+<td>可扩展、可并行</td>
+<td>复杂度高</td>
+<td>复杂任务、多 Agent 协作</td>
+</tr>
+<tr>
+<td><strong>Custom Process</strong></td>
+<td>自定义流程</td>
+<td>灵活、可定制</td>
+<td>实现复杂</td>
+<td>特定场景</td>
+</tr>
+</tbody>
+</table>
+<h3 id="343-crewai-使用方法" tabindex="-1">3.4.3 CrewAI 使用方法 <a class="heading-anchor" href="#343-crewai-使用方法" aria-hidden="true">#</a></h3>
+<h4>安装 CrewAI</h4>
+<pre class="hljs"><code>pip install crewai
+</code></pre>
+<h4>基础用法</h4>
+<pre class="hljs"><code><span class="hljs-keyword">from</span> crewai <span class="hljs-keyword">import</span> Crew, Agent, Task
+
+<span class="hljs-comment"># 定义 Agent</span>
+researcher = Agent(
+    role=<span class="hljs-string">&quot;研究员&quot;</span>,
+    goal=<span class="hljs-string">&quot;收集信息&quot;</span>,
+    backstory=<span class="hljs-string">&quot;你是一个专业的信息收集者&quot;</span>
+)
+
+<span class="hljs-comment"># 定义任务</span>
+task = Task(
+    description=<span class="hljs-string">&quot;收集 AI Agent 的相关信息&quot;</span>,
+    agent=researcher
+)
+
+<span class="hljs-comment"># 创建 Crew</span>
+crew = Crew(agents=[researcher], tasks=[task], verbose=<span class="hljs-literal">True</span>)
+
+<span class="hljs-comment"># 运行 Crew</span>
+result = crew.kickoff()
+</code></pre>
+<h3 id="344-crewai-代码示例" tabindex="-1">3.4.4 CrewAI 代码示例 <a class="heading-anchor" href="#344-crewai-代码示例" aria-hidden="true">#</a></h3>
+<p>高级用法示例：</p>
+<pre class="hljs"><code><span class="hljs-keyword">from</span> crewai <span class="hljs-keyword">import</span> Crew, Agent, Task
+<span class="hljs-keyword">from</span> langchain_openai <span class="hljs-keyword">import</span> ChatOpenAI
+
+<span class="hljs-comment"># 定义 LLM</span>
+llm = ChatOpenAI(model=<span class="hljs-string">&quot;gpt-4&quot;</span>, temperature=<span class="hljs-number">0.7</span>)
+
+<span class="hljs-comment"># 定义多个 Agents</span>
+researcher = Agent(
+    role=<span class="hljs-string">&quot;研究员&quot;</span>,
+    goal=<span class="hljs-string">&quot;收集信息&quot;</span>,
+    backstory=<span class="hljs-string">&quot;你是一个专业的信息收集者&quot;</span>,
+    llm=llm,
+    tools=[<span class="hljs-string">&quot;search&quot;</span>]  <span class="hljs-comment"># 使用搜索工具</span>
+)
+
+writer = Agent(
+    role=<span class="hljs-string">&quot;写作者&quot;</span>,
+    goal=<span class="hljs-string">&quot;撰写文章&quot;</span>,
+    backstory=<span class="hljs-string">&quot;你是一个专业的文章撰写者&quot;</span>,
+    llm=llm
+)
+
+reviewer = Agent(
+    role=<span class="hljs-string">&quot;审查者&quot;</span>,
+    goal=<span class="hljs-string">&quot;审查文章&quot;</span>,
+    backstory=<span class="hljs-string">&quot;你是一个专业的文章审查者&quot;</span>,
+    llm=llm
+)
+
+<span class="hljs-comment"># 定义多个 Tasks</span>
+task1 = Task(
+    description=<span class="hljs-string">&quot;收集 AI Agent 的相关信息&quot;</span>,
+    agent=researcher
+)
+
+task2 = Task(
+    description=<span class="hljs-string">&quot;根据收集的信息撰写文章&quot;</span>,
+    agent=writer,
+    context=[task1]
+)
+
+task3 = Task(
+    description=<span class="hljs-string">&quot;审查文章质量&quot;</span>,
+    agent=reviewer,
+    context=[task2]
+)
+
+<span class="hljs-comment"># 创建 Crew</span>
+crew = Crew(
+    agents=[researcher, writer, reviewer],
+    tasks=[task1, task2, task3],
+    process=<span class="hljs-string">&quot;sequential&quot;</span>,
+    verbose=<span class="hljs-literal">True</span>
+)
+
+<span class="hljs-comment"># 运行 Crew</span>
+result = crew.kickoff()
+</code></pre>
+<hr>
+<h2 id="35-其他框架对比与选型" tabindex="-1">3.5 其他框架对比与选型 <a class="heading-anchor" href="#35-其他框架对比与选型" aria-hidden="true">#</a></h2>
+<h3 id="351-主流框架对比" tabindex="-1">3.5.1 主流框架对比 <a class="heading-anchor" href="#351-主流框架对比" aria-hidden="true">#</a></h3>
+<h4>LangChain vs. AutoGPT</h4>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>LangChain</th>
+<th>AutoGPT</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>灵活性</strong></td>
+<td>高</td>
+<td>低</td>
+</tr>
+<tr>
+<td><strong>自主性</strong></td>
+<td>中</td>
+<td>高</td>
+</tr>
+<tr>
+<td><strong>易用性</strong></td>
+<td>高</td>
+<td>低</td>
+</tr>
+<tr>
+<td><strong>学习曲线</strong></td>
+<td>平缓</td>
+<td>陡峭</td>
+</tr>
+<tr>
+<td><strong>适用场景</strong></td>
+<td>灵活应用开发</td>
+<td>自主任务执行</td>
+</tr>
+</tbody>
+</table>
+<h4>LangChain vs. BabyAGI</h4>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>LangChain</th>
+<th>BabyAGI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>任务管理</strong></td>
+<td>弱</td>
+<td>强</td>
+</tr>
+<tr>
+<td><strong>灵活性</strong></td>
+<td>高</td>
+<td>中</td>
+</tr>
+<tr>
+<td><strong>易用性</strong></td>
+<td>高</td>
+<td>中</td>
+</tr>
+<tr>
+<td><strong>学习曲线</strong></td>
+<td>平缓</td>
+<td>中等</td>
+</tr>
+<tr>
+<td><strong>适用场景</strong></td>
+<td>灵活应用开发</td>
+<td>任务密集型应用</td>
+</tr>
+</tbody>
+</table>
+<h4>LangChain vs. CrewAI</h4>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>LangChain</th>
+<th>CrewAI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>单 Agent vs 多 Agent</strong></td>
+<td>单 Agent</td>
+<td>多 Agent</td>
+</tr>
+<tr>
+<td><strong>协作支持</strong></td>
+<td>弱</td>
+<td>强</td>
+</tr>
+<tr>
+<td><strong>易用性</strong></td>
+<td>中</td>
+<td>高</td>
+</tr>
+<tr>
+<td><strong>学习曲线</strong></td>
+<td>平缓</td>
+<td>平缓</td>
+</tr>
+<tr>
+<td><strong>适用场景</strong></td>
+<td>单 Agent 应用</td>
+<td>多 Agent 协作</td>
+</tr>
+</tbody>
+</table>
+<h4>AutoGPT vs. BabyAGI</h4>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>AutoGPT</th>
+<th>BabyAGI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>自主性</strong></td>
+<td>高</td>
+<td>中</td>
+</tr>
+<tr>
+<td><strong>任务管理</strong></td>
+<td>中</td>
+<td>强</td>
+</tr>
+<tr>
+<td><strong>易用性</strong></td>
+<td>低</td>
+<td>中</td>
+</tr>
+<tr>
+<td><strong>学习曲线</strong></td>
+<td>陡峭</td>
+<td>中等</td>
+</tr>
+<tr>
+<td><strong>适用场景</strong></td>
+<td>自主任务执行</td>
+<td>任务密集型应用</td>
+</tr>
+</tbody>
+</table>
+<h4>AutoGPT vs. CrewAI</h4>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>AutoGPT</th>
+<th>CrewAI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>单 Agent vs 多 Agent</strong></td>
+<td>单 Agent</td>
+<td>多 Agent</td>
+</tr>
+<tr>
+<td><strong>协作支持</strong></td>
+<td>无</td>
+<td>强</td>
+</tr>
+<tr>
+<td><strong>易用性</strong></td>
+<td>低</td>
+<td>高</td>
+</tr>
+<tr>
+<td><strong>学习曲线</strong></td>
+<td>陡峭</td>
+<td>平缓</td>
+</tr>
+<tr>
+<td><strong>适用场景</strong></td>
+<td>自主任务执行</td>
+<td>多 Agent 协作</td>
+</tr>
+</tbody>
+</table>
+<h4>BabyAGI vs. CrewAI</h4>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>BabyAGI</th>
+<th>CrewAI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>单 Agent vs 多 Agent</strong></td>
+<td>单 Agent</td>
+<td>多 Agent</td>
+</tr>
+<tr>
+<td><strong>任务管理</strong></td>
+<td>强</td>
+<td>中</td>
+</tr>
+<tr>
+<td><strong>协作支持</strong></td>
+<td>无</td>
+<td>强</td>
+</tr>
+<tr>
+<td><strong>易用性</strong></td>
+<td>中</td>
+<td>高</td>
+</tr>
+<tr>
+<td><strong>适用场景</strong></td>
+<td>任务密集型应用</td>
+<td>多 Agent 协作</td>
+</tr>
+</tbody>
+</table>
+<h3 id="352-框架选型指南" tabindex="-1">3.5.2 框架选型指南 <a class="heading-anchor" href="#352-框架选型指南" aria-hidden="true">#</a></h3>
+<h4>需求分析</h4>
+<p>选择框架前，需要分析以下需求：</p>
+<ol>
+<li>
+<p><strong>任务复杂度</strong></p>
+<ul>
+<li>简单任务：LangChain</li>
+<li>复杂任务：AutoGPT、BabyAGI、CrewAI</li>
+</ul>
+</li>
+<li>
+<p><strong>实时性要求</strong></p>
+<ul>
+<li>高实时性：LangChain</li>
+<li>低实时性：AutoGPT、BabyAGI</li>
+</ul>
+</li>
+<li>
+<p><strong>多 Agent 需求</strong></p>
+<ul>
+<li>单 Agent：LangChain、AutoGPT、BabyAGI</li>
+<li>多 Agent：CrewAI</li>
+</ul>
+</li>
+<li>
+<p><strong>自动化程度</strong></p>
+<ul>
+<li>手动控制：LangChain</li>
+<li>半自主：BabyAGI、CrewAI</li>
+<li>全自主：AutoGPT</li>
+</ul>
+</li>
+</ol>
+<h4>能力匹配</h4>
+<table>
+<thead>
+<tr>
+<th>需求</th>
+<th>推荐框架</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>灵活应用开发</strong></td>
+<td>LangChain</td>
+<td>组件丰富、灵活可组合</td>
+</tr>
+<tr>
+<td><strong>自主任务执行</strong></td>
+<td>AutoGPT</td>
+<td>高自主性、自动迭代</td>
+</tr>
+<tr>
+<td><strong>任务密集型应用</strong></td>
+<td>BabyAGI</td>
+<td>强任务管理、优先级调整</td>
+</tr>
+<tr>
+<td><strong>多 Agent 协作</strong></td>
+<td>CrewAI</td>
+<td>多 Agent 协作、流程管理</td>
+</tr>
+</tbody>
+</table>
+<h4>技术栈考虑</h4>
+<ol>
+<li>
+<p><strong>Python 生态</strong></p>
+<ul>
+<li>所有框架都支持 Python</li>
+</ul>
+</li>
+<li>
+<p><strong>LLM 兼容性</strong></p>
+<ul>
+<li>LangChain：支持最多 LLM</li>
+<li>AutoGPT：主要支持 OpenAI</li>
+<li>BabyAGI：主要支持 OpenAI</li>
+<li>CrewAI：支持多种 LLM</li>
+</ul>
+</li>
+<li>
+<p><strong>扩展需求</strong></p>
+<ul>
+<li>LangChain：最佳扩展性</li>
+<li>CrewAI：良好的扩展性</li>
+</ul>
+</li>
+</ol>
+<h4>成本考虑</h4>
+<table>
+<thead>
+<tr>
+<th>框架</th>
+<th>API 成本</th>
+<th>运行成本</th>
+<th>维护成本</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LangChain</strong></td>
+<td>中</td>
+<td>低</td>
+<td>低</td>
+</tr>
+<tr>
+<td><strong>AutoGPT</strong></td>
+<td>高（GPT-4）</td>
+<td>高（持续运行）</td>
+<td>中</td>
+</tr>
+<tr>
+<td><strong>BabyAGI</strong></td>
+<td>中</td>
+<td>中</td>
+<td>中</td>
+</tr>
+<tr>
+<td><strong>CrewAI</strong></td>
+<td>中</td>
+<td>中</td>
+<td>低</td>
+</tr>
+</tbody>
+</table>
+<h3 id="353-框架对比代码示例" tabindex="-1">3.5.3 框架对比代码示例 <a class="heading-anchor" href="#353-框架对比代码示例" aria-hidden="true">#</a></h3>
+<h4>LangChain 基础示例</h4>
+<pre class="hljs"><code><span class="hljs-keyword">from</span> langchain_openai <span class="hljs-keyword">import</span> ChatOpenAI
+<span class="hljs-keyword">from</span> langchain.agents <span class="hljs-keyword">import</span> create_tool_calling_agent, AgentExecutor
+
+llm = ChatOpenAI(model=<span class="hljs-string">&quot;gpt-4&quot;</span>, temperature=<span class="hljs-number">0</span>)
+agent_executor = AgentExecutor.from_llm_and_tools(llm=llm, tools=tools, verbose=<span class="hljs-literal">True</span>)
+result = agent_executor.invoke({<span class="hljs-string">&quot;input&quot;</span>: <span class="hljs-string">&quot;帮我搜索信息&quot;</span>})
+</code></pre>
+<h4>AutoGPT 基础示例</h4>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> autogpt
+
+agent = autogpt.AutoGPT(
+    ai_name=<span class="hljs-string">&quot;AutoGPT&quot;</span>,
+    ai_role=<span class="hljs-string">&quot;Task helper&quot;</span>,
+    ai_goals=[<span class="hljs-string">&quot;Help with tasks&quot;</span>],
+    llm_provider=<span class="hljs-string">&quot;openai&quot;</span>
+)
+agent.run()
+</code></pre>
+<h4>BabyAGI 基础示例</h4>
+<pre class="hljs"><code><span class="hljs-keyword">from</span> babyagi <span class="hljs-keyword">import</span> BabyAGI
+
+baby_agi = BabyAGI(
+    objective=<span class="hljs-string">&quot;完成一个项目&quot;</span>,
+    llm=<span class="hljs-string">&quot;gpt-4&quot;</span>,
+    vector_store=<span class="hljs-string">&quot;chroma&quot;</span>
+)
+baby_agi.run()
+</code></pre>
+<h4>CrewAI 基础示例</h4>
+<pre class="hljs"><code><span class="hljs-keyword">from</span> crewai <span class="hljs-keyword">import</span> Crew, Agent, Task
+
+agent = Agent(
+    role=<span class="hljs-string">&quot;研究员&quot;</span>,
+    goal=<span class="hljs-string">&quot;收集信息&quot;</span>,
+    backstory=<span class="hljs-string">&quot;你是一个专业的信息收集者&quot;</span>
+)
+
+task = Task(
+    description=<span class="hljs-string">&quot;收集 AI Agent 的相关信息&quot;</span>,
+    agent=agent
+)
+
+crew = Crew(agents=[agent], tasks=[task], verbose=<span class="hljs-literal">True</span>)
+result = crew.kickoff()
+</code></pre>
+<h4>混合集成示例</h4>
+<pre class="hljs"><code><span class="hljs-comment"># LangChain + CrewAI 集成示例</span>
+<span class="hljs-keyword">from</span> crewai <span class="hljs-keyword">import</span> Agent
+<span class="hljs-keyword">from</span> langchain_openai <span class="hljs-keyword">import</span> ChatOpenAI
+
+<span class="hljs-comment"># 使用 LangChain 的 LLM</span>
+llm = ChatOpenAI(model=<span class="hljs-string">&quot;gpt-4&quot;</span>, temperature=<span class="hljs-number">0.7</span>)
+
+<span class="hljs-comment"># 在 CrewAI 中使用 LangChain 的 LLM</span>
+agent = Agent(
+    role=<span class="hljs-string">&quot;研究员&quot;</span>,
+    goal=<span class="hljs-string">&quot;收集信息&quot;</span>,
+    backstory=<span class="hljs-string">&quot;你是一个专业的信息收集者&quot;</span>,
+    llm=llm  <span class="hljs-comment"># 使用 LangChain 的 LLM</span>
+)
+</code></pre>
+<hr>
+<h2 id="小结" tabindex="-1">小结 <a class="heading-anchor" href="#小结" aria-hidden="true">#</a></h2>
+<p>本章详细介绍了主流的 AI Agent 开发框架，帮助开发者快速上手 Agent 开发。</p>
+<p><strong>LangChain 框架</strong></p>
+<ul>
+<li><strong>核心组件</strong>：LLMs、Prompts、Memory、Tools、Chains、Agents、LCEL</li>
+<li><strong>特点</strong>：灵活可组合、组件丰富、易于扩展</li>
+<li><strong>适用场景</strong>：灵活应用开发、单 Agent 应用</li>
+</ul>
+<p><strong>AutoGPT 框架</strong></p>
+<ul>
+<li><strong>核心概念</strong>：自主 Agent、目标导向、迭代优化</li>
+<li><strong>特点</strong>：高自主性、自动迭代、最少人工干预</li>
+<li><strong>适用场景</strong>：自主任务执行、长期运行</li>
+</ul>
+<p><strong>BabyAGI 框架</strong></p>
+<ul>
+<li><strong>核心概念</strong>：任务管理、优先级调整、向量检索</li>
+<li><strong>特点</strong>：强任务管理、自动生成任务、动态优先级</li>
+<li><strong>适用场景</strong>：任务密集型应用、项目管理</li>
+</ul>
+<p><strong>CrewAI 框架</strong></p>
+<ul>
+<li><strong>核心概念</strong>：Agents、Tasks、Crews、Tools、Processes</li>
+<li><strong>特点</strong>：多 Agent 协作、角色定义、流程管理</li>
+<li><strong>适用场景</strong>：多 Agent 协作、团队协作</li>
+</ul>
+<p><strong>框架选型指南</strong></p>
+<ul>
+<li><strong>需求分析</strong>：任务复杂度、实时性要求、多 Agent 需求</li>
+<li><strong>能力匹配</strong>：根据需求选择合适的框架</li>
+<li><strong>技术栈考虑</strong>：Python 生态、LLM 兼容性、扩展需求</li>
+<li><strong>成本考虑</strong>：API 成本、运行成本、维护成本</li>
+</ul>
+<hr>
+<p><em>文档版本：v1.0</em>
+<em>最后更新：2026-03-17</em></p>
+</div> <nav class="pager"> <a class="pager__link" href="/ai-agent-development/02-agent-architecture/"> <span>上一篇</span> <strong>第二章：Agent 架构设计</strong> </a> <a class="pager__link" href="/ai-agent-development/04-agent-practices/"> <span>下一篇</span> <strong>4.3 企业级 Agent 开发实践</strong> </a> </nav> </article> </section>  </main> <footer class="site-footer"> <div class="site-footer__inner"> <p>Vinci Knowledge Base</p> <p>Source directory: <code>/Users/superone77/Documents/知识库/projects</code></p> </div> </footer> </div> </body></html>
