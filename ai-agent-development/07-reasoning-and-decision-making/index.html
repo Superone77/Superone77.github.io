@@ -1,0 +1,694 @@
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>第七章：推理与决策（Reasoning and Decision Making） | Vinci Knowledge Base</title><meta name="description" content="第七章：推理与决策（Reasoning and Decision Making） 推理与决策是 AI Agent 的核心能力之一，通过逐步推理和智能决策，使 Agent 能够解决复杂问题、规划任务路径并做出最优决策。 7.1 推理基础 7.1.1 Chain of Thought（CoT） Chain of Thought 是一种让 LLM 逐步推理的方法，"><meta name="generator" content="Vinci Knowledge Base"><link rel="stylesheet" href="/_astro/_doc_.CY2v1inF.css"></head> <body> <div class="page-shell"> <header class="site-header"> <div class="site-header__inner"> <a class="brand" href="/"> <span class="brand__eyebrow">GitHub Pages Knowledge Site</span> <span class="brand__name">Vinci Knowledge Base</span> </a> <nav class="site-nav"> <a href="/">Projects</a> </nav> </div> </header> <main class="page-main">  <section class="article-hero"> <div> <p class="eyebrow">Knowledge Article</p> <h1>第七章：推理与决策（Reasoning and Decision Making）</h1> <p class="article-hero__breadcrumbs"> <a href="/">Home</a> <span>/</span> <a href="/ai-agent-development/">AI Agent 智能体开发知识库</a> </p> </div> <div class="meta-card"> <p><strong>Project</strong> AI Agent 智能体开发知识库</p> <p><strong>Source</strong> <code>knowledge/07-reasoning-and-decision-making.md</code></p> <p><strong>Sections</strong> 15</p> </div> </section> <section class="content-grid"> <aside class="toc-card"> <p class="toc-card__title">本页目录</p> <ul class="toc-card__list"> <li class="toc-depth-1"> <a href="#第七章推理与决策reasoning-and-decision-making">第七章：推理与决策（Reasoning and Decision Making）</a> </li><li class="toc-depth-2"> <a href="#71-推理基础">7.1 推理基础</a> </li><li class="toc-depth-3"> <a href="#711-chain-of-thoughtcot">7.1.1 Chain of Thought（CoT）</a> </li><li class="toc-depth-3"> <a href="#712-推理与决策的关系">7.1.2 推理与决策的关系</a> </li><li class="toc-depth-2"> <a href="#72-react-框架">7.2 ReAct 框架</a> </li><li class="toc-depth-3"> <a href="#721-react-基础">7.2.1 ReAct 基础</a> </li><li class="toc-depth-3"> <a href="#722-react-vs-chain-of-thought">7.2.2 ReAct vs Chain of Thought</a> </li><li class="toc-depth-2"> <a href="#73-高级推理技术">7.3 高级推理技术</a> </li><li class="toc-depth-3"> <a href="#731-tree-of-thoughtstot">7.3.1 Tree of Thoughts（ToT）</a> </li><li class="toc-depth-3"> <a href="#732-rewooreasoning-without-observation">7.3.2 ReWOO（Reasoning Without Observation）</a> </li><li class="toc-depth-3"> <a href="#733-其他推理框架">7.3.3 其他推理框架</a> </li><li class="toc-depth-2"> <a href="#74-推理与决策代码示例">7.4 推理与决策代码示例</a> </li><li class="toc-depth-1"> <a href="#配置日志">配置日志</a> </li><li class="toc-depth-1"> <a href="#使用示例">使用示例</a> </li><li class="toc-depth-2"> <a href="#小结第七章全部完成">小结（第七章全部完成）</a> </li> </ul> </aside> <article class="prose-card"> <div class="prose"><h1 id="第七章推理与决策reasoning-and-decision-making" tabindex="-1">第七章：推理与决策（Reasoning and Decision Making） <a class="heading-anchor" href="#第七章推理与决策reasoning-and-decision-making" aria-hidden="true">#</a></h1>
+<p>推理与决策是 AI Agent 的核心能力之一，通过逐步推理和智能决策，使 Agent 能够解决复杂问题、规划任务路径并做出最优决策。</p>
+<h2 id="71-推理基础" tabindex="-1">7.1 推理基础 <a class="heading-anchor" href="#71-推理基础" aria-hidden="true">#</a></h2>
+<h3 id="711-chain-of-thoughtcot" tabindex="-1">7.1.1 Chain of Thought（CoT） <a class="heading-anchor" href="#711-chain-of-thoughtcot" aria-hidden="true">#</a></h3>
+<p>Chain of Thought 是一种让 LLM 逐步推理的方法，通过要求模型展示思考过程，提高复杂问题的解决能力。</p>
+<h4>Chain of Thought 的定义</h4>
+<p>Chain of Thought（CoT）是一种让 LLM 逐步推理的方法，通过要求模型在回答之前展示思考过程，分解复杂问题，逐步推理，最终得到答案。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong>OpenAI（2025）</strong>：Chain of Thought 允许 AI 模型通过逐步推理解决复杂任务，提高决策能力、可解释性和透明度。</li>
+<li><strong><a href="http://PromptingGuide.ai">PromptingGuide.ai</a>（2025）</strong>：Chain-of-thought prompting 使 AI 模型能够通过逐步推理解决复杂任务。</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，Chain of Thought 包括：</p>
+<ol>
+<li><strong>问题分解</strong>：将复杂问题分解为多个子问题</li>
+<li><strong>逐步推理</strong>：逐步推理每个子问题</li>
+<li><strong>中间结果</strong>：记录中间推理结果</li>
+<li><strong>最终答案</strong>：基于推理过程生成最终答案</li>
+<li><strong>可解释性</strong>：提供推理过程的可解释性</li>
+</ol>
+<h4>Chain of Thought 的核心机制</h4>
+<p><strong>1. 问题分解</strong></p>
+<p>将复杂问题分解为多个可管理的子问题。</p>
+<p><strong>2. 逐步推理</strong></p>
+<p>逐步推理每个子问题，记录思考过程。</p>
+<p><strong>3. 中间结果</strong></p>
+<p>记录中间推理结果，用于后续推理。</p>
+<p><strong>4. 最终答案</strong></p>
+<p>基于推理过程和中间结果生成最终答案。</p>
+<h4>Chain of Thought 的优势与劣势</h4>
+<table>
+<thead>
+<tr>
+<th>优势</th>
+<th>劣势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>提高复杂问题解决能力</td>
+<td>推理成本高</td>
+</tr>
+<tr>
+<td>提供可解释性</td>
+<td>可能产生幻觉</td>
+</tr>
+<tr>
+<td>适用于多种任务</td>
+<td>推理质量不稳定</td>
+</tr>
+</tbody>
+</table>
+<h3 id="712-推理与决策的关系" tabindex="-1">7.1.2 推理与决策的关系 <a class="heading-anchor" href="#712-推理与决策的关系" aria-hidden="true">#</a></h3>
+<p>推理与决策是密不可分的两个过程，推理是决策的基础，决策是推理的输出。</p>
+<h4>推理与决策的定义</h4>
+<p>推理是 Agent 分析信息、推导结论的过程，决策是基于推理结果选择最佳行动的过程。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong>IBM（2025）</strong>：ReAct 框架中，推理是指 Agent 确定实现特定目标所需的行动或策略的认知过程，类似于 agentic AI 的规划阶段。</li>
+<li><strong><a href="http://Sema4.ai">Sema4.ai</a>（2025）</strong>：Agents 思考它们的下一步行动，执行它，然后观察结果。这种迭代过程允许动态问题解决和适应。</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，推理与决策包括：</p>
+<ol>
+<li><strong>信息收集</strong>：收集相关信息</li>
+<li><strong>推理分析</strong>：分析信息，推导结论</li>
+<li><strong>行动选择</strong>：基于推理结果选择行动</li>
+<li><strong>执行观察</strong>：执行行动，观察结果</li>
+<li><strong>迭代优化</strong>：根据观察结果优化决策</li>
+</ol>
+<h4>推理与决策的核心机制</h4>
+<p><strong>1. 信息收集</strong></p>
+<p>收集相关信息，包括上下文、历史数据、外部知识。</p>
+<p><strong>2. 推理分析</strong></p>
+<p>使用 CoT 等推理方法分析信息，推导结论。</p>
+<p><strong>3. 行动选择</strong></p>
+<p>基于推理结果选择最佳行动。</p>
+<p><strong>4. 执行观察</strong></p>
+<p>执行行动，观察结果，反馈到推理过程。</p>
+<h4>推理与决策的优势与劣势</h4>
+<table>
+<thead>
+<tr>
+<th>优势</th>
+<th>劣势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>支持复杂问题解决</td>
+<td>推理成本高</td>
+</tr>
+<tr>
+<td>可解释性强</td>
+<td>可能产生错误的推理</td>
+</tr>
+<tr>
+<td>动态适应</td>
+<td>需要反馈机制</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="72-react-框架" tabindex="-1">7.2 ReAct 框架 <a class="heading-anchor" href="#72-react-框架" aria-hidden="true">#</a></h2>
+<h3 id="721-react-基础" tabindex="-1">7.2.1 ReAct 基础 <a class="heading-anchor" href="#721-react-基础" aria-hidden="true">#</a></h3>
+<p>ReAct（Reasoning and Acting）是一种结合推理和行动的框架，让 Agent 在推理的同时执行行动，动态调整推理过程。</p>
+<h4>ReAct 的定义</h4>
+<p>ReAct（Reasoning and Acting）是一种结合推理和行动的框架，让 LLM 生成推理轨迹和任务特定的行动，以交错的方式进行。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong>Yao et al.（2022）</strong>：ReAct 框架中，LLM 被用来以交错的方式生成推理轨迹和任务特定的行动。</li>
+<li><strong>arXiv（2023）</strong>：ReAct：Synergizing Reasoning and Acting in Language Models，研究了如何将推理和行动结合起来。</li>
+<li><strong>Neradot（2024）</strong>：ReAct 框架允许 Agent 推理、规划和执行行动，支持自主 AI Agents。</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，ReAct 包括：</p>
+<ol>
+<li><strong>推理</strong>：分析当前状态和目标</li>
+<li><strong>行动</strong>：执行具体行动</li>
+<li><strong>观察</strong>：观察行动结果</li>
+<li><strong>迭代</strong>：基于观察结果继续推理和行动</li>
+</ol>
+<h4>ReAct 的核心流程</h4>
+<p><strong>1. 推理</strong></p>
+<p>分析当前状态和目标，推理下一步行动。</p>
+<p><strong>2. 行动</strong></p>
+<p>执行推理出的行动。</p>
+<p><strong>3. 观察</strong></p>
+<p>观察行动结果。</p>
+<p><strong>4. 迭代</strong></p>
+<p>基于观察结果继续推理，直到达到目标。</p>
+<h4>ReAct 的优势与劣势</h4>
+<table>
+<thead>
+<tr>
+<th>优势</th>
+<th>劣势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>结合推理和行动</td>
+<td>迭代次数多</td>
+</tr>
+<tr>
+<td>动态适应</td>
+<td>推理成本高</td>
+</tr>
+<tr>
+<td>支持复杂任务</td>
+<td>需要良好的推理能力</td>
+</tr>
+</tbody>
+</table>
+<h3 id="722-react-vs-chain-of-thought" tabindex="-1">7.2.2 ReAct vs Chain of Thought <a class="heading-anchor" href="#722-react-vs-chain-of-thought" aria-hidden="true">#</a></h3>
+<p>ReAct 和 CoT 是两种不同的推理方法，ReAct 结合推理和行动，CoT 专注于推理过程。</p>
+<h4>ReAct vs CoT 的定义</h4>
+<p>ReAct 和 CoT 是两种不同的推理方法，ReAct 结合推理和行动，在推理的同时执行行动；CoT 专注于推理过程，在推理完成后执行行动。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong>CoForge（2025）</strong>：ReAct vs Tree-of-Thought: How Modern Reasoning Powers Autonomous AI Agents，详细介绍了 ReAct 和 ToT 的区别和应用场景。</li>
+<li><strong>Neradot（2024）</strong>：在 Chain-of-Thought（CoT）方法中，模型被指示在直接回答问题之前生成想法，这通常会提高模型的决策能力。</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，ReAct vs CoT 的区别包括：</p>
+<ol>
+<li><strong>推理方式</strong>：ReAct 交错推理和行动，CoT 先推理后行动</li>
+<li><strong>适应性</strong>：ReAct 动态适应，CoT 静态规划</li>
+<li><strong>复杂度</strong>：ReAct 适用于动态环境，CoT 适用于静态问题</li>
+<li><strong>成本</strong>：ReAct 迭代次数多，CoT 一次推理</li>
+</ol>
+<h4>ReAct vs CoT 对比表</h4>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>ReAct</th>
+<th>CoT</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>推理方式</strong></td>
+<td>交错推理和行动</td>
+<td>先推理后行动</td>
+</tr>
+<tr>
+<td><strong>适应性</strong></td>
+<td>动态适应</td>
+<td>静态规划</td>
+</tr>
+<tr>
+<td><strong>复杂度</strong></td>
+<td>适用于动态环境</td>
+<td>适用于静态问题</td>
+</tr>
+<tr>
+<td><strong>成本</strong></td>
+<td>迭代次数多</td>
+<td>一次推理</td>
+</tr>
+<tr>
+<td><strong>适用场景</strong></td>
+<td>动态任务</td>
+<td>复杂推理</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="73-高级推理技术" tabindex="-1">7.3 高级推理技术 <a class="heading-anchor" href="#73-高级推理技术" aria-hidden="true">#</a></h2>
+<h3 id="731-tree-of-thoughtstot" tabindex="-1">7.3.1 Tree of Thoughts（ToT） <a class="heading-anchor" href="#731-tree-of-thoughtstot" aria-hidden="true">#</a></h3>
+<p>Tree of Thoughts 是一种基于树的推理方法，通过生成多个思考路径，探索不同的推理可能性，选择最优路径。</p>
+<h4>Tree of Thoughts 的定义</h4>
+<p>Tree of Thoughts（ToT）是一种基于树的推理方法，通过生成多个思考路径，探索不同的推理可能性，选择最优路径。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong>CoForge（2025）</strong>：Tree-of-Thoughts（ToT）是一种基于树的推理方法，通过生成多个思考路径，探索不同的推理可能性，选择最优路径。</li>
+<li><strong>Long CoT Survey（2025）</strong>：Long CoT 的关键特征包括深度推理、广泛探索和可行反思，这些特征使推理比浅层、容易冗余的 Short CoT 更深入、更高效。</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，Tree of Thoughts 包括：</p>
+<ol>
+<li><strong>思考生成</strong>：生成多个思考路径</li>
+<li><strong>树构建</strong>：构建思考树</li>
+<li><strong>路径探索</strong>：探索不同的推理路径</li>
+<li><strong>路径评估</strong>：评估不同路径的质量</li>
+<li><strong>最优选择</strong>：选择最优路径</li>
+</ol>
+<h4>Tree of Thoughts 的核心机制</h4>
+<p><strong>1. 思考生成</strong></p>
+<p>生成多个思考路径，探索不同的推理可能性。</p>
+<p><strong>2. 树构建</strong></p>
+<p>构建思考树，表示不同的推理路径。</p>
+<p><strong>3. 路径探索</strong></p>
+<p>探索不同的推理路径，评估路径质量。</p>
+<p><strong>4. 最优选择</strong></p>
+<p>基于路径评估选择最优路径。</p>
+<h4>Tree of Thoughts 的优势与劣势</h4>
+<table>
+<thead>
+<tr>
+<th>优势</th>
+<th>劣势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>探索多种推理可能性</td>
+<td>计算成本高</td>
+</tr>
+<tr>
+<td>提高推理质量</td>
+<td>树构建复杂</td>
+</tr>
+<tr>
+<td>适合复杂问题</td>
+<td>路径评估困难</td>
+</tr>
+</tbody>
+</table>
+<h3 id="732-rewooreasoning-without-observation" tabindex="-1">7.3.2 ReWOO（Reasoning Without Observation） <a class="heading-anchor" href="#732-rewooreasoning-without-observation" aria-hidden="true">#</a></h3>
+<p>ReWOO 是一种分离规划和执行的推理框架，先规划任务，再执行工具调用。</p>
+<h4>ReWOO 的定义</h4>
+<p>ReWOO（Reasoning Without Observation）是一种分离规划和执行的推理框架，先规划任务，再执行工具调用，减少推理和行动的交错。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong>IBM（2025）</strong>：ReWOO 工作流由三个模块组成。在规划模块中，Agent 根据用户的提示预期其下一步。</li>
+<li><strong>IBM（2025）</strong>：下一个阶段包括收集通过调用这些工具产生的输出。</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，ReWOO 包括：</p>
+<ol>
+<li><strong>规划</strong>：先规划任务，生成执行计划</li>
+<li><strong>执行</strong>：执行工具调用</li>
+<li><strong>结果收集</strong>：收集工具调用结果</li>
+<li><strong>答案生成</strong>：基于工具调用结果生成最终答案</li>
+</ol>
+<h4>ReWOO 的核心机制</h4>
+<p><strong>1. 规划</strong></p>
+<p>先规划任务，生成执行计划，包括需要调用的工具。</p>
+<p><strong>2. 执行</strong></p>
+<p>执行工具调用，收集结果。</p>
+<p><strong>3. 答案生成</strong></p>
+<p>基于工具调用结果生成最终答案。</p>
+<h4>ReWOO 的优势与劣势</h4>
+<table>
+<thead>
+<tr>
+<th>优势</th>
+<th>劣势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>减少迭代次数</td>
+<td>规划质量依赖推理能力</td>
+</tr>
+<tr>
+<td>提高效率</td>
+<td>需要准确的规划</td>
+</tr>
+<tr>
+<td>适合工具调用任务</td>
+<td>不适合动态环境</td>
+</tr>
+</tbody>
+</table>
+<h3 id="733-其他推理框架" tabindex="-1">7.3.3 其他推理框架 <a class="heading-anchor" href="#733-其他推理框架" aria-hidden="true">#</a></h3>
+<p>除了 CoT、ReAct、ToT、ReWOO 之外，还有其他推理框架，如 Reflexion、RAISE 等。</p>
+<h4>其他推理框架的定义</h4>
+<p>其他推理框架包括 Reflexion、RAISE 等，它们提供了不同的推理方法和策略。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong>IBM（2025）</strong>：其他新兴框架包括 ReWOO、RAISE 和 Reflexion，每个框架都有自己的优势和劣势。</li>
+<li><strong>CoForge（2025）</strong>：介绍了多种推理框架，包括 ReAct、ToT、ReWOO 等，并比较了它们的优缺点。</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，其他推理框架包括：</p>
+<ol>
+<li><strong>Reflexion</strong>：基于反馈的自我反思推理</li>
+<li><strong>RAISE</strong>：结合检索和推理的框架</li>
+<li><strong>Self-Critique</strong>：自批判推理方法</li>
+</ol>
+<h4>其他推理框架对比表</h4>
+<table>
+<thead>
+<tr>
+<th>框架</th>
+<th>核心特点</th>
+<th>优势</th>
+<th>劣势</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CoT</strong></td>
+<td>逐步推理</td>
+<td>简单、可解释</td>
+<td>可能产生幻觉</td>
+<td>复杂推理问题</td>
+</tr>
+<tr>
+<td><strong>ReAct</strong></td>
+<td>推理 + 行动</td>
+<td>动态适应</td>
+<td>迭代次数多</td>
+<td>动态任务</td>
+</tr>
+<tr>
+<td><strong>ToT</strong></td>
+<td>树形推理</td>
+<td>探索多种可能性</td>
+<td>计算成本高</td>
+<td>复杂决策问题</td>
+</tr>
+<tr>
+<td><strong>ReWOO</strong></td>
+<td>规划 + 执行分离</td>
+<td>减少迭代次数</td>
+<td>规划质量依赖推理</td>
+<td>工具调用任务</td>
+</tr>
+<tr>
+<td><strong>Reflexion</strong></td>
+<td>自我反思</td>
+<td>持续改进</td>
+<td>需要反馈</td>
+<td>迭代优化</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="74-推理与决策代码示例" tabindex="-1">7.4 推理与决策代码示例 <a class="heading-anchor" href="#74-推理与决策代码示例" aria-hidden="true">#</a></h2>
+<p>以下代码示例展示如何实现一个 ReAct Agent：</p>
+<pre class="hljs"><code><span class="hljs-string">&quot;&quot;&quot;
+ReAct Agent 示例
+
+这个示例展示如何实现一个 ReAct（Reasoning and Acting）Agent，
+结合推理和行动，动态调整推理过程。
+&quot;&quot;&quot;</span>
+
+<span class="hljs-keyword">import</span> os
+<span class="hljs-keyword">import</span> logging
+<span class="hljs-keyword">from</span> typing <span class="hljs-keyword">import</span> <span class="hljs-type">Dict</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">List</span>, <span class="hljs-type">Optional</span>
+<span class="hljs-keyword">from</span> dataclasses <span class="hljs-keyword">import</span> dataclass
+<span class="hljs-keyword">from</span> enum <span class="hljs-keyword">import</span> Enum
+<span class="hljs-keyword">import</span> time
+
+<span class="hljs-keyword">from</span> langchain_openai <span class="hljs-keyword">import</span> ChatOpenAI
+<span class="hljs-keyword">from</span> langchain.prompts <span class="hljs-keyword">import</span> ChatPromptTemplate
+<span class="hljs-keyword">from</span> langchain.schema <span class="hljs-keyword">import</span> BaseMessage, SystemMessage, HumanMessage, AIMessage
+
+<span class="hljs-comment"># 配置日志</span>
+logging.basicConfig(
+    level=logging.INFO,
+    <span class="hljs-built_in">format</span>=<span class="hljs-string">&#x27;%(asctime)s - %(name)s - %(levelname)s - %(message)s&#x27;</span>
+)
+logger = logging.getLogger(__name__)
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">ActionType</span>(<span class="hljs-title class_ inherited__">Enum</span>):
+    <span class="hljs-string">&quot;&quot;&quot;行动类型&quot;&quot;&quot;</span>
+    THINK = <span class="hljs-string">&quot;think&quot;</span>
+    ACTION = <span class="hljs-string">&quot;action&quot;</span>
+    OBSERVE = <span class="hljs-string">&quot;observe&quot;</span>
+
+<span class="hljs-meta">@dataclass</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Thought</span>:
+    <span class="hljs-string">&quot;&quot;&quot;思考&quot;&quot;&quot;</span>
+    content: <span class="hljs-built_in">str</span>
+    action: <span class="hljs-type">Optional</span>[<span class="hljs-built_in">str</span>] = <span class="hljs-literal">None</span>
+    observation: <span class="hljs-type">Optional</span>[<span class="hljs-built_in">str</span>] = <span class="hljs-literal">None</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Tool</span>:
+    <span class="hljs-string">&quot;&quot;&quot;工具&quot;&quot;&quot;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, name: <span class="hljs-built_in">str</span>, description: <span class="hljs-built_in">str</span></span>):
+        <span class="hljs-variable language_">self</span>.name = name
+        <span class="hljs-variable language_">self</span>.description = description
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">execute</span>(<span class="hljs-params">self, **kwargs</span>) -&gt; <span class="hljs-built_in">str</span>:
+        <span class="hljs-string">&quot;&quot;&quot;执行工具&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">raise</span> NotImplementedError
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">WeatherTool</span>(<span class="hljs-title class_ inherited__">Tool</span>):
+    <span class="hljs-string">&quot;&quot;&quot;天气工具&quot;&quot;&quot;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-built_in">super</span>().__init__(
+            name=<span class="hljs-string">&quot;weather&quot;</span>,
+            description=<span class="hljs-string">&quot;获取指定地点的天气&quot;</span>
+        )
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">execute</span>(<span class="hljs-params">self, location: <span class="hljs-built_in">str</span></span>) -&gt; <span class="hljs-built_in">str</span>:
+        <span class="hljs-string">&quot;&quot;&quot;获取天气&quot;&quot;&quot;</span>
+        weather_data = {
+            <span class="hljs-string">&quot;北京&quot;</span>: <span class="hljs-string">&quot;晴天，温度 25°C&quot;</span>,
+            <span class="hljs-string">&quot;上海&quot;</span>: <span class="hljs-string">&quot;多云，温度 28°C&quot;</span>,
+            <span class="hljs-string">&quot;广州&quot;</span>: <span class="hljs-string">&quot;阵雨，温度 30°C&quot;</span>,
+            <span class="hljs-string">&quot;深圳&quot;</span>: <span class="hljs-string">&quot;晴天，温度 29°C&quot;</span>
+        }
+
+        result = weather_data.get(location, <span class="hljs-string">f&quot;未找到 <span class="hljs-subst">{location}</span> 的天气信息&quot;</span>)
+        logger.info(<span class="hljs-string">f&quot;天气工具执行：<span class="hljs-subst">{location}</span> -&gt; <span class="hljs-subst">{result}</span>&quot;</span>)
+        <span class="hljs-keyword">return</span> result
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">CalculatorTool</span>(<span class="hljs-title class_ inherited__">Tool</span>):
+    <span class="hljs-string">&quot;&quot;&quot;计算器工具&quot;&quot;&quot;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self</span>):
+        <span class="hljs-built_in">super</span>().__init__(
+            name=<span class="hljs-string">&quot;calculator&quot;</span>,
+            description=<span class="hljs-string">&quot;计算数学表达式&quot;</span>
+        )
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">execute</span>(<span class="hljs-params">self, expression: <span class="hljs-built_in">str</span></span>) -&gt; <span class="hljs-built_in">str</span>:
+        <span class="hljs-string">&quot;&quot;&quot;计算表达式&quot;&quot;&quot;</span>
+        <span class="hljs-keyword">try</span>:
+            result = <span class="hljs-built_in">eval</span>(expression)
+            output = <span class="hljs-string">f&quot;<span class="hljs-subst">{expression}</span> = <span class="hljs-subst">{result}</span>&quot;</span>
+            logger.info(<span class="hljs-string">f&quot;计算器工具执行：<span class="hljs-subst">{expression}</span> -&gt; <span class="hljs-subst">{output}</span>&quot;</span>)
+            <span class="hljs-keyword">return</span> output
+        <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+            error_msg = <span class="hljs-string">f&quot;计算错误：<span class="hljs-subst">{<span class="hljs-built_in">str</span>(e)}</span>&quot;</span>
+            logger.error(error_msg)
+            <span class="hljs-keyword">return</span> error_msg
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">ReActAgent</span>:
+    <span class="hljs-string">&quot;&quot;&quot;ReAct Agent&quot;&quot;&quot;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">
+        self,
+        name: <span class="hljs-built_in">str</span>,
+        model: <span class="hljs-built_in">str</span> = <span class="hljs-string">&quot;gpt-4&quot;</span>
+    </span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        初始化 ReAct Agent
+
+        Args:
+            name: Agent 名称
+            model: LLM 模型名称
+        &quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.name = name
+
+        <span class="hljs-comment"># 初始化 LLM</span>
+        <span class="hljs-variable language_">self</span>.llm = ChatOpenAI(model=model, temperature=<span class="hljs-number">0.0</span>)
+
+        <span class="hljs-comment"># 初始化工具</span>
+        <span class="hljs-variable language_">self</span>.tools = [
+            WeatherTool(),
+            CalculatorTool()
+        ]
+
+        <span class="hljs-comment"># 初始化提示词模板</span>
+        <span class="hljs-variable language_">self</span>.prompt = ChatPromptTemplate.from_messages([
+            (<span class="hljs-string">&quot;system&quot;</span>, <span class="hljs-string">f&quot;你是一个有用的助手，名为 <span class="hljs-subst">{self.name}</span>，使用 ReAct 方法推理和行动。&quot;</span>),
+            (<span class="hljs-string">&quot;user&quot;</span>, <span class="hljs-string">&quot;{input}&quot;</span>),
+        ])
+
+        <span class="hljs-comment"># 对话历史</span>
+        <span class="hljs-variable language_">self</span>.chat_history: <span class="hljs-type">List</span>[BaseMessage] = []
+
+        <span class="hljs-comment"># 思考历史</span>
+        <span class="hljs-variable language_">self</span>.thoughts: <span class="hljs-type">List</span>[Thought] = []
+
+        logger.info(<span class="hljs-string">f&quot;ReAct Agent &#x27;<span class="hljs-subst">{self.name}</span>&#x27; 初始化完成&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">think</span>(<span class="hljs-params">self, user_input: <span class="hljs-built_in">str</span>, max_thoughts: <span class="hljs-built_in">int</span> = <span class="hljs-number">5</span></span>) -&gt; <span class="hljs-built_in">str</span>:
+        <span class="hljs-string">&quot;&quot;&quot;
+        推理
+
+        Args:
+            user_input: 用户输入
+            max_thoughts: 最大思考次数
+
+        Returns:
+            最终答案
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 初始推理</span>
+        thought = Thought(content=<span class="hljs-string">f&quot;用户输入：<span class="hljs-subst">{user_input}</span>&quot;</span>)
+        <span class="hljs-variable language_">self</span>.thoughts.append(thought)
+
+        <span class="hljs-keyword">for</span> iteration <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(max_thoughts):
+            logger.info(<span class="hljs-string">f&quot;推理迭代 <span class="hljs-subst">{iteration + <span class="hljs-number">1</span>}</span>/<span class="hljs-subst">{max_thoughts}</span>&quot;</span>)
+
+            <span class="hljs-comment"># 构建推理上下文</span>
+            context = <span class="hljs-variable language_">self</span>._build_context()
+
+            <span class="hljs-comment"># 生成思考</span>
+            response = <span class="hljs-variable language_">self</span>.llm.invoke(context)
+            content = response.content
+
+            logger.info(<span class="hljs-string">f&quot;推理：<span class="hljs-subst">{content}</span>&quot;</span>)
+
+            <span class="hljs-comment"># 判断是否需要执行行动</span>
+            <span class="hljs-keyword">if</span> <span class="hljs-string">&quot;工具&quot;</span> <span class="hljs-keyword">in</span> content <span class="hljs-keyword">or</span> <span class="hljs-string">&quot;tool&quot;</span> <span class="hljs-keyword">in</span> content.lower():
+                <span class="hljs-comment"># 执行工具</span>
+                tool_result = <span class="hljs-variable language_">self</span>._execute_tool(content)
+
+                <span class="hljs-comment"># 记录观察</span>
+                thought = Thought(
+                    content=content,
+                    action=tool_result[<span class="hljs-number">0</span>],
+                    observation=tool_result[<span class="hljs-number">1</span>]
+                )
+                <span class="hljs-variable language_">self</span>.thoughts.append(thought)
+
+                logger.info(<span class="hljs-string">f&quot;工具执行结果：<span class="hljs-subst">{tool_result[<span class="hljs-number">1</span>]}</span>&quot;</span>)
+
+                <span class="hljs-comment"># 检查是否已经得到答案</span>
+                <span class="hljs-keyword">if</span> <span class="hljs-string">&quot;答案&quot;</span> <span class="hljs-keyword">in</span> content <span class="hljs-keyword">or</span> <span class="hljs-string">&quot;answer&quot;</span> <span class="hljs-keyword">in</span> content.lower():
+                    <span class="hljs-keyword">break</span>
+
+            <span class="hljs-keyword">else</span>:
+                <span class="hljs-comment"># 直接回答</span>
+                thought = Thought(content=content)
+                <span class="hljs-variable language_">self</span>.thoughts.append(thought)
+
+                logger.info(<span class="hljs-string">f&quot;最终答案：<span class="hljs-subst">{content}</span>&quot;</span>)
+                <span class="hljs-keyword">return</span> content
+
+        <span class="hljs-comment"># 如果达到最大迭代次数，返回最后一个思考</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.thoughts[-<span class="hljs-number">1</span>].content
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_build_context</span>(<span class="hljs-params">self</span>) -&gt; <span class="hljs-built_in">str</span>:
+        <span class="hljs-string">&quot;&quot;&quot;构建推理上下文&quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 添加用户输入</span>
+        context = <span class="hljs-string">f&quot;用户输入：<span class="hljs-subst">{self.thoughts[<span class="hljs-number">0</span>].content}</span>\n\n&quot;</span>
+
+        <span class="hljs-comment"># 添加工具列表</span>
+        context += <span class="hljs-string">&quot;可用工具：\n&quot;</span>
+        <span class="hljs-keyword">for</span> tool <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.tools:
+            context += <span class="hljs-string">f&quot;- <span class="hljs-subst">{tool.name}</span>: <span class="hljs-subst">{tool.description}</span>\n&quot;</span>
+
+        <span class="hljs-comment"># 添加思考历史</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.thoughts) &gt; <span class="hljs-number">1</span>:
+            context += <span class="hljs-string">&quot;\n推理历史：\n&quot;</span>
+            <span class="hljs-keyword">for</span> i, thought <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(<span class="hljs-variable language_">self</span>.thoughts[<span class="hljs-number">1</span>:], <span class="hljs-number">1</span>):
+                context += <span class="hljs-string">f&quot;<span class="hljs-subst">{i}</span>. <span class="hljs-subst">{thought.content}</span>&quot;</span>
+                <span class="hljs-keyword">if</span> thought.action:
+                    context += <span class="hljs-string">f&quot; (执行工具：<span class="hljs-subst">{thought.action}</span>)&quot;</span>
+                <span class="hljs-keyword">if</span> thought.observation:
+                    context += <span class="hljs-string">f&quot; (观察结果：<span class="hljs-subst">{thought.observation}</span>)&quot;</span>
+                context += <span class="hljs-string">&quot;\n&quot;</span>
+
+        <span class="hljs-comment"># 添加推理指令</span>
+        context += <span class="hljs-string">&quot;\n请基于推理历史和可用工具，进行推理。如果需要使用工具，请明确说明工具名称和参数。如果不需要工具，请直接给出答案。&quot;</span>
+
+        <span class="hljs-keyword">return</span> context
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_execute_tool</span>(<span class="hljs-params">self, content: <span class="hljs-built_in">str</span></span>) -&gt; <span class="hljs-built_in">tuple</span>:
+        <span class="hljs-string">&quot;&quot;&quot;
+        执行工具
+
+        Args:
+            content: 推理内容
+
+        Returns:
+            (工具名称, 执行结果)
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 解析工具调用（简化实现）</span>
+        tool_name = <span class="hljs-literal">None</span>
+        tool_args = {}
+
+        <span class="hljs-keyword">if</span> <span class="hljs-string">&quot;天气&quot;</span> <span class="hljs-keyword">in</span> content <span class="hljs-keyword">or</span> <span class="hljs-string">&quot;weather&quot;</span> <span class="hljs-keyword">in</span> content.lower():
+            tool_name = <span class="hljs-string">&quot;weather&quot;</span>
+            <span class="hljs-comment"># 提取地点</span>
+            location = content.replace(<span class="hljs-string">&quot;天气&quot;</span>, <span class="hljs-string">&quot;&quot;</span>).replace(<span class="hljs-string">&quot;的&quot;</span>, <span class="hljs-string">&quot;&quot;</span>).strip()
+            tool_args = {<span class="hljs-string">&quot;location&quot;</span>: location}
+        <span class="hljs-keyword">elif</span> <span class="hljs-string">&quot;计算&quot;</span> <span class="hljs-keyword">in</span> content <span class="hljs-keyword">or</span> <span class="hljs-string">&quot;calculator&quot;</span> <span class="hljs-keyword">in</span> content.lower():
+            tool_name = <span class="hljs-string">&quot;calculator&quot;</span>
+            <span class="hljs-comment"># 提取表达式</span>
+            expression = content.replace(<span class="hljs-string">&quot;计算&quot;</span>, <span class="hljs-string">&quot;&quot;</span>).strip()
+            tool_args = {<span class="hljs-string">&quot;expression&quot;</span>: expression}
+
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> tool_name:
+            <span class="hljs-keyword">return</span> (<span class="hljs-literal">None</span>, <span class="hljs-string">&quot;未找到合适的工具&quot;</span>)
+
+        <span class="hljs-comment"># 查找工具</span>
+        tool = <span class="hljs-built_in">next</span>((t <span class="hljs-keyword">for</span> t <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.tools <span class="hljs-keyword">if</span> t.name == tool_name), <span class="hljs-literal">None</span>)
+
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> tool:
+            <span class="hljs-keyword">return</span> (tool_name, <span class="hljs-string">f&quot;未找到工具：<span class="hljs-subst">{tool_name}</span>&quot;</span>)
+
+        <span class="hljs-comment"># 执行工具</span>
+        <span class="hljs-keyword">try</span>:
+            result = tool.execute(**tool_args)
+            <span class="hljs-keyword">return</span> (tool_name, result)
+        <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+            error_msg = <span class="hljs-string">f&quot;工具执行失败：<span class="hljs-subst">{<span class="hljs-built_in">str</span>(e)}</span>&quot;</span>
+            logger.error(error_msg)
+            <span class="hljs-keyword">return</span> (tool_name, error_msg)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">chat</span>(<span class="hljs-params">self, user_input: <span class="hljs-built_in">str</span></span>) -&gt; <span class="hljs-built_in">str</span>:
+        <span class="hljs-string">&quot;&quot;&quot;
+        聊天
+
+        Args:
+            user_input: 用户输入
+
+        Returns:
+            Agent 响应
+        &quot;&quot;&quot;</span>
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n用户：<span class="hljs-subst">{user_input}</span>&quot;</span>)
+        response = <span class="hljs-variable language_">self</span>.think(user_input)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;助手：<span class="hljs-subst">{response}</span>\n&quot;</span>)
+
+        <span class="hljs-keyword">return</span> response
+
+<span class="hljs-comment"># 使用示例</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">main</span>():
+    <span class="hljs-string">&quot;&quot;&quot;主函数&quot;&quot;&quot;</span>
+    <span class="hljs-comment"># 创建 ReAct Agent</span>
+    agent = ReActAgent(
+        name=<span class="hljs-string">&quot;ReActAgent&quot;</span>,
+        model=<span class="hljs-string">&quot;gpt-4&quot;</span>
+    )
+
+    <span class="hljs-comment"># 对话示例</span>
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;=&quot;</span>*<span class="hljs-number">60</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;ReAct Agent 对话示例&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;=&quot;</span>*<span class="hljs-number">60</span>)
+
+    agent.chat(<span class="hljs-string">&quot;北京的天气怎么样？&quot;</span>)
+    agent.chat(<span class="hljs-string">&quot;计算 12 * 15 + 8&quot;</span>)
+    agent.chat(<span class="hljs-string">&quot;北京和上海的天气有什么区别？&quot;</span>)
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    main()
+</code></pre>
+<hr>
+<h2 id="小结第七章全部完成" tabindex="-1">小结（第七章全部完成） <a class="heading-anchor" href="#小结第七章全部完成" aria-hidden="true">#</a></h2>
+<p>本章详细介绍了推理与决策的核心概念和实践，包括推理基础、ReAct 框架、高级推理技术等内容，帮助开发者构建强大的推理与决策能力。</p>
+<p><strong>推理基础</strong></p>
+<ul>
+<li><strong>Chain of Thought</strong>：定义、核心机制、优势与劣势</li>
+<li><strong>推理与决策的关系</strong>：定义、核心机制、优势与劣势</li>
+</ul>
+<p><strong>ReAct 框架</strong></p>
+<ul>
+<li><strong>ReAct 基础</strong>：定义、核心流程、优势与劣势</li>
+<li><strong>ReAct vs Chain of Thought</strong>：对比分析、对比表</li>
+</ul>
+<p><strong>高级推理技术</strong></p>
+<ul>
+<li><strong>Tree of Thoughts（ToT）</strong>：定义、核心机制、优势与劣势</li>
+<li><strong>ReWOO（Reasoning Without Observation）</strong>：定义、核心机制、优势与劣势</li>
+<li><strong>其他推理框架</strong>：Reflexion、RAISE、Self-Critique</li>
+</ul>
+<hr>
+<p><em>文档版本：v1.0</em>
+<em>最后更新：2026-03-18</em></p>
+</div> <nav class="pager"> <a class="pager__link" href="/ai-agent-development/06-tool-calling/"> <span>上一篇</span> <strong>第六章：工具调用（Tool Calling）</strong> </a> <a class="pager__link" href="/ai-agent-development/08-reflection-and-optimization/"> <span>下一篇</span> <strong>第八章：反思与优化（Reflection and Optimization）</strong> </a> </nav> </article> </section>  </main> <footer class="site-footer"> <div class="site-footer__inner"> <p>Vinci Knowledge Base</p> <p>Source directory: <code>/Users/superone77/Documents/知识库/projects</code></p> </div> </footer> </div> </body></html>

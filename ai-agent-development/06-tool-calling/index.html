@@ -1,0 +1,868 @@
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>第六章：工具调用（Tool Calling） | Vinci Knowledge Base</title><meta name="description" content="第六章：工具调用（Tool Calling） 工具调用是 AI Agent 的核心能力之一，通过调用外部工具和服务，扩展 Agent 的功能边界，使其能够执行各种实际任务。 6.1 工具调用基础 6.1.1 Function Calling 基础 Function Calling 是一种让 LLM 以结构化的方式调用外部函数的能力，通过定义函数的 schem"><meta name="generator" content="Vinci Knowledge Base"><link rel="stylesheet" href="/_astro/_doc_.CY2v1inF.css"></head> <body> <div class="page-shell"> <header class="site-header"> <div class="site-header__inner"> <a class="brand" href="/"> <span class="brand__eyebrow">GitHub Pages Knowledge Site</span> <span class="brand__name">Vinci Knowledge Base</span> </a> <nav class="site-nav"> <a href="/">Projects</a> </nav> </div> </header> <main class="page-main">  <section class="article-hero"> <div> <p class="eyebrow">Knowledge Article</p> <h1>第六章：工具调用（Tool Calling）</h1> <p class="article-hero__breadcrumbs"> <a href="/">Home</a> <span>/</span> <a href="/ai-agent-development/">AI Agent 智能体开发知识库</a> </p> </div> <div class="meta-card"> <p><strong>Project</strong> AI Agent 智能体开发知识库</p> <p><strong>Source</strong> <code>knowledge/06-tool-calling.md</code></p> <p><strong>Sections</strong> 18</p> </div> </section> <section class="content-grid"> <aside class="toc-card"> <p class="toc-card__title">本页目录</p> <ul class="toc-card__list"> <li class="toc-depth-1"> <a href="#第六章工具调用tool-calling">第六章：工具调用（Tool Calling）</a> </li><li class="toc-depth-2"> <a href="#61-工具调用基础">6.1 工具调用基础</a> </li><li class="toc-depth-3"> <a href="#611-function-calling-基础">6.1.1 Function Calling 基础</a> </li><li class="toc-depth-3"> <a href="#612-工具注册与定义">6.1.2 工具注册与定义</a> </li><li class="toc-depth-3"> <a href="#613-工具调用流程">6.1.3 工具调用流程</a> </li><li class="toc-depth-2"> <a href="#62-工具选择与路由">6.2 工具选择与路由</a> </li><li class="toc-depth-3"> <a href="#621-工具选择策略">6.2.1 工具选择策略</a> </li><li class="toc-depth-3"> <a href="#622-工具路由机制">6.2.2 工具路由机制</a> </li><li class="toc-depth-3"> <a href="#623-动态工具调用">6.2.3 动态工具调用</a> </li><li class="toc-depth-2"> <a href="#63-工具编排与链">6.3 工具编排与链</a> </li><li class="toc-depth-3"> <a href="#631-工具编排模式">6.3.1 工具编排模式</a> </li><li class="toc-depth-3"> <a href="#632-工具链">6.3.2 工具链</a> </li><li class="toc-depth-3"> <a href="#633-工具编排最佳实践">6.3.3 工具编排最佳实践</a> </li><li class="toc-depth-2"> <a href="#64-工具调用代码示例">6.4 工具调用代码示例</a> </li><li class="toc-depth-1"> <a href="#配置日志">配置日志</a> </li><li class="toc-depth-1"> <a href="#工具定义">工具定义</a> </li><li class="toc-depth-1"> <a href="#使用示例">使用示例</a> </li><li class="toc-depth-2"> <a href="#小结第六章全部完成">小结（第六章全部完成）</a> </li> </ul> </aside> <article class="prose-card"> <div class="prose"><h1 id="第六章工具调用tool-calling" tabindex="-1">第六章：工具调用（Tool Calling） <a class="heading-anchor" href="#第六章工具调用tool-calling" aria-hidden="true">#</a></h1>
+<p>工具调用是 AI Agent 的核心能力之一，通过调用外部工具和服务，扩展 Agent 的功能边界，使其能够执行各种实际任务。</p>
+<h2 id="61-工具调用基础" tabindex="-1">6.1 工具调用基础 <a class="heading-anchor" href="#61-工具调用基础" aria-hidden="true">#</a></h2>
+<h3 id="611-function-calling-基础" tabindex="-1">6.1.1 Function Calling 基础 <a class="heading-anchor" href="#611-function-calling-基础" aria-hidden="true">#</a></h3>
+<p>Function Calling 是一种让 LLM 以结构化的方式调用外部函数的能力，通过定义函数的 schema（模式），让 LLM 生成符合格式的函数调用参数。</p>
+<h4>Function Calling 的定义</h4>
+<p>Function Calling 是一种让 LLM 以结构化的方式调用外部函数的能力，通过定义函数的 schema（模式），让 LLM 生成符合格式的函数调用参数，然后由应用程序执行这些函数。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong>OpenAI（2025）</strong>：Function Calling 允许 LLM 生成结构化的函数调用参数，然后由应用程序执行这些函数，实现与外部系统的交互。</li>
+<li><strong>LangChain（2024）</strong>：LangChain 引入了新的 tool_calls 属性，提供与工具调用交互的标准接口，支持所有 LLM 提供商的工具调用 API。</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，Function Calling 包括：</p>
+<ol>
+<li><strong>工具定义</strong>：定义工具的名称、描述和参数 schema</li>
+<li><strong>工具调用</strong>：LLM 生成工具调用的参数</li>
+<li><strong>工具执行</strong>：应用程序执行工具调用</li>
+<li><strong>结果返回</strong>：将工具执行结果返回给 LLM</li>
+<li><strong>响应生成</strong>：LLM 基于工具执行结果生成最终响应</li>
+</ol>
+<h4>Function Calling 的核心流程</h4>
+<p><strong>1. 工具定义</strong></p>
+<p>定义工具的名称、描述和参数 schema（通常使用 JSON Schema 格式）。</p>
+<p><strong>2. 工具选择</strong></p>
+<p>LLM 根据用户输入和工具定义，选择合适的工具。</p>
+<p><strong>3. 参数生成</strong></p>
+<p>LLM 生成符合工具 schema 的参数。</p>
+<p><strong>4. 工具执行</strong></p>
+<p>应用程序执行工具调用，获取结果。</p>
+<p><strong>5. 结果处理</strong></p>
+<p>将工具执行结果返回给 LLM，LLM 基于结果生成最终响应。</p>
+<h4>Function Calling 的优势与劣势</h4>
+<table>
+<thead>
+<tr>
+<th>优势</th>
+<th>劣势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>结构化输出</td>
+<td>需要定义 schema</td>
+</tr>
+<tr>
+<td>可靠的参数解析</td>
+<td>可能生成无效参数</td>
+</tr>
+<tr>
+<td>支持复杂交互</td>
+<td>执行顺序需要管理</td>
+</tr>
+</tbody>
+</table>
+<h3 id="612-工具注册与定义" tabindex="-1">6.1.2 工具注册与定义 <a class="heading-anchor" href="#612-工具注册与定义" aria-hidden="true">#</a></h3>
+<p>工具注册与定义是指定义和管理可被 Agent 调用的工具的过程，包括工具的名称、描述、参数 schema 和执行逻辑。</p>
+<h4>工具注册与定义的定义</h4>
+<p>工具注册与定义是指定义和管理可被 Agent 调用的工具的过程，包括工具的名称、描述、参数 schema 和执行逻辑，以及将这些工具注册到 Agent 的工具列表中。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong>LangChain（2025）</strong>：Tools 模块提供了工具注册、工具调用和工具装饰器等功能，简化了工具定义和管理的过程。</li>
+<li><strong>Medium（2025）</strong>：How Tools Are Called in AI Agents：Complete 2025 Guide，详细介绍了工具定义、工具选择、工具路由和工具编排的最佳实践。</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，工具注册与定义包括：</p>
+<ol>
+<li><strong>工具定义</strong>：定义工具的名称、描述、参数 schema</li>
+<li><strong>工具实现</strong>：实现工具的执行逻辑</li>
+<li><strong>工具注册</strong>：将工具注册到 Agent 的工具列表中</li>
+<li><strong>工具管理</strong>：管理工具的生命周期（启用、禁用、更新）</li>
+<li><strong>工具权限</strong>：管理工具的访问权限</li>
+</ol>
+<h4>工具注册与定义的核心机制</h4>
+<p><strong>1. 工具定义</strong></p>
+<p>使用 JSON Schema 定义工具的参数 schema。</p>
+<p><strong>2. 工具装饰器</strong></p>
+<p>使用装饰器（如 LangChain 的 @tool）简化工具定义。</p>
+<p><strong>3. 工具注册</strong></p>
+<p>将工具注册到 Agent 的工具列表中。</p>
+<p><strong>4. 工具管理</strong></p>
+<p>管理工具的生命周期和权限。</p>
+<h4>工具注册与定义的优势与劣势</h4>
+<table>
+<thead>
+<tr>
+<th>优势</th>
+<th>劣势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>简化工具定义</td>
+<td>需要维护工具列表</td>
+</tr>
+<tr>
+<td>支持动态加载</td>
+<td>工具权限管理复杂</td>
+</tr>
+<tr>
+<td>类型安全</td>
+<td>Schema 定义繁琐</td>
+</tr>
+</tbody>
+</table>
+<h3 id="613-工具调用流程" tabindex="-1">6.1.3 工具调用流程 <a class="heading-anchor" href="#613-工具调用流程" aria-hidden="true">#</a></h3>
+<p>工具调用流程是指 Agent 调用工具的完整流程，从工具选择到结果返回的整个过程。</p>
+<h4>工具调用流程的定义</h4>
+<p>工具调用流程是指 Agent 调用工具的完整流程，包括工具选择、参数生成、工具执行、结果返回和响应生成的整个过程。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong>Medium（2025）</strong>：How Tools Are Called in AI Agents：Complete 2025 Guide，详细介绍了工具调用的完整流程，包括工具选择、参数生成、工具执行和结果处理。</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，工具调用流程包括：</p>
+<ol>
+<li><strong>工具选择</strong>：Agent 根据用户输入选择合适的工具</li>
+<li><strong>参数生成</strong>：Agent 生成符合工具 schema 的参数</li>
+<li><strong>工具执行</strong>：执行工具调用，获取结果</li>
+<li><strong>结果处理</strong>：处理工具执行结果（错误处理、重试）</li>
+<li><strong>响应生成</strong>：基于工具执行结果生成最终响应</li>
+</ol>
+<h4>工具调用流程的核心步骤</h4>
+<p><strong>1. 工具选择</strong></p>
+<p>Agent 根据用户输入和工具定义，选择合适的工具。</p>
+<p><strong>2. 参数生成</strong></p>
+<p>Agent 生成符合工具 schema 的参数。</p>
+<p><strong>3. 工具执行</strong></p>
+<p>执行工具调用，获取结果。</p>
+<p><strong>4. 错误处理</strong></p>
+<p>处理工具执行错误（重试、降级、日志记录）。</p>
+<p><strong>5. 响应生成</strong></p>
+<p>基于工具执行结果生成最终响应。</p>
+<h4>工具调用流程的优势与劣势</h4>
+<table>
+<thead>
+<tr>
+<th>优势</th>
+<th>劣势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>流程清晰</td>
+<td>错误处理复杂</td>
+</tr>
+<tr>
+<td>可扩展性强</td>
+<td>性能优化困难</td>
+</tr>
+<tr>
+<td>易于调试</td>
+<td>并发控制复杂</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="62-工具选择与路由" tabindex="-1">6.2 工具选择与路由 <a class="heading-anchor" href="#62-工具选择与路由" aria-hidden="true">#</a></h2>
+<h3 id="621-工具选择策略" tabindex="-1">6.2.1 工具选择策略 <a class="heading-anchor" href="#621-工具选择策略" aria-hidden="true">#</a></h3>
+<p>工具选择策略是指 Agent 根据用户输入选择合适工具的策略，包括基于规则的选择、基于 LLM 的选择和基于学习的策略。</p>
+<h4>工具选择策略的定义</h4>
+<p>工具选择策略是指 Agent 根据用户输入选择合适工具的策略，包括基于规则的选择、基于 LLM 的选择和基于学习的策略，确保选择最合适的工具。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong>Medium（2025）</strong>：How Tools Are Called in AI Agents：Complete 2025 Guide，详细介绍了工具选择的策略，包括基于规则的策略、基于 LLM 的策略和基于学习的策略。</li>
+<li><strong>DEV Community（2025）</strong>：Build Multi-Agent Systems Using the Agents as Tools Pattern，强调了&quot;总是选择最合适的工具&quot;的原则。</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，工具选择策略包括：</p>
+<ol>
+<li><strong>基于规则的选择</strong>：基于预定义规则选择工具</li>
+<li><strong>基于 LLM 的选择</strong>：使用 LLM 选择工具</li>
+<li><strong>基于学习的策略</strong>：使用机器学习模型选择工具</li>
+<li><strong>混合策略</strong>：结合多种策略选择工具</li>
+<li><strong>工具评分</strong>：对工具进行评分，选择评分最高的工具</li>
+</ol>
+<h4>工具选择策略的核心机制</h4>
+<p><strong>1. 基于规则的选择</strong></p>
+<p>基于预定义规则选择工具（如关键词匹配、模式匹配）。</p>
+<p><strong>2. 基于 LLM 的选择</strong></p>
+<p>使用 LLM 分析用户输入，选择合适的工具。</p>
+<p><strong>3. 基于学习的策略</strong></p>
+<p>使用机器学习模型预测最合适的工具。</p>
+<p><strong>4. 混合策略</strong></p>
+<p>结合多种策略选择工具，提高准确率。</p>
+<h4>工具选择策略的优势与劣势</h4>
+<table>
+<thead>
+<tr>
+<th>策略类型</th>
+<th>优势</th>
+<th>劣势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>基于规则</strong></td>
+<td>简单、高效</td>
+<td>不灵活、难以维护</td>
+</tr>
+<tr>
+<td><strong>基于 LLM</strong></td>
+<td>灵活、智能</td>
+<td>成本高、速度慢</td>
+</tr>
+<tr>
+<td><strong>基于学习</strong></td>
+<td>准确、自适应</td>
+<td>需要训练数据</td>
+</tr>
+<tr>
+<td><strong>混合策略</strong></td>
+<td>平衡各种因素</td>
+<td>复杂度高</td>
+</tr>
+</tbody>
+</table>
+<h3 id="622-工具路由机制" tabindex="-1">6.2.2 工具路由机制 <a class="heading-anchor" href="#622-工具路由机制" aria-hidden="true">#</a></h3>
+<p>工具路由机制是指 Agent 根据用户输入和上下文，将请求路由到合适的工具的过程。</p>
+<h4>工具路由机制的定义</h4>
+<p>工具路由机制是指 Agent 根据用户输入和上下文，将请求路由到合适的工具的过程，支持多工具并发、工具链和工具组。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong>LangChain（2025）</strong>：LangChain 支持工具路由，可以基于用户输入和上下文，将请求路由到合适的工具。</li>
+<li><strong>Medium（2025）</strong>：How Tools Are Called in AI Agents：Complete 2025 Guide，详细介绍了工具路由的机制和最佳实践。</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，工具路由机制包括：</p>
+<ol>
+<li><strong>路由规则</strong>：定义路由规则（如基于关键词、基于意图）</li>
+<li><strong>路由模型</strong>：使用模型预测路由结果</li>
+<li><strong>路由缓存</strong>：缓存路由结果，提高性能</li>
+<li><strong>路由监控</strong>：监控路由结果，优化路由策略</li>
+<li><strong>路由回退</strong>：提供路由回退机制</li>
+</ol>
+<h4>工具路由机制的核心机制</h4>
+<p><strong>1. 基于意图的路由</strong></p>
+<p>基于用户意图路由到合适的工具。</p>
+<p><strong>2. 基于关键词的路由</strong></p>
+<p>基于关键词匹配路由到合适的工具。</p>
+<p><strong>3. 基于模型的路由</strong></p>
+<p>使用 LLM 或机器学习模型预测路由结果。</p>
+<p><strong>4. 多层路由</strong></p>
+<p>支持多层路由，提高准确率。</p>
+<h4>工具路由机制的优势与劣势</h4>
+<table>
+<thead>
+<tr>
+<th>优势</th>
+<th>劣势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>提高工具调用准确率</td>
+<td>路由规则复杂</td>
+</tr>
+<tr>
+<td>支持多工具协作</td>
+<td>路由性能优化困难</td>
+</tr>
+<tr>
+<td>易于扩展</td>
+<td>路由调试困难</td>
+</tr>
+</tbody>
+</table>
+<h3 id="623-动态工具调用" tabindex="-1">6.2.3 动态工具调用 <a class="heading-anchor" href="#623-动态工具调用" aria-hidden="true">#</a></h3>
+<p>动态工具调用是指 Agent 在运行时动态地选择和调用工具，而不是使用固定的工具列表。</p>
+<h4>动态工具调用的定义</h4>
+<p>动态工具调用是指 Agent 在运行时动态地选择和调用工具，根据任务需求和上下文，动态加载和调用合适的工具。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong>LangChain（2025）</strong>：动态工具调用允许 Agent 在不同步骤使用不同的工具，而不是在所有步骤使用相同的工具列表。</li>
+<li><strong>LangChain Changelog（2025）</strong>：Dynamic Tool Calling in LangGraph Agents，详细介绍了如何在 LangGraph 中实现动态工具调用。</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，动态工具调用包括：</p>
+<ol>
+<li><strong>工具动态加载</strong>：在运行时动态加载工具</li>
+<li><strong>工具动态选择</strong>：根据任务需求动态选择工具</li>
+<li><strong>工具动态卸载</strong>：在运行时动态卸载不再使用的工具</li>
+<li><strong>工具状态管理</strong>：管理工具的状态（启用、禁用）</li>
+<li><strong>工具版本管理</strong>：管理工具的版本和兼容性</li>
+</ol>
+<h4>动态工具调用的核心机制</h4>
+<p><strong>1. 工具动态加载</strong></p>
+<p>在运行时根据任务需求加载工具。</p>
+<p><strong>2. 工具动态选择</strong></p>
+<p>根据任务需求和上下文动态选择工具。</p>
+<p><strong>3. 工具动态卸载</strong></p>
+<p>在运行时动态卸载不再使用的工具，释放资源。</p>
+<h4>动态工具调用的优势与劣势</h4>
+<table>
+<thead>
+<tr>
+<th>优势</th>
+<th>劣势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>灵活性高</td>
+<td>实现复杂</td>
+</tr>
+<tr>
+<td>资源利用率高</td>
+<td>工具管理复杂</td>
+</tr>
+<tr>
+<td>支持动态任务</td>
+<td>性能优化困难</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="63-工具编排与链" tabindex="-1">6.3 工具编排与链 <a class="heading-anchor" href="#63-工具编排与链" aria-hidden="true">#</a></h2>
+<h3 id="631-工具编排模式" tabindex="-1">6.3.1 工具编排模式 <a class="heading-anchor" href="#631-工具编排模式" aria-hidden="true">#</a></h3>
+<p>工具编排模式是指 Agent 如何协调多个工具的调用，包括顺序调用、并行调用、条件分支等模式。</p>
+<h4>工具编排模式的定义</h4>
+<p>工具编排模式是指 Agent 如何协调多个工具的调用，包括顺序调用、并行调用、条件分支等模式，实现复杂的任务流程。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong><a href="http://Ema.ai">Ema.ai</a>（2025）</strong>：Outcome-driven orchestration：设置目标，由编排引擎管理路由、规划、重试和错误处理。</li>
+<li><strong>Spaceo（2026）</strong>：Agentic AI Frameworks：Complete Enterprise Guide for 2026，介绍了各种工具编排模式和最佳实践。</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，工具编排模式包括：</p>
+<ol>
+<li><strong>顺序调用</strong>：按顺序调用多个工具</li>
+<li><strong>并行调用</strong>：并行调用多个工具</li>
+<li><strong>条件分支</strong>：根据条件调用不同的工具</li>
+<li><strong>循环调用</strong>：循环调用工具直到满足条件</li>
+<li><strong>回滚机制</strong>：支持工具调用的回滚</li>
+</ol>
+<h4>工具编排模式的核心机制</h4>
+<p><strong>1. 顺序调用</strong></p>
+<p>按顺序调用多个工具，前一个工具的输出作为后一个工具的输入。</p>
+<p><strong>2. 并行调用</strong></p>
+<p>并行调用多个工具，提高效率。</p>
+<p><strong>3. 条件分支</strong></p>
+<p>根据条件调用不同的工具或执行不同的流程。</p>
+<p><strong>4. 循环调用</strong></p>
+<p>循环调用工具直到满足条件。</p>
+<h4>工具编排模式的优势与劣势</h4>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>优势</th>
+<th>劣势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>顺序调用</strong></td>
+<td>简单、可控</td>
+<td>效率低</td>
+</tr>
+<tr>
+<td><strong>并行调用</strong></td>
+<td>效率高</td>
+<td>复杂度高</td>
+</tr>
+<tr>
+<td><strong>条件分支</strong></td>
+<td>灵活</td>
+<td>难以调试</td>
+</tr>
+<tr>
+<td><strong>循环调用</strong></td>
+<td>适合迭代任务</td>
+<td>可能无限循环</td>
+</tr>
+</tbody>
+</table>
+<h3 id="632-工具链" tabindex="-1">6.3.2 工具链 <a class="heading-anchor" href="#632-工具链" aria-hidden="true">#</a></h3>
+<p>工具链是指将多个工具串联起来，形成一个完整的工具调用链，实现复杂的工作流。</p>
+<h4>工具链的定义</h4>
+<p>工具链是指将多个工具串联起来，形成一个完整的工具调用链，每个工具的输出作为下一个工具的输入，实现复杂的工作流。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong>LangChain（2024-2025）</strong>：LangChain 提供了 Chain 机制，可以将多个工具串联起来，形成完整的工具调用链。</li>
+<li><strong>Medium（2025）</strong>：How Tools Are Called in AI Agents：Complete 2025 Guide，详细介绍了工具链的构建和使用。</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，工具链包括：</p>
+<ol>
+<li><strong>工具链定义</strong>：定义工具链的结构和流程</li>
+<li><strong>工具链执行</strong>：执行工具链，传递数据</li>
+<li><strong>工具链优化</strong>：优化工具链的执行效率</li>
+<li><strong>工具链监控</strong>：监控工具链的执行状态</li>
+<li><strong>工具链回滚</strong>：支持工具链的回滚</li>
+</ol>
+<h4>工具链的核心机制</h4>
+<p><strong>1. 工具链定义</strong></p>
+<p>定义工具链的结构和流程，包括工具顺序、数据传递等。</p>
+<p><strong>2. 工具链执行</strong></p>
+<p>执行工具链，传递数据，处理错误。</p>
+<p><strong>3. 工具链优化</strong></p>
+<p>优化工具链的执行效率，如并行化、缓存等。</p>
+<h4>工具链的优势与劣势</h4>
+<table>
+<thead>
+<tr>
+<th>优势</th>
+<th>劣势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>实现复杂工作流</td>
+<td>定义复杂</td>
+</tr>
+<tr>
+<td>数据流清晰</td>
+<td>调试困难</td>
+</tr>
+<tr>
+<td>易于扩展</td>
+<td>性能优化复杂</td>
+</tr>
+</tbody>
+</table>
+<h3 id="633-工具编排最佳实践" tabindex="-1">6.3.3 工具编排最佳实践 <a class="heading-anchor" href="#633-工具编排最佳实践" aria-hidden="true">#</a></h3>
+<p>工具编排最佳实践是指在工具编排过程中应遵循的最佳实践，包括错误处理、重试机制、性能优化等。</p>
+<h4>工具编排最佳实践的定义</h4>
+<p>工具编排最佳实践是指在工具编排过程中应遵循的最佳实践，包括错误处理、重试机制、性能优化、日志记录等，确保工具编排的可靠性和效率。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong><a href="http://Sparkco.ai">Sparkco.ai</a>（2023）</strong>：Mastering Tool Calling: Best Practices for 2025，详细介绍了工具调用的最佳实践。</li>
+<li><strong><a href="http://Ema.ai">Ema.ai</a>（2025）</strong>：EmaFusion™ 的Outcome-driven orchestration，强调目标驱动的编排和最佳实践。</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，工具编排最佳实践包括：</p>
+<ol>
+<li><strong>错误处理</strong>：完善的错误处理机制</li>
+<li><strong>重试机制</strong>：合理的重试策略</li>
+<li><strong>性能优化</strong>：优化工具调用的性能</li>
+<li><strong>日志记录</strong>：详细的日志记录</li>
+<li><strong>监控告警</strong>：实时监控和告警</li>
+<li><strong>权限管理</strong>：严格的权限管理</li>
+<li><strong>资源限制</strong>：合理的资源限制</li>
+</ol>
+<h4>工具编排最佳实践的核心原则</h4>
+<p><strong>1. 错误处理</strong></p>
+<p>完善的错误处理机制，包括异常捕获、错误传播、降级处理。</p>
+<p><strong>2. 重试机制</strong></p>
+<p>合理的重试策略，包括指数退避、最大重试次数等。</p>
+<p><strong>3. 性能优化</strong></p>
+<p>优化工具调用的性能，如并行化、缓存、批量调用等。</p>
+<p><strong>4. 日志记录</strong></p>
+<p>详细的日志记录，包括工具调用日志、错误日志、性能日志。</p>
+<h4>工具编排最佳实践对比表</h4>
+<table>
+<thead>
+<tr>
+<th>实践</th>
+<th>核心原则</th>
+<th>优势</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>错误处理</strong></td>
+<td>异常捕获、错误传播、降级处理</td>
+<td>提高可靠性</td>
+<td>所有场景</td>
+</tr>
+<tr>
+<td><strong>重试机制</strong></td>
+<td>指数退避、最大重试次数</td>
+<td>提高成功率</td>
+<td>网络调用</td>
+</tr>
+<tr>
+<td><strong>性能优化</strong></td>
+<td>并行化、缓存、批量调用</td>
+<td>提高效率</td>
+<td>高并发场景</td>
+</tr>
+<tr>
+<td><strong>日志记录</strong></td>
+<td>详细日志、结构化日志</td>
+<td>便于调试</td>
+<td>所有场景</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="64-工具调用代码示例" tabindex="-1">6.4 工具调用代码示例 <a class="heading-anchor" href="#64-工具调用代码示例" aria-hidden="true">#</a></h2>
+<p>以下代码示例展示如何实现一个完整的工具调用 Agent：</p>
+<pre class="hljs"><code><span class="hljs-string">&quot;&quot;&quot;
+工具调用 Agent 示例
+
+这个示例展示如何实现一个完整的工具调用 Agent，包括工具定义、工具注册、工具调用、工具路由和工具编排。
+&quot;&quot;&quot;</span>
+
+<span class="hljs-keyword">import</span> os
+<span class="hljs-keyword">import</span> logging
+<span class="hljs-keyword">from</span> typing <span class="hljs-keyword">import</span> <span class="hljs-type">Dict</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">List</span>, <span class="hljs-type">Optional</span>, <span class="hljs-type">Union</span>
+<span class="hljs-keyword">from</span> dataclasses <span class="hljs-keyword">import</span> dataclass
+<span class="hljs-keyword">from</span> enum <span class="hljs-keyword">import</span> Enum
+<span class="hljs-keyword">import</span> time
+
+<span class="hljs-keyword">from</span> langchain_openai <span class="hljs-keyword">import</span> ChatOpenAI
+<span class="hljs-keyword">from</span> langchain.prompts <span class="hljs-keyword">import</span> ChatPromptTemplate, MessagesPlaceholder
+<span class="hljs-keyword">from</span> langchain.schema <span class="hljs-keyword">import</span> BaseMessage, SystemMessage, HumanMessage, AIMessage
+<span class="hljs-keyword">from</span> langchain.tools <span class="hljs-keyword">import</span> tool
+<span class="hljs-keyword">from</span> langchain_core.utils.function_calling <span class="hljs-keyword">import</span> convert_to_openai_function
+
+<span class="hljs-comment"># 配置日志</span>
+logging.basicConfig(
+    level=logging.INFO,
+    <span class="hljs-built_in">format</span>=<span class="hljs-string">&#x27;%(asctime)s - %(name)s - %(levelname)s - %(message)s&#x27;</span>
+)
+logger = logging.getLogger(__name__)
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">ToolType</span>(<span class="hljs-title class_ inherited__">Enum</span>):
+    <span class="hljs-string">&quot;&quot;&quot;工具类型&quot;&quot;&quot;</span>
+    WEATHER = <span class="hljs-string">&quot;weather&quot;</span>
+    CALCULATOR = <span class="hljs-string">&quot;calculator&quot;</span>
+    SEARCH = <span class="hljs-string">&quot;search&quot;</span>
+
+<span class="hljs-meta">@dataclass</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">ToolResult</span>:
+    <span class="hljs-string">&quot;&quot;&quot;工具执行结果&quot;&quot;&quot;</span>
+    tool_name: <span class="hljs-built_in">str</span>
+    success: <span class="hljs-built_in">bool</span>
+    result: <span class="hljs-type">Any</span>
+    error: <span class="hljs-type">Optional</span>[<span class="hljs-built_in">str</span>] = <span class="hljs-literal">None</span>
+    execution_time: <span class="hljs-built_in">float</span> = <span class="hljs-number">0.0</span>
+
+<span class="hljs-comment"># 工具定义</span>
+<span class="hljs-meta">@tool</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">get_weather</span>(<span class="hljs-params">location: <span class="hljs-built_in">str</span></span>) -&gt; <span class="hljs-built_in">str</span>:
+    <span class="hljs-string">&quot;&quot;&quot;
+    获取指定地点的天气
+
+    Args:
+        location: 地点名称
+
+    Returns:
+        天气信息
+    &quot;&quot;&quot;</span>
+    start_time = time.time()
+    logger.info(<span class="hljs-string">f&quot;执行工具：get_weather，参数：<span class="hljs-subst">{location}</span>&quot;</span>)
+
+    <span class="hljs-comment"># 模拟天气查询</span>
+    weather_data = {
+        <span class="hljs-string">&quot;北京&quot;</span>: <span class="hljs-string">&quot;晴天，温度 25°C&quot;</span>,
+        <span class="hljs-string">&quot;上海&quot;</span>: <span class="hljs-string">&quot;多云，温度 28°C&quot;</span>,
+        <span class="hljs-string">&quot;广州&quot;</span>: <span class="hljs-string">&quot;阵雨，温度 30°C&quot;</span>,
+        <span class="hljs-string">&quot;深圳&quot;</span>: <span class="hljs-string">&quot;晴天，温度 29°C&quot;</span>
+    }
+
+    result = weather_data.get(location, <span class="hljs-string">f&quot;未找到 <span class="hljs-subst">{location}</span> 的天气信息&quot;</span>)
+
+    execution_time = time.time() - start_time
+    logger.info(<span class="hljs-string">f&quot;工具执行完成：get_weather，结果：<span class="hljs-subst">{result}</span>，耗时：<span class="hljs-subst">{execution_time:<span class="hljs-number">.2</span>f}</span>秒&quot;</span>)
+
+    <span class="hljs-keyword">return</span> result
+
+<span class="hljs-meta">@tool</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">calculator</span>(<span class="hljs-params">expression: <span class="hljs-built_in">str</span></span>) -&gt; <span class="hljs-built_in">str</span>:
+    <span class="hljs-string">&quot;&quot;&quot;
+    计算数学表达式
+
+    Args:
+        expression: 数学表达式
+
+    Returns:
+        计算结果
+    &quot;&quot;&quot;</span>
+    start_time = time.time()
+    logger.info(<span class="hljs-string">f&quot;执行工具：calculator，参数：<span class="hljs-subst">{expression}</span>&quot;</span>)
+
+    <span class="hljs-keyword">try</span>:
+        <span class="hljs-comment"># 简单的计算器实现</span>
+        result = <span class="hljs-built_in">eval</span>(expression)
+        output = <span class="hljs-string">f&quot;<span class="hljs-subst">{expression}</span> = <span class="hljs-subst">{result}</span>&quot;</span>
+
+        execution_time = time.time() - start_time
+        logger.info(<span class="hljs-string">f&quot;工具执行完成：calculator，结果：<span class="hljs-subst">{output}</span>，耗时：<span class="hljs-subst">{execution_time:<span class="hljs-number">.2</span>f}</span>秒&quot;</span>)
+
+        <span class="hljs-keyword">return</span> output
+
+    <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+        error_msg = <span class="hljs-string">f&quot;计算错误：<span class="hljs-subst">{<span class="hljs-built_in">str</span>(e)}</span>&quot;</span>
+        logger.error(error_msg)
+        <span class="hljs-keyword">return</span> error_msg
+
+<span class="hljs-meta">@tool</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">search</span>(<span class="hljs-params">query: <span class="hljs-built_in">str</span>, top_k: <span class="hljs-built_in">int</span> = <span class="hljs-number">3</span></span>) -&gt; <span class="hljs-built_in">str</span>:
+    <span class="hljs-string">&quot;&quot;&quot;
+    搜索信息
+
+    Args:
+        query: 搜索查询
+        top_k: 返回前 top_k 个结果
+
+    Returns:
+        搜索结果
+    &quot;&quot;&quot;</span>
+    start_time = time.time()
+    logger.info(<span class="hljs-string">f&quot;执行工具：search，参数：<span class="hljs-subst">{query}</span>, top_k=<span class="hljs-subst">{top_k}</span>&quot;</span>)
+
+    <span class="hljs-comment"># 模拟搜索</span>
+    search_results = [
+        <span class="hljs-string">f&quot;结果1：关于 <span class="hljs-subst">{query}</span> 的信息&quot;</span>,
+        <span class="hljs-string">f&quot;结果2：关于 <span class="hljs-subst">{query}</span> 的详细信息&quot;</span>,
+        <span class="hljs-string">f&quot;结果3：关于 <span class="hljs-subst">{query}</span> 的更多内容&quot;</span>
+    ]
+
+    result = <span class="hljs-string">&quot;\n&quot;</span>.join(search_results[:top_k])
+
+    execution_time = time.time() - start_time
+    logger.info(<span class="hljs-string">f&quot;工具执行完成：search，结果：<span class="hljs-subst">{result[:<span class="hljs-number">50</span>]}</span>...，耗时：<span class="hljs-subst">{execution_time:<span class="hljs-number">.2</span>f}</span>秒&quot;</span>)
+
+    <span class="hljs-keyword">return</span> result
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">ToolCallingAgent</span>:
+    <span class="hljs-string">&quot;&quot;&quot;工具调用 Agent&quot;&quot;&quot;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">
+        self,
+        name: <span class="hljs-built_in">str</span>,
+        model: <span class="hljs-built_in">str</span> = <span class="hljs-string">&quot;gpt-4&quot;</span>
+    </span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        初始化工具调用 Agent
+
+        Args:
+            name: Agent 名称
+            model: LLM 模型名称
+        &quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.name = name
+
+        <span class="hljs-comment"># 初始化 LLM</span>
+        <span class="hljs-variable language_">self</span>.llm = ChatOpenAI(model=model, temperature=<span class="hljs-number">0.0</span>)
+
+        <span class="hljs-comment"># 初始化工具</span>
+        <span class="hljs-variable language_">self</span>.tools = [get_weather, calculator, search]
+
+        <span class="hljs-comment"># 初始化提示词模板</span>
+        <span class="hljs-variable language_">self</span>.prompt = ChatPromptTemplate.from_messages([
+            (<span class="hljs-string">&quot;system&quot;</span>, <span class="hljs-string">f&quot;你是一个有用的助手，名为 <span class="hljs-subst">{self.name}</span>，可以使用工具帮助用户。&quot;</span>),
+            (<span class="hljs-string">&quot;user&quot;</span>, <span class="hljs-string">&quot;{input}&quot;</span>),
+            MessagesPlaceholder(variable_name=<span class="hljs-string">&quot;chat_history&quot;</span>)
+        ])
+
+        <span class="hljs-comment"># 对话历史</span>
+        <span class="hljs-variable language_">self</span>.chat_history: <span class="hljs-type">List</span>[BaseMessage] = []
+
+        <span class="hljs-comment"># 工具执行历史</span>
+        <span class="hljs-variable language_">self</span>.tool_execution_history: <span class="hljs-type">List</span>[ToolResult] = []
+
+        logger.info(<span class="hljs-string">f&quot;工具调用 Agent &#x27;<span class="hljs-subst">{self.name}</span>&#x27; 初始化完成&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_select_tool</span>(<span class="hljs-params">self, user_input: <span class="hljs-built_in">str</span></span>) -&gt; <span class="hljs-type">Optional</span>[<span class="hljs-built_in">str</span>]:
+        <span class="hljs-string">&quot;&quot;&quot;
+        选择工具
+
+        Args:
+            user_input: 用户输入
+
+        Returns:
+            选中的工具名称
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 简单的工具选择逻辑</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-string">&quot;天气&quot;</span> <span class="hljs-keyword">in</span> user_input <span class="hljs-keyword">or</span> <span class="hljs-string">&quot;weather&quot;</span> <span class="hljs-keyword">in</span> user_input.lower():
+            <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;get_weather&quot;</span>
+        <span class="hljs-keyword">elif</span> <span class="hljs-built_in">any</span>(op <span class="hljs-keyword">in</span> user_input <span class="hljs-keyword">for</span> op <span class="hljs-keyword">in</span> [<span class="hljs-string">&quot;+&quot;</span>, <span class="hljs-string">&quot;-&quot;</span>, <span class="hljs-string">&quot;*&quot;</span>, <span class="hljs-string">&quot;/&quot;</span>, <span class="hljs-string">&quot;计算&quot;</span>]):
+            <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;calculator&quot;</span>
+        <span class="hljs-keyword">elif</span> <span class="hljs-string">&quot;搜索&quot;</span> <span class="hljs-keyword">in</span> user_input <span class="hljs-keyword">or</span> <span class="hljs-string">&quot;search&quot;</span> <span class="hljs-keyword">in</span> user_input.lower():
+            <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;search&quot;</span>
+
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">None</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_execute_tool</span>(<span class="hljs-params">self, tool_name: <span class="hljs-built_in">str</span>, tool_args: <span class="hljs-type">Dict</span>[<span class="hljs-built_in">str</span>, <span class="hljs-type">Any</span>]</span>) -&gt; ToolResult:
+        <span class="hljs-string">&quot;&quot;&quot;
+        执行工具
+
+        Args:
+            tool_name: 工具名称
+            tool_args: 工具参数
+
+        Returns:
+            工具执行结果
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 查找工具</span>
+        tool = <span class="hljs-built_in">next</span>((t <span class="hljs-keyword">for</span> t <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.tools <span class="hljs-keyword">if</span> t.name == tool_name), <span class="hljs-literal">None</span>)
+
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> tool:
+            <span class="hljs-keyword">return</span> ToolResult(
+                tool_name=tool_name,
+                success=<span class="hljs-literal">False</span>,
+                result=<span class="hljs-literal">None</span>,
+                error=<span class="hljs-string">f&quot;未找到工具：<span class="hljs-subst">{tool_name}</span>&quot;</span>
+            )
+
+        <span class="hljs-keyword">try</span>:
+            <span class="hljs-comment"># 执行工具</span>
+            result = tool.run(tool_args)
+
+            tool_result = ToolResult(
+                tool_name=tool_name,
+                success=<span class="hljs-literal">True</span>,
+                result=result
+            )
+
+            <span class="hljs-comment"># 记录工具执行历史</span>
+            <span class="hljs-variable language_">self</span>.tool_execution_history.append(tool_result)
+
+            <span class="hljs-keyword">return</span> tool_result
+
+        <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+            error_msg = <span class="hljs-string">f&quot;工具执行失败：<span class="hljs-subst">{<span class="hljs-built_in">str</span>(e)}</span>&quot;</span>
+            logger.error(error_msg)
+
+            tool_result = ToolResult(
+                tool_name=tool_name,
+                success=<span class="hljs-literal">False</span>,
+                result=<span class="hljs-literal">None</span>,
+                error=error_msg
+            )
+
+            <span class="hljs-comment"># 记录工具执行历史</span>
+            <span class="hljs-variable language_">self</span>.tool_execution_history.append(tool_result)
+
+            <span class="hljs-keyword">return</span> tool_result
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">generate_response</span>(<span class="hljs-params">self, user_input: <span class="hljs-built_in">str</span></span>) -&gt; <span class="hljs-built_in">str</span>:
+        <span class="hljs-string">&quot;&quot;&quot;
+        生成响应
+
+        Args:
+            user_input: 用户输入
+
+        Returns:
+            Agent 响应
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 选择工具</span>
+        tool_name = <span class="hljs-variable language_">self</span>._select_tool(user_input)
+
+        <span class="hljs-keyword">if</span> tool_name:
+            <span class="hljs-comment"># 提取工具参数（简化实现）</span>
+            tool_args = {}
+
+            <span class="hljs-keyword">if</span> tool_name == <span class="hljs-string">&quot;get_weather&quot;</span>:
+                <span class="hljs-comment"># 提取地点</span>
+                location = user_input.replace(<span class="hljs-string">&quot;天气&quot;</span>, <span class="hljs-string">&quot;&quot;</span>).replace(<span class="hljs-string">&quot;的&quot;</span>, <span class="hljs-string">&quot;&quot;</span>).strip()
+                tool_args = {<span class="hljs-string">&quot;location&quot;</span>: location}
+            <span class="hljs-keyword">elif</span> tool_name == <span class="hljs-string">&quot;calculator&quot;</span>:
+                <span class="hljs-comment"># 提取表达式</span>
+                expression = user_input.replace(<span class="hljs-string">&quot;计算&quot;</span>, <span class="hljs-string">&quot;&quot;</span>).strip()
+                tool_args = {<span class="hljs-string">&quot;expression&quot;</span>: expression}
+            <span class="hljs-keyword">elif</span> tool_name == <span class="hljs-string">&quot;search&quot;</span>:
+                <span class="hljs-comment"># 提取查询</span>
+                query = user_input.replace(<span class="hljs-string">&quot;搜索&quot;</span>, <span class="hljs-string">&quot;&quot;</span>).strip()
+                tool_args = {<span class="hljs-string">&quot;query&quot;</span>: query}
+
+            <span class="hljs-comment"># 执行工具</span>
+            tool_result = <span class="hljs-variable language_">self</span>._execute_tool(tool_name, tool_args)
+
+            <span class="hljs-keyword">if</span> tool_result.success:
+                tool_context = <span class="hljs-string">f&quot;\n工具调用结果：<span class="hljs-subst">{tool_result.result}</span>&quot;</span>
+            <span class="hljs-keyword">else</span>:
+                tool_context = <span class="hljs-string">f&quot;\n工具调用失败：<span class="hljs-subst">{tool_result.error}</span>&quot;</span>
+
+            <span class="hljs-comment"># 构建完整输入</span>
+            full_input = <span class="hljs-string">f&quot;&quot;&quot;
+            用户输入：<span class="hljs-subst">{user_input}</span>
+
+            <span class="hljs-subst">{tool_context}</span>
+
+            请基于用户输入和工具调用结果生成响应。
+            &quot;&quot;&quot;</span>
+
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-comment"># 不使用工具，直接生成响应</span>
+            full_input = <span class="hljs-string">f&quot;&quot;&quot;
+            用户输入：<span class="hljs-subst">{user_input}</span>
+
+            请直接回答用户的问题。
+            &quot;&quot;&quot;</span>
+
+        <span class="hljs-comment"># 添加到对话历史</span>
+        <span class="hljs-variable language_">self</span>.chat_history.append(HumanMessage(content=user_input))
+
+        <span class="hljs-keyword">try</span>:
+            <span class="hljs-comment"># 生成响应</span>
+            response = <span class="hljs-variable language_">self</span>.llm.invoke(full_input)
+            content = response.content
+
+            <span class="hljs-comment"># 添加到对话历史</span>
+            <span class="hljs-variable language_">self</span>.chat_history.append(AIMessage(content=content))
+
+            <span class="hljs-keyword">return</span> content
+
+        <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+            error_msg = <span class="hljs-string">f&quot;生成响应失败：<span class="hljs-subst">{<span class="hljs-built_in">str</span>(e)}</span>&quot;</span>
+            logger.error(error_msg)
+            <span class="hljs-keyword">return</span> error_msg
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">chat</span>(<span class="hljs-params">self, user_input: <span class="hljs-built_in">str</span></span>) -&gt; <span class="hljs-built_in">str</span>:
+        <span class="hljs-string">&quot;&quot;&quot;
+        聊天
+
+        Args:
+            user_input: 用户输入
+
+        Returns:
+            Agent 响应
+        &quot;&quot;&quot;</span>
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n用户：<span class="hljs-subst">{user_input}</span>&quot;</span>)
+        response = <span class="hljs-variable language_">self</span>.generate_response(user_input)
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;助手：<span class="hljs-subst">{response}</span>\n&quot;</span>)
+
+        <span class="hljs-keyword">return</span> response
+
+<span class="hljs-comment"># 使用示例</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">main</span>():
+    <span class="hljs-string">&quot;&quot;&quot;主函数&quot;&quot;&quot;</span>
+    <span class="hljs-comment"># 创建工具调用 Agent</span>
+    agent = ToolCallingAgent(
+        name=<span class="hljs-string">&quot;ToolCallingAgent&quot;</span>,
+        model=<span class="hljs-string">&quot;gpt-4&quot;</span>
+    )
+
+    <span class="hljs-comment"># 对话示例</span>
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;=&quot;</span>*<span class="hljs-number">60</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;工具调用 Agent 对话示例&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;=&quot;</span>*<span class="hljs-number">60</span>)
+
+    agent.chat(<span class="hljs-string">&quot;北京的天气怎么样？&quot;</span>)
+    agent.chat(<span class="hljs-string">&quot;计算 12 * 15 + 8&quot;</span>)
+    agent.chat(<span class="hljs-string">&quot;搜索人工智能的最新进展&quot;</span>)
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    main()
+</code></pre>
+<hr>
+<h2 id="小结第六章全部完成" tabindex="-1">小结（第六章全部完成） <a class="heading-anchor" href="#小结第六章全部完成" aria-hidden="true">#</a></h2>
+<p>本章详细介绍了工具调用（Tool Calling）的核心概念和实践，包括工具调用基础、工具选择与路由、工具编排与链等内容，帮助开发者构建强大的工具调用能力。</p>
+<p><strong>工具调用基础</strong></p>
+<ul>
+<li><strong>Function Calling</strong>：定义、流程、优势与劣势</li>
+<li><strong>工具注册与定义</strong>：工具定义、工具注册、工具管理</li>
+<li><strong>工具调用流程</strong>：完整流程、错误处理、响应生成</li>
+</ul>
+<p><strong>工具选择与路由</strong></p>
+<ul>
+<li><strong>工具选择策略</strong>：基于规则、基于 LLM、基于学习、混合策略</li>
+<li><strong>工具路由机制</strong>：基于意图、基于关键词、基于模型、多层路由</li>
+<li><strong>动态工具调用</strong>：动态加载、动态选择、动态卸载</li>
+</ul>
+<p><strong>工具编排与链</strong></p>
+<ul>
+<li><strong>工具编排模式</strong>：顺序调用、并行调用、条件分支、循环调用</li>
+<li><strong>工具链</strong>：定义、执行、优化</li>
+<li><strong>工具编排最佳实践</strong>：错误处理、重试机制、性能优化、日志记录</li>
+</ul>
+<hr>
+<p><em>文档版本：v1.0</em>
+<em>最后更新：2026-03-18</em></p>
+</div> <nav class="pager"> <a class="pager__link" href="/ai-agent-development/05-agent-advanced-topics/"> <span>上一篇</span> <strong>第五章：Agent 进阶主题</strong> </a> <a class="pager__link" href="/ai-agent-development/07-reasoning-and-decision-making/"> <span>下一篇</span> <strong>第七章：推理与决策（Reasoning and Decision Making）</strong> </a> </nav> </article> </section>  </main> <footer class="site-footer"> <div class="site-footer__inner"> <p>Vinci Knowledge Base</p> <p>Source directory: <code>/Users/superone77/Documents/知识库/projects</code></p> </div> </footer> </div> </body></html>
