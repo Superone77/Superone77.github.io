@@ -86,7 +86,16 @@ function readStatus(filePath: string): StatusMeta {
     return {};
   }
 
-  const parsed = YAML.parse(raw) as Record<string, unknown> | null;
+  let parsed: Record<string, unknown> | null = null;
+
+  try {
+    parsed = YAML.parse(raw) as Record<string, unknown> | null;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.warn(`[vinci-kb] Skipping invalid STATUS.yaml at ${filePath}: ${message}`);
+    return {};
+  }
+
   return {
     currentBatch: typeof parsed?.current_batch === "string" ? parsed.current_batch : undefined,
     displayName: typeof parsed?.display_name === "string" ? parsed.display_name : undefined,

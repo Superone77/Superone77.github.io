@@ -8,6 +8,7 @@ NPM_BIN="/Users/superone77/.nvm/versions/node/v22.22.0/bin/npm"
 LOG_DIR="${HOME}/Library/Logs/vinci-knowledge-base"
 LOG_FILE="${LOG_DIR}/manual-deploy.log"
 LOCK_DIR="/tmp/vinci-knowledge-base-deploy.lock"
+DEPLOY_SUCCEEDED=0
 
 mkdir -p "${LOG_DIR}"
 
@@ -20,7 +21,14 @@ log() {
 }
 
 cleanup() {
+  local exit_code=$?
   rmdir "${LOCK_DIR}" 2>/dev/null || true
+
+  if [[ ${DEPLOY_SUCCEEDED} -eq 0 && ${exit_code} -ne 0 ]]; then
+    log "Manual Vinci Knowledge Base deploy failed with exit code ${exit_code}."
+    echo
+    echo "Deploy failed. Check ${LOG_FILE} for details."
+  fi
 }
 
 trap cleanup EXIT INT TERM
@@ -59,6 +67,7 @@ if ! "${NODE_BIN}" -e 'require("node:fs").readdirSync(process.env.KB_SOURCE_DIR)
 fi
 
 "${NPM_BIN}" run deploy | tee -a "${LOG_FILE}"
+DEPLOY_SUCCEEDED=1
 log "Manual Vinci Knowledge Base deploy completed successfully."
 
 echo
