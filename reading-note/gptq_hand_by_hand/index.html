@@ -1,11 +1,35 @@
-<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>手把手带你写GPTQ (附Notebook) | Vinci Knowledge Base</title><meta name="description" content="手把手带你写GPTQ (附Notebook) 第一步：实现均匀对称量化 1. 计算原范围 ori range = x.abs().max() 2. 计算量化精度所能表示的范围 bits range = 2 (bits 1) 1 为什么？以int4举例 计算规则： int4可写作 b3 b2 b1 b0 十进制值 = 8 b3 + 4 b2 + 2 b1 + "><meta name="generator" content="Vinci Knowledge Base"><link rel="stylesheet" href="/_astro/_doc_.CY2v1inF.css"></head> <body> <div class="page-shell"> <header class="site-header"> <div class="site-header__inner"> <a class="brand" href="/"> <span class="brand__eyebrow">GitHub Pages Knowledge Site</span> <span class="brand__name">Vinci Knowledge Base</span> </a> <nav class="site-nav"> <a href="/">Projects</a> </nav> </div> </header> <main class="page-main">  <section class="article-hero"> <div> <p class="eyebrow">Knowledge Article</p> <h1>手把手带你写GPTQ (附Notebook)</h1> <p class="article-hero__breadcrumbs"> <a href="/">Home</a> <span>/</span> <a href="/reading-note/">Reading Note</a> </p> </div> <div class="meta-card"> <p><strong>Project</strong> Reading Note</p> <p><strong>Source</strong> <code>knowledge/gptq_hand_by_hand.md</code></p> <p><strong>Sections</strong> 6</p> </div> </section> <section class="content-grid"> <aside class="toc-card"> <p class="toc-card__title">本页目录</p> <ul class="toc-card__list"> <li class="toc-depth-1"> <a href="#手把手带你写gptq-附notebook">手把手带你写GPTQ (附Notebook)</a> </li><li class="toc-depth-3"> <a href="#第一步实现均匀对称量化">第一步：实现均匀对称量化</a> </li><li class="toc-depth-3"> <a href="#第二步实现hessian矩阵">第二步：实现Hessian矩阵</a> </li><li class="toc-depth-3"> <a href="#第三步如何为一行权重做gptq逐列更新">第三步：如何为一行权重做GPTQ逐列更新</a> </li><li class="toc-depth-3"> <a href="#第四步如何对整个线性层做gptq更新">第四步：如何对整个线性层做GPTQ更新</a> </li><li class="toc-depth-3"> <a href="#验证">验证</a> </li> </ul> </aside> <article class="prose-card"> <div class="prose"><h1 id="手把手带你写gptq-附notebook" tabindex="-1">手把手带你写GPTQ (附Notebook) <a class="heading-anchor" href="#手把手带你写gptq-附notebook" aria-hidden="true">#</a></h1>
-<h3 id="第一步实现均匀对称量化" tabindex="-1">第一步：实现均匀对称量化 <a class="heading-anchor" href="#第一步实现均匀对称量化" aria-hidden="true">#</a></h3>
-<h4>1. 计算原范围</h4>
-<p>ori_range = x.abs().max()</p>
-<h4>2. 计算量化精度所能表示的范围</h4>
-<p>bits_range = 2**(bits - 1) - 1
-为什么？以int4举例</p>
-<p>计算规则：</p>
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>手把手带你写算法：GPTQ | Vinci Knowledge Base</title><meta name="description" content="手把手带你写算法：GPTQ 如果了解GPTQ的朋友，可以首先问自己下面三个问题，我们接下来会用简单的代码讲解GPTQ是如何回答这三个问题的： 1. 如何计算一个量化值？ 2. 如何近似一个Hessian矩阵？ 3. 量化一个元素之后，如何补偿后面的元素？ 需要配套Notebook代码，可以公众号后台发送 &#34; Notebook &#34;领取。代码分填空版本和答案版本"><meta name="generator" content="Vinci Knowledge Base"><link rel="stylesheet" href="/_astro/_doc_.CY2v1inF.css"></head> <body> <div class="page-shell"> <header class="site-header"> <div class="site-header__inner"> <a class="brand" href="/"> <span class="brand__eyebrow">GitHub Pages Knowledge Site</span> <span class="brand__name">Vinci Knowledge Base</span> </a> <nav class="site-nav"> <a href="/">Projects</a> </nav> </div> </header> <main class="page-main">  <section class="article-hero"> <div> <p class="eyebrow">Knowledge Article</p> <h1>手把手带你写算法：GPTQ</h1> <p class="article-hero__breadcrumbs"> <a href="/">Home</a> <span>/</span> <a href="/reading-note/">Reading Note</a> </p> </div> <div class="meta-card"> <p><strong>Project</strong> Reading Note</p> <p><strong>Source</strong> <code>knowledge/gptq_hand_by_hand.md</code></p> <p><strong>Sections</strong> 12</p> </div> </section> <section class="content-grid"> <aside class="toc-card"> <p class="toc-card__title">本页目录</p> <ul class="toc-card__list"> <li class="toc-depth-1"> <a href="#手把手带你写算法gptq">手把手带你写算法：GPTQ</a> </li><li class="toc-depth-2"> <a href="#怎么将一个张量量化到4bit">怎么将一个张量量化到4bit？</a> </li><li class="toc-depth-3"> <a href="#为什么-bitsrange-2-bits-1-1">为什么 `bits_range = 2 ** (bits - 1) - 1`？</a> </li><li class="toc-depth-2"> <a href="#第二步gptq-为什么需要-hessian">第二步：GPTQ 为什么需要 Hessian？</a> </li><li class="toc-depth-2"> <a href="#第三步逐列更新参数">第三步：逐列更新参数</a> </li><li class="toc-depth-2"> <a href="#我的第一版为什么和答案不一样">我的第一版为什么和答案不一样？</a> </li><li class="toc-depth-3"> <a href="#1-我没有用对角项做归一化">1. 我没有用对角项做归一化</a> </li><li class="toc-depth-3"> <a href="#2-我传播误差时切的是列不是行">2. 我传播误差时切的是列，不是行</a> </li><li class="toc-depth-3"> <a href="#3-我量化的是标量不是长度为-1-的-tensor">3. 我量化的是标量，不是长度为 1 的 tensor</a> </li><li class="toc-depth-2"> <a href="#第四步把逐行量化推广到整个线性层">第四步：把逐行量化推广到整个线性层</a> </li><li class="toc-depth-2"> <a href="#第五步怎么验证-gptq-比-rtn-更合理-参考代码见notebook">第五步：怎么验证 GPTQ 比 RTN 更合理？ （参考代码见Notebook）</a> </li><li class="toc-depth-2"> <a href="#最后一个容易问到的问题如果有多层-linear要不要跨层传播误差">最后一个容易问到的问题：如果有多层 Linear，要不要跨层传播误差？</a> </li> </ul> </aside> <article class="prose-card"> <div class="prose"><h1 id="手把手带你写算法gptq" tabindex="-1">手把手带你写算法：GPTQ <a class="heading-anchor" href="#手把手带你写算法gptq" aria-hidden="true">#</a></h1>
+<p>如果了解GPTQ的朋友，可以首先问自己下面三个问题，我们接下来会用简单的代码讲解GPTQ是如何回答这三个问题的：</p>
+<ol>
+<li>如何计算一个量化值？</li>
+<li>如何近似一个Hessian矩阵？</li>
+<li>量化一个元素之后，如何补偿后面的元素？</li>
+</ol>
+<ul>
+<li>需要配套Notebook代码，可以公众号后台发送 &quot;<strong>Notebook</strong>&quot;领取。代码分填空版本和答案版本，适合自己练习。</li>
+</ul>
+<p>先从第一个问题开始：</p>
+<h2 id="怎么将一个张量量化到4bit" tabindex="-1">怎么将一个张量量化到4bit？ <a class="heading-anchor" href="#怎么将一个张量量化到4bit" aria-hidden="true">#</a></h2>
+<p>GPTQ 再复杂，底层也离不开最基础的量化操作。第一步我们先实现了一个最简单的“均匀对称量化”。</p>
+<p>思路很直接：</p>
+<ol>
+<li>找到当前张量的最大绝对值。</li>
+<li>计算 4-bit 可表示的整数范围。</li>
+<li>用最大值映射出缩放因子 <code>scale</code>。</li>
+<li>先除以 <code>scale</code> 变成整数空间，四舍五入，再乘回来完成反量化。</li>
+</ol>
+<p>代码大致长这样：</p>
+<pre class="hljs"><code><span class="hljs-keyword">def</span> <span class="hljs-title function_">quantize_tensor_symmetric</span>(<span class="hljs-params">x: torch.Tensor, bits: <span class="hljs-built_in">int</span> = <span class="hljs-number">4</span></span>):
+    ori_range = x.<span class="hljs-built_in">abs</span>().<span class="hljs-built_in">max</span>()
+    bits_range = <span class="hljs-number">2</span> ** (bits - <span class="hljs-number">1</span>) - <span class="hljs-number">1</span>
+    scale = ori_range / bits_range
+    x_q = (x / scale).<span class="hljs-built_in">round</span>()
+    x_q = x_q * scale
+    <span class="hljs-keyword">return</span> x_q, scale
+</code></pre>
+<p>这个实现已经够用来建立第一层直觉了。它对应的是“把浮点数压缩到有限个离散格点上，然后再映射回浮点空间”。</p>
+<h3 id="为什么-bitsrange-2-bits-1-1" tabindex="-1">为什么 <code>bits_range = 2 ** (bits - 1) - 1</code>？ <a class="heading-anchor" href="#为什么-bitsrange-2-bits-1-1" aria-hidden="true">#</a></h3>
+<p>以int4举例</p>
 <ul>
 <li>int4可写作 <code>b3 b2 b1 b0</code></li>
 <li>十进制值 = <code>-8*b3 + 4*b2 + 2*b1 + 1*b0</code></li>
@@ -105,90 +129,198 @@
 </tbody>
 </table>
 <hr>
-<p>所以 <code>int4</code> 范围是：<strong><code>-8 ~ 7</code></strong>。<br>
-如果你愿意，我还可以再给你一版“用补码取反加一”来验证负数的推导过程。</p>
-<h4>3. 计算缩放因子</h4>
-<p>scale = ori_range / bits_range</p>
-<h4>4. 量化 + 反量化</h4>
-<p>x_q = (x / scale).round()
-x_q = x_q * scale
-return x_q</p>
-<h3 id="第二步实现hessian矩阵" tabindex="-1">第二步：实现Hessian矩阵 <a class="heading-anchor" href="#第二步实现hessian矩阵" aria-hidden="true">#</a></h3>
-<p>什么是黑森矩阵，如何计算一个线性层输入的黑森矩阵？
-黑森矩阵（Hessian）是一个函数对参数的二阶偏导数组成的矩阵，用来描述“曲率”。
-对标量损失 (L(\theta))，Hessian 定义为： [ H_{ij}=\frac{\partial^2 L}{\partial \theta_i\partial \theta_j} ]</p>
-<p>对角线大：该方向曲率大，参数改一点损失就变很多
-非对角线大：两个参数之间耦合强（一起变化会影响损失）</p>
-<p>在GPTQ中，使用如下近似
-H ~= X^T X / N + damping * I
-含义是：
-X：线性层输入样本矩阵，形状通常是 ([N, d_{in}])
-N：样本数
-(\frac{X^\top X}{N})：输入协方差（或二阶矩）近似，反映不同输入维度的相关性
-(\lambda I)（damping）：阻尼项，让矩阵更稳定、更可逆，防止数值问题
-最后通常还会算 (H^{-1})（H_inv），用于后续量化误差补偿
-所以代码如下
-def build_hessian(calib_x: torch.Tensor, damping: float = 1e-4):
-“”&quot;
-Approximate Hessian for linear layer inputs:
-H ~= X^T X / N + damping * I
-Returns H and H_inv.
-“”&quot;
-x_t = calib_x.T
-N = x_t.shape[0]
-I = torch.eye(x_t.shape[0])
-H = calib_x @ x_t / N + damping * I
-H_inv = torch.linalg.inv(H)
-return H,H_inv</p>
-<h3 id="第三步如何为一行权重做gptq逐列更新" tabindex="-1">第三步：如何为一行权重做GPTQ逐列更新 <a class="heading-anchor" href="#第三步如何为一行权重做gptq逐列更新" aria-hidden="true">#</a></h3>
-<p>把线性层权重矩阵中的“一行”做 GPTQ 量化，而不是像 RTN 一样直接一把 round 完。
-GPTQ 的核心就在这里：按列（按元素）依次量化 + 误差补偿到后续列。</p>
-<p>大致流程是：
-复制当前行权重作为可更新向量 w_work
-从第 j 个元素开始，取当前值 w_work[j]
-对这个标量做 4-bit 量化，得到 q_j
-计算量化误差 e_j = w_work[j] - q_j
-用 h_inv 把这个误差“传播/补偿”到后面的元素（j+1…），让后续量化考虑前面误差
-最终得到整行的量化结果 q_row</p>
-<p>def gptq_quantize_row(w_row: torch.Tensor, h_inv: torch.Tensor, bits: int = 4):
-“”&quot;
-Quantize one output row of W with GPTQ-style column-wise updates.
-“”&quot;
-w_work = w_row.clone()
-for j in range(w_work.shape[0]):
-tmp = w_work[j]
-tmp_q = quantize_tensor_symmetric(tmp, bits)
-e_j = tmp - tmp_q
-w_work[j+1:] = w_work[j+1:] - e_j * h_inv[j+1:,j]
-w_work[j] = tmp_q
-return w_work</p>
-<h3 id="第四步如何对整个线性层做gptq更新" tabindex="-1">第四步：如何对整个线性层做GPTQ更新 <a class="heading-anchor" href="#第四步如何对整个线性层做gptq更新" aria-hidden="true">#</a></h3>
-<p>用 calib_x 构建 Hessian 近似和逆矩阵：H, H_inv = build_hessian(calib_x, damping)
-深拷贝原始 linear，避免改坏原模型
-遍历每个输出通道（即 weight 的每一行 w_row）
-对每一行调用 gptq_quantize_row(w_row, h_inv=H_inv, bits=bits) 得到量化行
-把所有量化行拼回新的 weight
-bias 原样保留不变（题目要求）
-返回这个量化后的 q_layer（由于Parameter没有copy()所以要用copy_()原地拷贝。</p>
-<p>def gptq_quantize_linear(
-linear: nn.Linear,
-calib_x: torch.Tensor,
-bits: int = 4,
-damping: float = 1e-4,
-):
-“”&quot;
-Return a new quantized Linear layer using GPTQ.
-“”&quot;
-# build hessian based on calibration data
-H, H_inv = build_hessian(calib_x, damping)
-q_layer = copy.deepcopy(linear)
-with torch.no_grad():
-q_w = []
-for r in range(linear.weight.shape[0]):
-q_r = gptq_quantize_row(linear.weight[r], h_inv=H_inv, bits=bits)
-q_w.append(q_r)
-q_layer.weight.copy_(torch.stack(q_w, dim=0))
-return q_layer</p>
-<h3 id="验证" tabindex="-1">验证 <a class="heading-anchor" href="#验证" aria-hidden="true">#</a></h3>
-<p>至此你已经完成了GPTQ算法所需的大部分操作，请验证你的结果。</p>
+<p>所以 <code>int4</code> 范围是：<strong><code>-8 ~ 7</code></strong>。</p>
+<h2 id="第二步gptq-为什么需要-hessian" tabindex="-1">第二步：GPTQ 为什么需要 Hessian？ <a class="heading-anchor" href="#第二步gptq-为什么需要-hessian" aria-hidden="true">#</a></h2>
+<p>如果只是做 RTN，也就是 round-to-nearest，会直接把整行权重 round 掉：</p>
+<pre class="hljs"><code>q_w = <span class="hljs-built_in">round</span>(w / scale) * scale
+</code></pre>
+<p>而GPTQ 关注“量化之后，对模型输出影响大不大”，而衡量这一敏感性的方式就是Hessian矩阵</p>
+<p>如果从数学定义出发，Hessian 是一个标量函数对参数的二阶偏导矩阵：</p>
+<pre class="hljs"><code>H[i, j] = d^<span class="hljs-number">2</span> L / (d theta_i d theta_j)
+</code></pre>
+<p>它描述的是输出对权重的“曲率大不大”。</p>
+<ul>
+<li>对角项大，说明这个方向很敏感，参数稍微改一点，损失就会变很多。</li>
+<li>非对角项大，说明两个方向之间耦合强，一个方向的误差会影响另一个方向。</li>
+</ul>
+<p>GPTQ 并不会真的去精确计算整层权重的完整二阶导，而是用输入激活的统计量做一个近似：</p>
+<pre class="hljs"><code>H ~= X^T X / N + damping * I
+</code></pre>
+<p>其中：</p>
+<ul>
+<li><code>X</code> 是校准数据 <code>calib_x</code></li>
+<li><code>N</code> 是样本数</li>
+<li><code>X^T X / N</code> 可以理解为输入的二阶统计量</li>
+<li><code>damping * I</code> 是阻尼项，用来提升数值稳定性</li>
+</ul>
+<p>它的直觉是：如果某些输入维度经常一起出现，或者某个方向对输出特别敏感，那么量化这些方向上的权重时，就应该更谨慎。</p>
+<p>对应代码如下：</p>
+<pre class="hljs"><code><span class="hljs-keyword">def</span> <span class="hljs-title function_">build_hessian</span>(<span class="hljs-params">calib_x: torch.Tensor, damping: <span class="hljs-built_in">float</span> = <span class="hljs-number">1e-4</span></span>):
+    n = calib_x.shape[<span class="hljs-number">0</span>]
+    H = calib_x.T @ calib_x / n
+    I = torch.eye(H.shape[<span class="hljs-number">0</span>], device=calib_x.device, dtype=calib_x.dtype)
+    H = H + damping * I
+    H_inv = torch.linalg.inv(H)
+    <span class="hljs-keyword">return</span> H, H_inv
+</code></pre>
+<h2 id="第三步逐列更新参数" tabindex="-1">第三步：逐列更新参数 <a class="heading-anchor" href="#第三步逐列更新参数" aria-hidden="true">#</a></h2>
+<p>GPTQ 的核心就是，量化当前这个数之后，把误差补偿给后面的数</p>
+<p>假设我们现在要量化线性层权重矩阵中的某一行 <code>w_row</code>。<br>
+GPTQ 不会一次性把这一整行 round 掉，而是遍历所有列：</p>
+<ol>
+<li>处理第 <code>j</code> 列时。</li>
+<li>先把当前元素量化成 <code>q_j</code>。</li>
+<li>计算当前量化误差。</li>
+<li>用 Hessian 逆矩阵把这个误差传播到后续列。</li>
+<li>继续量化下一列。</li>
+</ol>
+<p>这就是“逐列量化 + 误差补偿”。</p>
+<p>更接近 GPTQ 思路的实现如下：</p>
+<pre class="hljs"><code><span class="hljs-keyword">def</span> <span class="hljs-title function_">gptq_quantize_row</span>(<span class="hljs-params">w_row: torch.Tensor, h_inv: torch.Tensor, bits: <span class="hljs-built_in">int</span> = <span class="hljs-number">4</span></span>):
+    w_work = w_row.clone()
+    q_row = w_row.clone()
+
+    <span class="hljs-keyword">for</span> j <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(w_row.numel()):
+        q_j, _ = quantize_tensor_symmetric(w_work[j:j + <span class="hljs-number">1</span>], bits=bits)
+        q_row[j] = q_j[<span class="hljs-number">0</span>]
+
+        diag = torch.clamp(h_inv[j, j], <span class="hljs-built_in">min</span>=<span class="hljs-number">1e-8</span>)
+        err = (w_work[j] - q_row[j]) / diag
+
+        <span class="hljs-keyword">if</span> j + <span class="hljs-number">1</span> &lt; w_row.numel():
+            w_work[j + <span class="hljs-number">1</span>:] = w_work[j + <span class="hljs-number">1</span>:] - err * h_inv[j, j + <span class="hljs-number">1</span>:]
+
+        w_work[j] = q_row[j]
+
+    <span class="hljs-keyword">return</span> q_row
+</code></pre>
+<p>上面第 4 步最值得单独展开。假设第 <code>j</code> 个位置量化前后分别是：</p>
+<ul>
+<li>原值：<code>w_work[j]</code></li>
+<li>量化后：<code>q_row[j]</code></li>
+</ul>
+<p>那么当前误差是：</p>
+<pre class="hljs"><code>e_j = w_work[j] - q_row[j]
+</code></pre>
+<p>RTN 的做法是“这个误差产生了就产生了”，直接继续量化下一个元素。<br>
+GPTQ 的做法是：后面的元素还没有量化，我可以先轻微改一下它们，让它们替前面这个误差“分担一点”。</p>
+<p>因此代码里会写成：</p>
+<pre class="hljs"><code>diag = torch.clamp(h_inv[j, j], <span class="hljs-built_in">min</span>=<span class="hljs-number">1e-8</span>)
+err = (w_work[j] - q_row[j]) / diag
+w_work[j + <span class="hljs-number">1</span>:] = w_work[j + <span class="hljs-number">1</span>:] - err * h_inv[j, j + <span class="hljs-number">1</span>:]
+</code></pre>
+<p>可以这样理解：</p>
+<ul>
+<li><code>h_inv[j, j]</code> 是当前这个方向自己的尺度，用来做归一化。</li>
+<li><code>h_inv[j, j + 1:]</code> 描述“当前列的误差”应该如何影响未来列。</li>
+<li><code>w_work[j + 1:]</code> 被提前调整过之后，后面再量化时就不是在原始权重上硬 round，而是在“已经补偿过”的权重上继续做决策。</li>
+</ul>
+<p>所以 GPTQ 的关键不是“第 <code>j</code> 个数怎么 round”，而是“第 <code>j</code> 个数 round 完之后，怎么把代价重新分配给未来列”。</p>
+<h2 id="我的第一版为什么和答案不一样" tabindex="-1">我的第一版为什么和答案不一样？ <a class="heading-anchor" href="#我的第一版为什么和答案不一样" aria-hidden="true">#</a></h2>
+<p>我一开始写的是下面这种思路：</p>
+<pre class="hljs"><code><span class="hljs-keyword">def</span> <span class="hljs-title function_">gptq_quantize_row</span>(<span class="hljs-params">w_row: torch.Tensor, h_inv: torch.Tensor, bits: <span class="hljs-built_in">int</span> = <span class="hljs-number">4</span></span>):
+    w_work = w_row.clone()
+    <span class="hljs-keyword">for</span> j <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(w_work.shape[<span class="hljs-number">0</span>]):
+        tmp = w_work[j]
+        tmp_q, scale = quantize_tensor_symmetric(tmp, bits)
+        e_j = tmp - tmp_q
+        w_work[j+<span class="hljs-number">1</span>:] = w_work[j+<span class="hljs-number">1</span>:] - e_j * h_inv[j+<span class="hljs-number">1</span>:, j]
+        w_work[j] = tmp_q
+    <span class="hljs-keyword">return</span> w_work
+</code></pre>
+<p>它“看起来”已经很像 GPTQ 了，但严格来说和答案版还有三个关键差异。</p>
+<h3 id="1-我没有用对角项做归一化" tabindex="-1">1. 我没有用对角项做归一化 <a class="heading-anchor" href="#1-我没有用对角项做归一化" aria-hidden="true">#</a></h3>
+<p>答案里会写：</p>
+<pre class="hljs"><code>err = (w_work[j] - q_row[j]) / h_inv[j, j]
+</code></pre>
+<p>我一开始直接用了：</p>
+<pre class="hljs"><code>e_j = tmp - tmp_q
+</code></pre>
+<p>少了这一步，误差传播的尺度就不对。<br>
+这不是实现细节，而是 GPTQ 更新式本身的重要组成部分。</p>
+<h3 id="2-我传播误差时切的是列不是行" tabindex="-1">2. 我传播误差时切的是列，不是行 <a class="heading-anchor" href="#2-我传播误差时切的是列不是行" aria-hidden="true">#</a></h3>
+<p>我写的是：</p>
+<pre class="hljs"><code>h_inv[j+<span class="hljs-number">1</span>:, j]
+</code></pre>
+<p>答案更接近：</p>
+<pre class="hljs"><code>h_inv[j, j+<span class="hljs-number">1</span>:]
+</code></pre>
+<p>两者维度虽然都能对上，但表达的更新方向不同。GPTQ 的常见推导是“当前列的误差如何影响未来列”，所以更自然的写法是沿着第 <code>j</code> 行向右传播。</p>
+<h3 id="3-我量化的是标量不是长度为-1-的-tensor" tabindex="-1">3. 我量化的是标量，不是长度为 1 的 tensor <a class="heading-anchor" href="#3-我量化的是标量不是长度为-1-的-tensor" aria-hidden="true">#</a></h3>
+<p>我最开始写的是：</p>
+<pre class="hljs"><code>tmp = w_work[j]
+tmp_q, scale = quantize_tensor_symmetric(tmp, bits)
+</code></pre>
+<p>这在很多时候能跑，但数值语义不够稳定。答案版用的是：</p>
+<pre class="hljs"><code>q_j, _ = quantize_tensor_symmetric(w_work[j:j+<span class="hljs-number">1</span>], bits=bits)
+</code></pre>
+<p>这样整个量化函数始终处理 tensor，逻辑更一致，也更不容易踩边界条件。</p>
+<h2 id="第四步把逐行量化推广到整个线性层" tabindex="-1">第四步：把逐行量化推广到整个线性层 <a class="heading-anchor" href="#第四步把逐行量化推广到整个线性层" aria-hidden="true">#</a></h2>
+<p>当一行的 GPTQ 量化能跑通以后，整层的逻辑就很自然了：</p>
+<ol>
+<li>用校准数据构造 Hessian 及其逆矩阵。</li>
+<li>深拷贝原始线性层，避免直接改动原模型。</li>
+<li>逐行量化 <code>weight</code>。</li>
+<li>保留原始 <code>bias</code> 不变。</li>
+</ol>
+<p>代码如下：</p>
+<pre class="hljs"><code><span class="hljs-keyword">def</span> <span class="hljs-title function_">gptq_quantize_linear</span>(<span class="hljs-params">
+    linear: nn.Linear,
+    calib_x: torch.Tensor,
+    bits: <span class="hljs-built_in">int</span> = <span class="hljs-number">4</span>,
+    damping: <span class="hljs-built_in">float</span> = <span class="hljs-number">1e-4</span>,
+</span>):
+    _, h_inv = build_hessian(calib_x, damping=damping)
+    q_layer = copy.deepcopy(linear)
+
+    <span class="hljs-keyword">with</span> torch.no_grad():
+        q_w = []
+        <span class="hljs-keyword">for</span> r <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(linear.weight.shape[<span class="hljs-number">0</span>]):
+            q_r = gptq_quantize_row(linear.weight[r], h_inv=h_inv, bits=bits)
+            q_w.append(q_r)
+        q_layer.weight.copy_(torch.stack(q_w, dim=<span class="hljs-number">0</span>))
+
+    <span class="hljs-keyword">return</span> q_layer
+</code></pre>
+<p>这里<code>torch.stack</code> 是把多个形状相同的 tensor 沿着一个新维度堆起来。</p>
+<p>在这段代码里，<code>q_w</code> 里存的是一行一行的量化结果，每个 <code>q_r</code> 的形状都是 <code>[in_features]</code>。<br>
+执行：</p>
+<pre class="hljs"><code>torch.stack(q_w, dim=<span class="hljs-number">0</span>)
+</code></pre>
+<p>之后，就会把这些行重新拼成一个二维权重矩阵，形状变回：</p>
+<pre class="hljs"><code>[out_features, in_features]
+</code></pre>
+<p>这一步和 <code>torch.cat</code> 不一样。<code>stack</code> 会新增一个维度，所以非常适合“把很多行重新堆成一整个矩阵”。</p>
+<p>注意 <code>Parameter</code> 没有 <code>.copy()</code>，要用原地赋值：</p>
+<pre class="hljs"><code>q_layer.weight.copy_(...)
+</code></pre>
+<p>这类错误不复杂，但很适合提醒自己：PyTorch 里改参数，通常要留意是不是需要原地操作。</p>
+<h2 id="第五步怎么验证-gptq-比-rtn-更合理-参考代码见notebook" tabindex="-1">第五步：怎么验证 GPTQ 比 RTN 更合理？ （参考代码见Notebook） <a class="heading-anchor" href="#第五步怎么验证-gptq-比-rtn-更合理-参考代码见notebook" aria-hidden="true">#</a></h2>
+<p>做完实现之后，不能只看“代码跑了没有”，还得看量化后的输出误差。</p>
+<p>最简单的验证方式是：</p>
+<ol>
+<li>构造一个随机线性层。</li>
+<li>准备一批校准输入 <code>calib_x</code>。</li>
+<li>再准备一批测试输入 <code>test_x</code>。</li>
+<li>分别比较 FP、RTN、GPTQ 三者输出之间的 MSE。</li>
+</ol>
+<p>如果实现合理，GPTQ 通常应该至少不比 RTN 差，在不少设置下还会更好。</p>
+<h2 id="最后一个容易问到的问题如果有多层-linear要不要跨层传播误差" tabindex="-1">最后一个容易问到的问题：如果有多层 Linear，要不要跨层传播误差？ <a class="heading-anchor" href="#最后一个容易问到的问题如果有多层-linear要不要跨层传播误差" aria-hidden="true">#</a></h2>
+<p>标准 GPTQ 的答案是：<strong>不用直接跨层传播，它是逐层做的。</strong></p>
+<p>也就是说：</p>
+<ul>
+<li>在量化当前层时，只考虑当前层自己的权重和当前层输入 <code>X</code>。</li>
+<li>误差补偿只发生在“当前层、当前行、未来列”内部。</li>
+<li>不会在量化第 1 层时，同时去联动优化第 2 层、第 3 层的权重。</li>
+</ul>
+<p>那后续层完全没考虑到前面层的误差吗？也不是。</p>
+<p>更准确地说，后续层是<strong>间接感受到</strong>前面层误差的：</p>
+<ol>
+<li>先量化前一层。</li>
+<li>前一层量化后，输出激活会发生一点偏移。</li>
+<li>下一层看到的输入分布也就变了。</li>
+<li>下一层再基于这个输入分布去构建自己的 Hessian 近似并量化。</li>
+</ol>
+<p>GPTQ 是一种很典型的 layer-wise post-training quantization 方法，主流框架均支持的很好了，本文及练习均为示意性代码，帮助读者快速理解其中的逻辑。</p>
+<p>需要配套Notebook代码，可以公众号后台发送 &quot;<strong>Notebook</strong>&quot;领取。代码分填空版本和答案版本，适合自己练习。</p>
 </div> <nav class="pager"> <a class="pager__link" href="/reading-note/cities-and-ambition/"> <span>上一篇</span> <strong>城市与雄心</strong> </a> <a class="pager__link" href="/reading-note/openclaw_report/"> <span>下一篇</span> <strong>详细解读OpenClaw</strong> </a> </nav> </article> </section>  </main> <footer class="site-footer"> <div class="site-footer__inner"> <p>Vinci Knowledge Base</p> <p>Source directory: <code>/Users/superone77/Documents/知识库/projects</code></p> </div> </footer> </div> </body></html>

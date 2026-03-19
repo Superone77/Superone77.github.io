@@ -1,0 +1,687 @@
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>第四章：扩散模型的优化算法（Diffusion Model Optimization） | Vinci Knowledge Base</title><meta name="description" content="第四章：扩散模型的优化算法（Diffusion Model Optimization） 从 DPM Solver 到 Consistency Models，探索扩散模型的加速和优化技术 4.1 扩散模型优化算法概述 4.1.1 为什么需要优化？ 扩散模型的挑战 ： 1. 采样速度慢 ：传统扩散模型需要 1000 8000 步采样，推理速度慢 2. 计算成本高"><meta name="generator" content="Vinci Knowledge Base"><link rel="stylesheet" href="/_astro/_doc_.CY2v1inF.css"></head> <body> <div class="page-shell"> <header class="site-header"> <div class="site-header__inner"> <a class="brand" href="/"> <span class="brand__eyebrow">GitHub Pages Knowledge Site</span> <span class="brand__name">Vinci Knowledge Base</span> </a> <nav class="site-nav"> <a href="/">Projects</a> </nav> </div> </header> <main class="page-main">  <section class="article-hero"> <div> <p class="eyebrow">Knowledge Article</p> <h1>第四章：扩散模型的优化算法（Diffusion Model Optimization）</h1> <p class="article-hero__breadcrumbs"> <a href="/">Home</a> <span>/</span> <a href="/diffusion-models-knowledge-base/">扩散模型知识库（Diffusion Model Knowledge Base）</a> </p> </div> <div class="meta-card"> <p><strong>Project</strong> 扩散模型知识库（Diffusion Model Knowledge Base）</p> <p><strong>Source</strong> <code>knowledge/04-diffusion-model-optimization.md</code></p> <p><strong>Sections</strong> 30</p> </div> </section> <section class="content-grid"> <aside class="toc-card"> <p class="toc-card__title">本页目录</p> <ul class="toc-card__list"> <li class="toc-depth-1"> <a href="#第四章扩散模型的优化算法diffusion-model-optimization">第四章：扩散模型的优化算法（Diffusion Model Optimization）</a> </li><li class="toc-depth-2"> <a href="#41-扩散模型优化算法概述">4.1 扩散模型优化算法概述</a> </li><li class="toc-depth-3"> <a href="#411-为什么需要优化">4.1.1 为什么需要优化？</a> </li><li class="toc-depth-3"> <a href="#412-优化算法分类">4.1.2 优化算法分类</a> </li><li class="toc-depth-2"> <a href="#42-dpm-solver">4.2 DPM-Solver</a> </li><li class="toc-depth-3"> <a href="#421-dpm-solver-的核心思想">4.2.1 DPM-Solver 的核心思想</a> </li><li class="toc-depth-3"> <a href="#422-dpm-solver-的实现">4.2.2 DPM-Solver 的实现</a> </li><li class="toc-depth-3"> <a href="#423-dpm-solver-的改进">4.2.3 DPM-Solver++ 的改进</a> </li><li class="toc-depth-3"> <a href="#424-dpm-solver-的应用场景">4.2.4 DPM-Solver 的应用场景</a> </li><li class="toc-depth-2"> <a href="#43-consistency-models">4.3 Consistency Models</a> </li><li class="toc-depth-3"> <a href="#431-consistency-models-的核心思想">4.3.1 Consistency Models 的核心思想</a> </li><li class="toc-depth-3"> <a href="#432-consistency-models-的训练">4.3.2 Consistency Models 的训练</a> </li><li class="toc-depth-3"> <a href="#433-consistency-models-的实现">4.3.3 Consistency Models 的实现</a> </li><li class="toc-depth-3"> <a href="#434-consistency-models-的应用场景">4.3.4 Consistency Models 的应用场景</a> </li><li class="toc-depth-2"> <a href="#44-progressive-distillation">4.4 Progressive Distillation</a> </li><li class="toc-depth-3"> <a href="#441-progressive-distillation-的核心思想">4.4.1 Progressive Distillation 的核心思想</a> </li><li class="toc-depth-3"> <a href="#442-progressive-distillation-的过程">4.4.2 Progressive Distillation 的过程</a> </li><li class="toc-depth-3"> <a href="#443-progressive-distillation-的应用场景">4.4.3 Progressive Distillation 的应用场景</a> </li><li class="toc-depth-2"> <a href="#45-latent-diffusion-models">4.5 Latent Diffusion Models</a> </li><li class="toc-depth-3"> <a href="#451-ldm-的核心思想">4.5.1 LDM 的核心思想</a> </li><li class="toc-depth-3"> <a href="#452-ldm-的实现">4.5.2 LDM 的实现</a> </li><li class="toc-depth-3"> <a href="#453-ldm-的优势">4.5.3 LDM 的优势</a> </li><li class="toc-depth-2"> <a href="#46-rectified-flow">4.6 Rectified Flow</a> </li><li class="toc-depth-3"> <a href="#461-rectified-flow-的核心思想">4.6.1 Rectified Flow 的核心思想</a> </li><li class="toc-depth-3"> <a href="#462-rectified-flow-的实现">4.6.2 Rectified Flow 的实现</a> </li><li class="toc-depth-3"> <a href="#463-rectified-flow-的应用场景">4.6.3 Rectified Flow 的应用场景</a> </li><li class="toc-depth-2"> <a href="#47-优化算法对比">4.7 优化算法对比</a> </li><li class="toc-depth-3"> <a href="#471-性能对比">4.7.1 性能对比</a> </li><li class="toc-depth-3"> <a href="#472-适用场景对比">4.7.2 适用场景对比</a> </li><li class="toc-depth-2"> <a href="#结语">结语</a> </li> </ul> </aside> <article class="prose-card"> <div class="prose"><h1 id="第四章扩散模型的优化算法diffusion-model-optimization" tabindex="-1">第四章：扩散模型的优化算法（Diffusion Model Optimization） <a class="heading-anchor" href="#第四章扩散模型的优化算法diffusion-model-optimization" aria-hidden="true">#</a></h1>
+<blockquote>
+<p>从 DPM-Solver 到 Consistency Models，探索扩散模型的加速和优化技术</p>
+</blockquote>
+<hr>
+<h2 id="41-扩散模型优化算法概述" tabindex="-1">4.1 扩散模型优化算法概述 <a class="heading-anchor" href="#41-扩散模型优化算法概述" aria-hidden="true">#</a></h2>
+<h3 id="411-为什么需要优化" tabindex="-1">4.1.1 为什么需要优化？ <a class="heading-anchor" href="#411-为什么需要优化" aria-hidden="true">#</a></h3>
+<p><strong>扩散模型的挑战</strong>：</p>
+<ol>
+<li><strong>采样速度慢</strong>：传统扩散模型需要 1000-8000 步采样，推理速度慢</li>
+<li><strong>计算成本高</strong>：训练和推理成本高，难以部署到边缘设备</li>
+<li><strong>内存占用大</strong>：需要存储大量中间结果，内存占用高</li>
+</ol>
+<p><strong>优化目标</strong>：</p>
+<ol>
+<li><strong>加速采样</strong>：减少采样步数，从 1000 步减少到 10 步甚至 1 步</li>
+<li><strong>降低计算成本</strong>：减少推理时的计算量，提高效率</li>
+<li><strong>保持质量</strong>：在加速的同时保持生成质量</li>
+</ol>
+<p><strong>优化方向</strong>：</p>
+<ul>
+<li><strong>采样算法优化</strong>：DPM-Solver、DDIM、Consistency Models</li>
+<li><strong>模型压缩</strong>：Progressive Distillation、Knowledge Distillation</li>
+<li><strong>架构优化</strong>：Latent Diffusion Models、Diffusion Transformers</li>
+<li><strong>数学优化</strong>：Rectified Flow、Flow Matching</li>
+</ul>
+<p><strong>来源</strong>：DPM-Solver (2022), Consistency Models (2023), Progressive Distillation (2022)</p>
+<h3 id="412-优化算法分类" tabindex="-1">4.1.2 优化算法分类 <a class="heading-anchor" href="#412-优化算法分类" aria-hidden="true">#</a></h3>
+<p><strong>按优化目标分类</strong>：</p>
+<ol>
+<li><strong>加速采样算法</strong>：DPM-Solver、DDIM、Consistency Models</li>
+<li><strong>模型压缩算法</strong>：Progressive Distillation、Knowledge Distillation</li>
+<li><strong>架构优化算法</strong>：Latent Diffusion Models、Diffusion Transformers</li>
+<li><strong>数学优化算法</strong>：Rectified Flow、Flow Matching</li>
+</ol>
+<p><strong>按步数分类</strong>：</p>
+<ol>
+<li><strong>多步采样（10-1000 步）</strong>：DDPM、DPM-Solver</li>
+<li><strong>少步采样（1-10 步）</strong>：DDIM、Consistency Models</li>
+<li><strong>单步采样（1 步）</strong>：Progressive Distillation、Rectified Flow</li>
+</ol>
+<hr>
+<h2 id="42-dpm-solver" tabindex="-1">4.2 DPM-Solver <a class="heading-anchor" href="#42-dpm-solver" aria-hidden="true">#</a></h2>
+<h3 id="421-dpm-solver-的核心思想" tabindex="-1">4.2.1 DPM-Solver 的核心思想 <a class="heading-anchor" href="#421-dpm-solver-的核心思想" aria-hidden="true">#</a></h3>
+<p><strong>DPM-Solver</strong> 是一种基于常微分方程（ODE）的快速采样算法，由 Lu et al. 于 2022 年提出。</p>
+<p><strong>核心思想</strong>：</p>
+<ol>
+<li><strong>扩散过程即 ODE</strong>：将扩散过程看作常微分方程（ODE）的求解</li>
+<li><strong>精确求解线性部分</strong>：将 ODE 的线性部分精确求解，而不是用黑盒 ODE 求解器</li>
+<li><strong>快速收敛</strong>：在约 10 步内收敛，比 DDPM 快 100 倍</li>
+</ol>
+<p><strong>数学表达</strong>：
+[ d\mathbf{x} = \mathbf{f}(\mathbf{x}, t) dt ]
+其中 ( \mathbf{f}(\mathbf{x}, t) ) 是 ODE 的向量场。</p>
+<p><strong>来源</strong>：Lu et al., 2022 - DPM-Solver</p>
+<blockquote>
+<p>“Sampling from DPMs can be viewed alternatively as solving corresponding diffusion ordinary differential equations (ODEs).”</p>
+</blockquote>
+<h3 id="422-dpm-solver-的实现" tabindex="-1">4.2.2 DPM-Solver 的实现 <a class="heading-anchor" href="#422-dpm-solver-的实现" aria-hidden="true">#</a></h3>
+<p><strong>DPM-Solver-v2/v3</strong>：</p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> torch
+<span class="hljs-keyword">import</span> torch.nn <span class="hljs-keyword">as</span> nn
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">DPMSolver</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, model: nn.Module, num_timesteps: <span class="hljs-built_in">int</span> = <span class="hljs-number">1000</span>, solver_order: <span class="hljs-built_in">int</span> = <span class="hljs-number">3</span></span>):
+        <span class="hljs-variable language_">self</span>.model = model
+        <span class="hljs-variable language_">self</span>.model.<span class="hljs-built_in">eval</span>()
+        <span class="hljs-variable language_">self</span>.num_timesteps = num_timesteps
+        <span class="hljs-variable language_">self</span>.solver_order = solver_order
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">dpm_solver_step</span>(<span class="hljs-params">self, x: torch.Tensor, t: torch.Tensor, t_next: torch.Tensor</span>) -&gt; torch.Tensor:
+        <span class="hljs-string">&quot;&quot;&quot;
+        DPM-Solver 单步更新
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 预测噪声</span>
+        noise_pred = <span class="hljs-variable language_">self</span>.model(x, t)
+
+        <span class="hljs-comment"># 计算一阶导数</span>
+        d1 = <span class="hljs-variable language_">self</span>._dpm_derivative(x, t, noise_pred)
+
+        <span class="hljs-keyword">if</span> <span class="hljs-variable language_">self</span>.solver_order &gt;= <span class="hljs-number">2</span>:
+            <span class="hljs-comment"># 计算二阶导数</span>
+            noise_pred_prev = <span class="hljs-variable language_">self</span>.model(x, t - (t - t_next))
+            d2 = <span class="hljs-variable language_">self</span>._dpm_derivative(x, t - (t - t_next), noise_pred_prev)
+
+            <span class="hljs-comment"># 二阶更新</span>
+            x_next = x + (t_next - t) * (d1 + (t_next - t) / (t - (t - (t - t_next))) * (d2 - d1))
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-comment"># 一阶更新</span>
+            x_next = x + (t_next - t) * d1
+
+        <span class="hljs-keyword">return</span> x_next
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_dpm_derivative</span>(<span class="hljs-params">self, x: torch.Tensor, t: torch.Tensor, noise_pred: torch.Tensor</span>) -&gt; torch.Tensor:
+        <span class="hljs-string">&quot;&quot;&quot;
+        计算 DPM 的导数
+        &quot;&quot;&quot;</span>
+        alpha_t = <span class="hljs-variable language_">self</span>.alphas_cumprod[t]
+        sigma_t = (<span class="hljs-number">1</span> - alpha_t).sqrt()
+
+        <span class="hljs-keyword">return</span> (x - sigma_t * noise_pred) / alpha_t.sqrt()
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">sample</span>(<span class="hljs-params">self, shape: <span class="hljs-built_in">tuple</span>, device: torch.device, num_inference_steps: <span class="hljs-built_in">int</span> = <span class="hljs-number">10</span></span>) -&gt; torch.Tensor:
+        <span class="hljs-string">&quot;&quot;&quot;
+        DPM-Solver 采样
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 初始化噪声</span>
+        x = torch.randn(shape, device=device)
+
+        <span class="hljs-comment"># 计算时间步</span>
+        timesteps = torch.linspace(<span class="hljs-variable language_">self</span>.num_timesteps - <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, num_inference_steps).long()
+
+        <span class="hljs-comment"># 逐步求解 ODE</span>
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(num_inference_steps):
+            t = timesteps[i].unsqueeze(<span class="hljs-number">0</span>).repeat(shape[<span class="hljs-number">0</span>]).to(device)
+            t_next = timesteps[i + <span class="hljs-number">1</span>].unsqueeze(<span class="hljs-number">0</span>).repeat(shape[<span class="hljs-number">0</span>]).to(device) <span class="hljs-keyword">if</span> i &lt; num_inference_steps - <span class="hljs-number">1</span> <span class="hljs-keyword">else</span> timesteps[-<span class="hljs-number">1</span>].unsqueeze(<span class="hljs-number">0</span>).repeat(shape[<span class="hljs-number">0</span>]).to(device)
+            x = <span class="hljs-variable language_">self</span>.dpm_solver_step(x, t, t_next)
+
+        <span class="hljs-keyword">return</span> x
+</code></pre>
+<p><strong>来源</strong>：Lu et al., 2022 - DPM-Solver; Lu et al., 2025 - DPM-Solver++</p>
+<h3 id="423-dpm-solver-的改进" tabindex="-1">4.2.3 DPM-Solver++ 的改进 <a class="heading-anchor" href="#423-dpm-solver-的改进" aria-hidden="true">#</a></h3>
+<p><strong>DPM-Solver++</strong>（2025）的改进：</p>
+<ol>
+<li><strong>更快收敛</strong>：在 5-10 步内达到 SOTA 性能</li>
+<li><strong>更好的稳定性</strong>：数值稳定性更好，不容易发散</li>
+<li><strong>支持引导采样</strong>：支持分类器自由引导（Classifier-Free Guidance）</li>
+</ol>
+<p><strong>来源</strong>：Lu et al., 2025 - DPM-Solver++</p>
+<blockquote>
+<p>“We propose a fast ODE solver for diffusion models, achieving SOTA acceleration performance especially in 5 to 10 NFEs.”</p>
+</blockquote>
+<h3 id="424-dpm-solver-的应用场景" tabindex="-1">4.2.4 DPM-Solver 的应用场景 <a class="heading-anchor" href="#424-dpm-solver-的应用场景" aria-hidden="true">#</a></h3>
+<p><strong>适用场景</strong>：</p>
+<ol>
+<li><strong>高质量图像生成</strong>：需要高质量结果的应用</li>
+<li><strong>中等速度要求</strong>：可以接受 10-50 步采样</li>
+<li><strong>研究和实验</strong>：学术研究和实验</li>
+</ol>
+<hr>
+<h2 id="43-consistency-models" tabindex="-1">4.3 Consistency Models <a class="heading-anchor" href="#43-consistency-models" aria-hidden="true">#</a></h2>
+<h3 id="431-consistency-models-的核心思想" tabindex="-1">4.3.1 Consistency Models 的核心思想 <a class="heading-anchor" href="#431-consistency-models-的核心思想" aria-hidden="true">#</a></h3>
+<p>**Consistency Models（一致性模型）**是一种新的生成模型框架，由 Song et al. 于 2023 年提出。</p>
+<p><strong>核心思想</strong>：</p>
+<ol>
+<li><strong>一致性路径</strong>：从任意时间步到其他时间步的路径</li>
+<li><strong>单步生成</strong>：通过训练一致性模型，实现单步生成</li>
+<li><strong>自一致性</strong>：从任意时间步出发，都能收敛到相同的样本</li>
+</ol>
+<p><strong>数学表达</strong>：
+[ f_\theta(\mathbf{x}_t, t) = \mathbf{x}<em>0 ]
+其中 ( f</em>\theta ) 是一致性模型，( \mathbf{x}_t ) 是任意时间步的样本。</p>
+<p><strong>来源</strong>：Song et al., 2023 - Consistency Models</p>
+<blockquote>
+<p>“Through extensive experiments, we demonstrate that they outperform existing distillation techniques for diffusion models in one- and few-step sampling.”</p>
+</blockquote>
+<h3 id="432-consistency-models-的训练" tabindex="-1">4.3.2 Consistency Models 的训练 <a class="heading-anchor" href="#432-consistency-models-的训练" aria-hidden="true">#</a></h3>
+<p><strong>训练目标</strong>：
+[ \mathcal{L}<em>{\text{CM}} = \mathbb{E}</em>{t, \mathbf{x}<em>t} \left| f</em>\theta(\mathbf{x}<em>t, t) - f</em>\theta(\mathbf{x}_{t’}, t’) \right|^2 ]</p>
+<p><strong>训练过程</strong>：</p>
+<ol>
+<li>从扩散模型中采样 ( (\mathbf{x}<em>t, \mathbf{x}</em>{t’}) ) 对</li>
+<li>训练一致性模型 ( f_\theta ) 使它们映射到相同的 ( \mathbf{x}_0 )</li>
+<li>逐步减少时间步的间隔，最终实现单步生成</li>
+</ol>
+<p><strong>来源</strong>：Song et al., 2023 - Consistency Models</p>
+<h3 id="433-consistency-models-的实现" tabindex="-1">4.3.3 Consistency Models 的实现 <a class="heading-anchor" href="#433-consistency-models-的实现" aria-hidden="true">#</a></h3>
+<p><strong>一致性模型</strong>：</p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> torch
+<span class="hljs-keyword">import</span> torch.nn <span class="hljs-keyword">as</span> nn
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">ConsistencyModel</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, in_channels: <span class="hljs-built_in">int</span> = <span class="hljs-number">3</span>, hidden_dim: <span class="hljs-built_in">int</span> = <span class="hljs-number">128</span></span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        <span class="hljs-variable language_">self</span>.time_emb_dim = hidden_dim
+
+        <span class="hljs-comment"># 时间嵌入</span>
+        <span class="hljs-variable language_">self</span>.time_mlp = nn.Sequential(
+            SinusoidalPosEmb(hidden_dim),
+            nn.Linear(hidden_dim, hidden_dim * <span class="hljs-number">4</span>),
+            nn.Mish(),
+            nn.Linear(hidden_dim * <span class="hljs-number">4</span>, hidden_dim)
+        )
+
+        <span class="hljs-comment"># UNet 风格的网络</span>
+        <span class="hljs-variable language_">self</span>.encoder = <span class="hljs-variable language_">self</span>._make_encoder(in_channels, hidden_dim)
+        <span class="hljs-variable language_">self</span>.decoder = <span class="hljs-variable language_">self</span>._make_decoder(hidden_dim, in_channels)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_make_encoder</span>(<span class="hljs-params">self, in_channels: <span class="hljs-built_in">int</span>, hidden_dim: <span class="hljs-built_in">int</span></span>):
+        <span class="hljs-keyword">return</span> nn.ModuleList([
+            nn.Sequential(
+                nn.Conv2d(in_channels, hidden_dim, kernel_size=<span class="hljs-number">3</span>, padding=<span class="hljs-number">1</span>),
+                nn.GroupNorm(<span class="hljs-number">8</span>, hidden_dim),
+                nn.Mish()
+            ),
+            nn.Sequential(
+                nn.Conv2d(hidden_dim, hidden_dim * <span class="hljs-number">2</span>, kernel_size=<span class="hljs-number">3</span>, padding=<span class="hljs-number">1</span>),
+                nn.GroupNorm(<span class="hljs-number">8</span>, hidden_dim * <span class="hljs-number">2</span>),
+                nn.Mish()
+            )
+        ])
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_make_decoder</span>(<span class="hljs-params">self, hidden_dim: <span class="hljs-built_in">int</span>, out_channels: <span class="hljs-built_in">int</span></span>):
+        <span class="hljs-keyword">return</span> nn.ModuleList([
+            nn.Sequential(
+                nn.Conv2d(hidden_dim * <span class="hljs-number">2</span>, hidden_dim, kernel_size=<span class="hljs-number">3</span>, padding=<span class="hljs-number">1</span>),
+                nn.GroupNorm(<span class="hljs-number">8</span>, hidden_dim),
+                nn.Mish()
+            ),
+            nn.Sequential(
+                nn.Conv2d(hidden_dim, out_channels, kernel_size=<span class="hljs-number">3</span>, padding=<span class="hljs-number">1</span>),
+                nn.Tanh()
+            )
+        ])
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x: torch.Tensor, t: torch.Tensor</span>) -&gt; torch.Tensor:
+        <span class="hljs-comment"># 时间嵌入</span>
+        time_emb = <span class="hljs-variable language_">self</span>.time_mlp(t)
+        time_emb = time_emb.unsqueeze(-<span class="hljs-number">1</span>).unsqueeze(-<span class="hljs-number">1</span>)
+
+        <span class="hljs-comment"># 编码</span>
+        skips = []
+        <span class="hljs-keyword">for</span> block <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.encoder:
+            x = block(x) + time_emb
+            skips.append(x)
+
+        <span class="hljs-comment"># 解码</span>
+        <span class="hljs-keyword">for</span> i, block <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(<span class="hljs-variable language_">self</span>.decoder):
+            <span class="hljs-keyword">if</span> i &gt; <span class="hljs-number">0</span>:
+                x = torch.cat([x, skips[-i]], dim=<span class="hljs-number">1</span>)
+            x = block(x) + time_emb
+
+        <span class="hljs-keyword">return</span> x
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">sample</span>(<span class="hljs-params">self, shape: <span class="hljs-built_in">tuple</span>, device: torch.Tensor</span>) -&gt; torch.Tensor:
+        <span class="hljs-string">&quot;&quot;&quot;
+        单步采样
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 初始化噪声</span>
+        x = torch.randn(shape, device=device)
+
+        <span class="hljs-comment"># 单步生成</span>
+        t = torch.zeros((shape[<span class="hljs-number">0</span>],), dtype=torch.long, device=device)
+        x_0 = <span class="hljs-variable language_">self</span>.forward(x, t)
+
+        <span class="hljs-keyword">return</span> x_0
+
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">SinusoidalPosEmb</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, dim: <span class="hljs-built_in">int</span></span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        <span class="hljs-variable language_">self</span>.dim = dim
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x: torch.Tensor</span>) -&gt; torch.Tensor:
+        device = x.device
+        half_dim = <span class="hljs-variable language_">self</span>.dim // <span class="hljs-number">2</span>
+        emb = torch.log(torch.tensor(<span class="hljs-number">10000</span>, device=device)) / (half_dim - <span class="hljs-number">1</span>)
+        emb = torch.exp(torch.arange(half_dim, device=device) * -emb)
+        emb = x[:, <span class="hljs-literal">None</span>] * emb[<span class="hljs-literal">None</span>, :]
+        emb = torch.cat((emb.sin(), emb.cos()), dim=-<span class="hljs-number">1</span>)
+        <span class="hljs-keyword">return</span> emb
+</code></pre>
+<p><strong>来源</strong>：Song et al., 2023 - Consistency Models</p>
+<h3 id="434-consistency-models-的应用场景" tabindex="-1">4.3.4 Consistency Models 的应用场景 <a class="heading-anchor" href="#434-consistency-models-的应用场景" aria-hidden="true">#</a></h3>
+<p><strong>适用场景</strong>：</p>
+<ol>
+<li><strong>超快速生成</strong>：需要 1 步生成的应用</li>
+<li><strong>实时应用</strong>：需要实时推理的应用</li>
+<li><strong>边缘设备部署</strong>：计算资源有限的环境</li>
+</ol>
+<hr>
+<h2 id="44-progressive-distillation" tabindex="-1">4.4 Progressive Distillation <a class="heading-anchor" href="#44-progressive-distillation" aria-hidden="true">#</a></h2>
+<h3 id="441-progressive-distillation-的核心思想" tabindex="-1">4.4.1 Progressive Distillation 的核心思想 <a class="heading-anchor" href="#441-progressive-distillation-的核心思想" aria-hidden="true">#</a></h3>
+<p>**Progressive Distillation（渐进式蒸馏）**是一种模型压缩技术，由 Salimans et al. 于 2022 年提出。</p>
+<p><strong>核心思想</strong>：</p>
+<ol>
+<li><strong>逐步蒸馏</strong>：将多步采样模型逐步蒸馏到少步采样模型</li>
+<li><strong>保持质量</strong>：在减少步数的同时保持生成质量</li>
+<li><strong>高效训练</strong>：蒸馏过程不需要比原始训练更多的时间</li>
+</ol>
+<p><strong>数学表达</strong>：
+[ \mathcal{L}<em>{\text{distill}} = \mathbb{E}</em>{\mathbf{x}<em>0, t} \left| \epsilon</em>{\theta’}(\mathbf{x}<em>t, t) - \epsilon</em>{\theta}(\mathbf{x}_{t’}, t’) \right|^2 ]
+其中 ( \theta’ ) 是蒸馏后的模型，( \theta ) 是原始模型。</p>
+<p><strong>来源</strong>：Salimans et al., 2022 - Progressive Distillation</p>
+<blockquote>
+<p>“We start out with (near) state-of-the-art samplers taking 1024 or 8192 steps, and are able to distill down to models taking as little as 4 steps without losing much perceptual quality.”</p>
+</blockquote>
+<h3 id="442-progressive-distillation-的过程" tabindex="-1">4.4.2 Progressive Distillation 的过程 <a class="heading-anchor" href="#442-progressive-distillation-的过程" aria-hidden="true">#</a></h3>
+<p><strong>蒸馏过程</strong>：</p>
+<ol>
+<li><strong>第一阶段</strong>：从 1000 步蒸馏到 500 步</li>
+<li><strong>第二阶段</strong>：从 500 步蒸馏到 250 步</li>
+<li><strong>第三阶段</strong>：从 250 步蒸馏到 125 步</li>
+<li><strong>第四阶段</strong>：从 125 步蒸馏到 64 步</li>
+<li><strong>最终阶段</strong>：从 64 步蒸馏到 4 步</li>
+</ol>
+<p><strong>性能</strong>：</p>
+<ul>
+<li>CIFAR-10：4 步采样，FID 3.0</li>
+<li>ImageNet：8 步采样，FID 10.0</li>
+</ul>
+<p><strong>来源</strong>：Salimans et al., 2022 - Progressive Distillation</p>
+<h3 id="443-progressive-distillation-的应用场景" tabindex="-1">4.4.3 Progressive Distillation 的应用场景 <a class="heading-anchor" href="#443-progressive-distillation-的应用场景" aria-hidden="true">#</a></h3>
+<p><strong>适用场景</strong>：</p>
+<ol>
+<li><strong>快速生成</strong>：需要快速生成的应用</li>
+<li><strong>有限计算资源</strong>：计算资源有限的环境</li>
+<li><strong>商业化应用</strong>：需要平衡速度和质量的应用</li>
+</ol>
+<hr>
+<h2 id="45-latent-diffusion-models" tabindex="-1">4.5 Latent Diffusion Models <a class="heading-anchor" href="#45-latent-diffusion-models" aria-hidden="true">#</a></h2>
+<h3 id="451-ldm-的核心思想" tabindex="-1">4.5.1 LDM 的核心思想 <a class="heading-anchor" href="#451-ldm-的核心思想" aria-hidden="true">#</a></h3>
+<p>**Latent Diffusion Models（潜扩散模型）**是在潜空间中进行扩散的模型，由 Rombach et al. 于 2021 年提出。</p>
+<p><strong>核心思想</strong>：</p>
+<ol>
+<li><strong>潜空间扩散</strong>：在 VAE 的潜空间中进行扩散，而不是在像素空间</li>
+<li><strong>降低计算成本</strong>：潜空间的维度比像素空间低得多</li>
+<li><strong>保持质量</strong>：通过 VAE 编码器和解码器保持生成质量</li>
+</ol>
+<p><strong>架构</strong>：</p>
+<ul>
+<li><strong>VAE Encoder</strong>：将图像编码到潜空间</li>
+<li><strong>扩散模型</strong>：在潜空间中进行扩散</li>
+<li><strong>VAE Decoder</strong>：将潜空间解码回图像空间</li>
+</ul>
+<p><strong>来源</strong>：Rombach et al., 2021 - Latent Diffusion Models</p>
+<blockquote>
+<p>“Our latent diffusion models (LDMs) achieve a new state of art for image inpainting and highly competitive performance on various tasks.”</p>
+</blockquote>
+<h3 id="452-ldm-的实现" tabindex="-1">4.5.2 LDM 的实现 <a class="heading-anchor" href="#452-ldm-的实现" aria-hidden="true">#</a></h3>
+<p><strong>Latent Diffusion Models</strong>：</p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> torch
+<span class="hljs-keyword">import</span> torch.nn <span class="hljs-keyword">as</span> nn
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">LatentDiffusionModel</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, in_channels: <span class="hljs-built_in">int</span> = <span class="hljs-number">4</span>, hidden_dim: <span class="hljs-built_in">int</span> = <span class="hljs-number">320</span>, num_timesteps: <span class="hljs-built_in">int</span> = <span class="hljs-number">1000</span></span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        <span class="hljs-variable language_">self</span>.num_timesteps = num_timesteps
+
+        <span class="hljs-comment"># VAE Encoder</span>
+        <span class="hljs-variable language_">self</span>.vae_encoder = nn.Sequential(
+            nn.Conv2d(<span class="hljs-number">3</span>, <span class="hljs-number">128</span>, kernel_size=<span class="hljs-number">3</span>, padding=<span class="hljs-number">1</span>),
+            nn.GroupNorm(<span class="hljs-number">8</span>, <span class="hljs-number">128</span>),
+            nn.Mish(),
+            nn.Conv2d(<span class="hljs-number">128</span>, <span class="hljs-number">256</span>, kernel_size=<span class="hljs-number">3</span>, padding=<span class="hljs-number">1</span>, stride=<span class="hljs-number">2</span>),
+            nn.GroupNorm(<span class="hljs-number">8</span>, <span class="hljs-number">256</span>),
+            nn.Mish(),
+            nn.Conv2d(<span class="hljs-number">256</span>, <span class="hljs-number">512</span>, kernel_size=<span class="hljs-number">3</span>, padding=<span class="hljs-number">1</span>, stride=<span class="hljs-number">2</span>),
+            nn.GroupNorm(<span class="hljs-number">8</span>, <span class="hljs-number">512</span>),
+            nn.Mish(),
+            nn.Conv2d(<span class="hljs-number">512</span>, <span class="hljs-number">512</span>, kernel_size=<span class="hljs-number">3</span>, padding=<span class="hljs-number">1</span>, stride=<span class="hljs-number">2</span>),
+            nn.GroupNorm(<span class="hljs-number">8</span>, <span class="hljs-number">512</span>),
+            nn.Mish()
+        )
+
+        <span class="hljs-comment"># VAE Decoder</span>
+        <span class="hljs-variable language_">self</span>.vae_decoder = nn.Sequential(
+            nn.ConvTranspose2d(<span class="hljs-number">512</span>, <span class="hljs-number">512</span>, kernel_size=<span class="hljs-number">3</span>, stride=<span class="hljs-number">2</span>, padding=<span class="hljs-number">1</span>, output_padding=<span class="hljs-number">1</span>),
+            nn.GroupNorm(<span class="hljs-number">8</span>, <span class="hljs-number">512</span>),
+            nn.Mish(),
+            nn.ConvTranspose2d(<span class="hljs-number">512</span>, <span class="hljs-number">256</span>, kernel_size=<span class="hljs-number">3</span>, stride=<span class="hljs-number">2</span>, padding=<span class="hljs-number">1</span>, output_padding=<span class="hljs-number">1</span>),
+            nn.GroupNorm(<span class="hljs-number">8</span>, <span class="hljs-number">256</span>),
+            nn.Mish(),
+            nn.ConvTranspose2d(<span class="hljs-number">256</span>, <span class="hljs-number">128</span>, kernel_size=<span class="hljs-number">3</span>, stride=<span class="hljs-number">2</span>, padding=<span class="hljs-number">1</span>, output_padding=<span class="hljs-number">1</span>),
+            nn.GroupNorm(<span class="hljs-number">8</span>, <span class="hljs-number">128</span>),
+            nn.Mish(),
+            nn.Conv2d(<span class="hljs-number">128</span>, <span class="hljs-number">3</span>, kernel_size=<span class="hljs-number">3</span>, padding=<span class="hljs-number">1</span>),
+            nn.Tanh()
+        )
+
+        <span class="hljs-comment"># 扩散模型 UNet</span>
+        <span class="hljs-variable language_">self</span>.unet = UNet(in_channels=in_channels, hidden_dim=hidden_dim)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">encode</span>(<span class="hljs-params">self, x: torch.Tensor</span>) -&gt; torch.Tensor:
+        <span class="hljs-string">&quot;&quot;&quot;
+        编码到潜空间
+        &quot;&quot;&quot;</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.vae_encoder(x)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">decode</span>(<span class="hljs-params">self, latent: torch.Tensor</span>) -&gt; torch.Tensor:
+        <span class="hljs-string">&quot;&quot;&quot;
+        从潜空间解码
+        &quot;&quot;&quot;</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.vae_decoder(latent)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x: torch.Tensor, t: torch.Tensor</span>) -&gt; torch.Tensor:
+        <span class="hljs-string">&quot;&quot;&quot;
+        前向传播
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 编码到潜空间</span>
+        latent = <span class="hljs-variable language_">self</span>.encode(x)
+
+        <span class="hljs-comment"># 在潜空间中进行扩散</span>
+        noise_pred = <span class="hljs-variable language_">self</span>.unet(latent, t)
+
+        <span class="hljs-keyword">return</span> noise_pred
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">sample</span>(<span class="hljs-params">self, shape: <span class="hljs-built_in">tuple</span>, device: torch.Tensor, num_inference_steps: <span class="hljs-built_in">int</span> = <span class="hljs-number">50</span></span>) -&gt; torch.Tensor:
+        <span class="hljs-string">&quot;&quot;&quot;
+        LDM 采样
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 在潜空间中初始化噪声</span>
+        latent = torch.randn(shape, device=device)
+
+        <span class="hljs-comment"># 逐步去噪</span>
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">reversed</span>(<span class="hljs-built_in">range</span>(<span class="hljs-variable language_">self</span>.num_timesteps)):
+            t = torch.full((shape[<span class="hljs-number">0</span>],), i, device=device).long()
+            noise_pred = <span class="hljs-variable language_">self</span>.unet(latent, t)
+            latent = <span class="hljs-variable language_">self</span>._denoise_step(latent, noise_pred, t)
+
+        <span class="hljs-comment"># 解码回图像空间</span>
+        image = <span class="hljs-variable language_">self</span>.decode(latent)
+        <span class="hljs-keyword">return</span> image
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_denoise_step</span>(<span class="hljs-params">self, x: torch.Tensor, noise_pred: torch.Tensor, t: torch.Tensor</span>) -&gt; torch.Tensor:
+        <span class="hljs-string">&quot;&quot;&quot;
+        去噪步骤
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 这里使用简化的去噪步骤</span>
+        <span class="hljs-comment"># 实际实现应该使用 DDPM 或 DDIM 的去噪步骤</span>
+        <span class="hljs-keyword">return</span> x - (t / <span class="hljs-variable language_">self</span>.num_timesteps) * noise_pred
+</code></pre>
+<p><strong>来源</strong>：Rombach et al., 2021 - Latent Diffusion Models; GitHub - CompVis/latent-diffusion</p>
+<h3 id="453-ldm-的优势" tabindex="-1">4.5.3 LDM 的优势 <a class="heading-anchor" href="#453-ldm-的优势" aria-hidden="true">#</a></h3>
+<p><strong>优势</strong>：</p>
+<ol>
+<li><strong>计算效率高</strong>：潜空间维度低，计算成本大幅降低</li>
+<li><strong>内存占用小</strong>：不需要存储大量像素空间的中间结果</li>
+<li><strong>生成质量高</strong>：通过 VAE 保持高质量</li>
+<li><strong>易于扩展</strong>：易于支持高分辨率图像生成</li>
+</ol>
+<p><strong>应用场景</strong>：</p>
+<ul>
+<li>Stable Diffusion：基于 LDM 的文本到图像生成模型</li>
+<li>高分辨率图像生成：512x512、1024x1024</li>
+<li>文本到图像生成：文本条件生成</li>
+</ul>
+<p><strong>来源</strong>：Rombach et al., 2021 - Latent Diffusion Models</p>
+<hr>
+<h2 id="46-rectified-flow" tabindex="-1">4.6 Rectified Flow <a class="heading-anchor" href="#46-rectified-flow" aria-hidden="true">#</a></h2>
+<h3 id="461-rectified-flow-的核心思想" tabindex="-1">4.6.1 Rectified Flow 的核心思想 <a class="heading-anchor" href="#461-rectified-flow-的核心思想" aria-hidden="true">#</a></h3>
+<p>**Rectified Flow（矫正流）**是一种基于流匹配（Flow Matching）的生成模型框架，由 Liu et al. 于 2024 年提出。</p>
+<p><strong>核心思想</strong>：</p>
+<ol>
+<li><strong>线性插值</strong>：在数据分布和噪声分布之间进行线性插值</li>
+<li><strong>流匹配</strong>：学习从噪声分布到数据分布的最优传输路径</li>
+<li><strong>单步生成</strong>：通过矫正流实现单步生成</li>
+</ol>
+<p><strong>数学表达</strong>：
+[ d\mathbf{z}_t = \mathbf{v}(\mathbf{z}_t, t) dt ]
+其中 ( \mathbf{v}(\mathbf{z}_t, t) ) 是速度场。</p>
+<p><strong>来源</strong>：Liu et al., 2024 - Rectified Flow</p>
+<blockquote>
+<p>“This realization unifies rectified flows and first-order consistency models, enabling extremely fast inference—often down to one or a few steps.”</p>
+</blockquote>
+<h3 id="462-rectified-flow-的实现" tabindex="-1">4.6.2 Rectified Flow 的实现 <a class="heading-anchor" href="#462-rectified-flow-的实现" aria-hidden="true">#</a></h3>
+<p><strong>Rectified Flow 模型</strong>：</p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> torch
+<span class="hljs-keyword">import</span> torch.nn <span class="hljs-keyword">as</span> nn
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">RectifiedFlowModel</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, in_channels: <span class="hljs-built_in">int</span> = <span class="hljs-number">3</span>, hidden_dim: <span class="hljs-built_in">int</span> = <span class="hljs-number">128</span></span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        <span class="hljs-variable language_">self</span>.time_emb_dim = hidden_dim
+
+        <span class="hljs-comment"># 时间嵌入</span>
+        <span class="hljs-variable language_">self</span>.time_mlp = nn.Sequential(
+            SinusoidalPosEmb(hidden_dim),
+            nn.Linear(hidden_dim, hidden_dim * <span class="hljs-number">4</span>),
+            nn.Mish(),
+            nn.Linear(hidden_dim * <span class="hljs-number">4</span>, hidden_dim)
+        )
+
+        <span class="hljs-comment"># UNet 风格的速度场网络</span>
+        <span class="hljs-variable language_">self</span>.velocity_net = UNet(in_channels=in_channels * <span class="hljs-number">2</span>, out_channels=in_channels * <span class="hljs-number">2</span>, hidden_dim=hidden_dim)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x: torch.Tensor, x0: torch.Tensor, t: torch.Tensor</span>) -&gt; torch.Tensor:
+        <span class="hljs-string">&quot;&quot;&quot;
+        预测速度场
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 时间嵌入</span>
+        time_emb = <span class="hljs-variable language_">self</span>.time_mlp(t)
+        time_emb = time_emb.unsqueeze(-<span class="hljs-number">1</span>).unsqueeze(-<span class="hljs-number">1</span>)
+
+        <span class="hljs-comment"># 拼接 x 和 x0</span>
+        x_concat = torch.cat([x, x0], dim=<span class="hljs-number">1</span>)
+
+        <span class="hljs-comment"># 预测速度场</span>
+        velocity = <span class="hljs-variable language_">self</span>.velocity_net(x_concat, t)
+
+        <span class="hljs-keyword">return</span> velocity
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">sample</span>(<span class="hljs-params">self, shape: <span class="hljs-built_in">tuple</span>, device: torch.Tensor, num_inference_steps: <span class="hljs-built_in">int</span> = <span class="hljs-number">1</span></span>) -&gt; torch.Tensor:
+        <span class="hljs-string">&quot;&quot;&quot;
+        Rectified Flow 采样
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 初始化噪声</span>
+        z_t = torch.randn(shape, device=device)
+
+        <span class="hljs-comment"># 单步生成</span>
+        <span class="hljs-keyword">if</span> num_inference_steps == <span class="hljs-number">1</span>:
+            <span class="hljs-comment"># 从噪声分布到数据分布</span>
+            x0_pred = <span class="hljs-variable language_">self</span>.velocity_net(z_t, torch.zeros((shape[<span class="hljs-number">0</span>],), dtype=torch.long, device=device))
+            <span class="hljs-keyword">return</span> x0_pred[:, :<span class="hljs-number">3</span>]
+        <span class="hljs-keyword">else</span>:
+            <span class="hljs-comment"># 多步采样（用于调试）</span>
+            dt = <span class="hljs-number">1.0</span> / num_inference_steps
+            <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(num_inference_steps):
+                t = torch.full((shape[<span class="hljs-number">0</span>],), i / num_inference_steps, device=device)
+                velocity = <span class="hljs-variable language_">self</span>.velocity_net(z_t, z_t, t)
+                z_t = z_t + velocity * dt
+            <span class="hljs-keyword">return</span> z_t[:, :<span class="hljs-number">3</span>]
+
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">SinusoidalPosEmb</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, dim: <span class="hljs-built_in">int</span></span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        <span class="hljs-variable language_">self</span>.dim = dim
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x: torch.Tensor</span>) -&gt; torch.Tensor:
+        device = x.device
+        half_dim = <span class="hljs-variable language_">self</span>.dim // <span class="hljs-number">2</span>
+        emb = torch.log(torch.tensor(<span class="hljs-number">10000</span>, device=device)) / (half_dim - <span class="hljs-number">1</span>)
+        emb = torch.exp(torch.arange(half_dim, device=device) * -emb)
+        emb = x[:, <span class="hljs-literal">None</span>] * emb[<span class="hljs-literal">None</span>, :]
+        emb = torch.cat((emb.sin(), emb.cos()), dim=-<span class="hljs-number">1</span>)
+        <span class="hljs-keyword">return</span> emb
+</code></pre>
+<p><strong>来源</strong>：Liu et al., 2024 - Rectified Flow; Text-to-Image Rectified Flow (2025)</p>
+<h3 id="463-rectified-flow-的应用场景" tabindex="-1">4.6.3 Rectified Flow 的应用场景 <a class="heading-anchor" href="#463-rectified-flow-的应用场景" aria-hidden="true">#</a></h3>
+<p><strong>适用场景</strong>：</p>
+<ol>
+<li><strong>超快速生成</strong>：需要 1 步生成的应用</li>
+<li><strong>实时应用</strong>：需要实时推理的应用</li>
+<li><strong>文本到图像生成</strong>：支持条件生成</li>
+</ol>
+<hr>
+<h2 id="47-优化算法对比" tabindex="-1">4.7 优化算法对比 <a class="heading-anchor" href="#47-优化算法对比" aria-hidden="true">#</a></h2>
+<h3 id="471-性能对比" tabindex="-1">4.7.1 性能对比 <a class="heading-anchor" href="#471-性能对比" aria-hidden="true">#</a></h3>
+<p><strong>对比表</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>算法</th>
+<th>采样步数</th>
+<th>FID (CIFAR-10)</th>
+<th>FID (ImageNet)</th>
+<th>训练成本</th>
+<th>应用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DDPM</strong></td>
+<td>1000</td>
+<td>3.17</td>
+<td>11.2</td>
+<td>高</td>
+<td>研究、高质量生成</td>
+</tr>
+<tr>
+<td><strong>DDIM</strong></td>
+<td>100</td>
+<td>4.0</td>
+<td>12.5</td>
+<td>中等</td>
+<td>快速生成、实时应用</td>
+</tr>
+<tr>
+<td><strong>DPM-Solver</strong></td>
+<td>10</td>
+<td>3.5</td>
+<td>11.5</td>
+<td>中等</td>
+<td>高质量生成、中等速度</td>
+</tr>
+<tr>
+<td><strong>Consistency Models</strong></td>
+<td>1</td>
+<td>3.55</td>
+<td>6.20</td>
+<td>高</td>
+<td>超快速生成、实时应用</td>
+</tr>
+<tr>
+<td><strong>Progressive Distillation</strong></td>
+<td>4</td>
+<td>3.0</td>
+<td>10.0</td>
+<td>中等</td>
+<td>快速生成、商业化应用</td>
+</tr>
+<tr>
+<td><strong>LDM</strong></td>
+<td>50</td>
+<td>2.5</td>
+<td>5.0</td>
+<td>中等</td>
+<td>高分辨率生成、文本到图像</td>
+</tr>
+<tr>
+<td><strong>Rectified Flow</strong></td>
+<td>1</td>
+<td>3.2</td>
+<td>5.5</td>
+<td>高</td>
+<td>超快速生成、实时应用</td>
+</tr>
+</tbody>
+</table>
+<p><strong>来源</strong>：Lu et al., 2022 - DPM-Solver; Song et al., 2023 - Consistency Models; Salimans et al., 2022 - Progressive Distillation; Rombach et al., 2021 - LDM; Liu et al., 2024 - Rectified Flow</p>
+<h3 id="472-适用场景对比" tabindex="-1">4.7.2 适用场景对比 <a class="heading-anchor" href="#472-适用场景对比" aria-hidden="true">#</a></h3>
+<p><strong>按速度需求分类</strong>：</p>
+<ol>
+<li><strong>超快速（1 步）</strong>：Consistency Models、Rectified Flow</li>
+<li><strong>快速（4-10 步）</strong>：Progressive Distillation、DPM-Solver</li>
+<li><strong>中等（50-100 步）</strong>：DDIM、LDM</li>
+<li><strong>慢速（1000 步）</strong>：DDPM</li>
+</ol>
+<p><strong>按质量需求分类</strong>：</p>
+<ol>
+<li><strong>最高质量</strong>：LDM、DPM-Solver</li>
+<li><strong>高质量</strong>：DDPM、DDIM</li>
+<li><strong>中等质量</strong>：Progressive Distillation、Rectified Flow</li>
+<li><strong>低质量</strong>：Consistency Models（单步）</li>
+</ol>
+<hr>
+<h2 id="结语" tabindex="-1">结语 <a class="heading-anchor" href="#结语" aria-hidden="true">#</a></h2>
+<p>本章介绍了扩散模型的优化算法，包括 DPM-Solver、Consistency Models、Progressive Distillation、Latent Diffusion Models 和 Rectified Flow。这些优化算法通过不同的方法（采样算法优化、模型压缩、架构优化、数学优化）实现了扩散模型的加速和优化。</p>
+<p>读者可以根据应用场景（速度、质量、计算资源）选择合适的优化算法。例如，需要超快速生成时可以选择 Consistency Models 或 Rectified Flow，需要高质量时可以选择 DPM-Solver 或 LDM。</p>
+<hr>
+<p><strong>参考文献</strong>：</p>
+<ol>
+<li>
+<p>Lu et al. - DPM-Solver: A Fast ODE Solver for Diffusion Probabilistic Model Sampling (2022)</p>
+<ul>
+<li>论文链接：<a href="https://arxiv.org/abs/2206.00927">https://arxiv.org/abs/2206.00927</a></li>
+<li>重要性：DPM-Solver 的开山之作，实现了约 10 步采样</li>
+</ul>
+</li>
+<li>
+<p>Lu et al. - DPM-Solver++: Fast Solver for Guided Sampling (2025)</p>
+<ul>
+<li>论文链接：<a href="https://arxiv.org/abs/2211.01095">https://arxiv.org/abs/2211.01095</a></li>
+<li>重要性：DPM-Solver 的改进版本，支持引导采样</li>
+</ul>
+</li>
+<li>
+<p>Song et al. - Consistency Models (2023)</p>
+<ul>
+<li>论文链接：<a href="https://arxiv.org/abs/2303.01469">https://arxiv.org/abs/2303.01469</a></li>
+<li>重要性：一致性模型，实现单步生成</li>
+</ul>
+</li>
+<li>
+<p>Salimans et al. - Progressive Distillation for Fast Sampling (2022)</p>
+<ul>
+<li>论文链接：<a href="https://arxiv.org/abs/2202.00512">https://arxiv.org/abs/2202.00512</a></li>
+<li>重要性：渐进式蒸馏，将模型蒸馏到 4 步</li>
+</ul>
+</li>
+<li>
+<p>Rombach et al. - High-Resolution Image Synthesis with Latent Diffusion Models (2021)</p>
+<ul>
+<li>论文链接：<a href="https://arxiv.org/abs/2112.10752">https://arxiv.org/abs/2112.10752</a></li>
+<li>重要性：潜扩散模型，Stable Diffusion 的基础</li>
+</ul>
+</li>
+<li>
+<p>Liu et al. - Rectified Flow (2024)</p>
+<ul>
+<li>论文链接：<a href="https://arxiv.org/abs/2209.03003">https://arxiv.org/abs/2209.03003</a></li>
+<li>重要性：矫正流，基于流匹配的单步生成</li>
+</ul>
+</li>
+<li>
+<p>GitHub - CompVis/latent-diffusion (2024)</p>
+<ul>
+<li>链接：<a href="https://github.com/CompVis/latent-diffusion">https://github.com/CompVis/latent-diffusion</a></li>
+<li>重要性：LDM 的官方实现</li>
+</ul>
+</li>
+</ol>
+<hr>
+<p><strong>章节版本</strong>：v1.0
+<strong>最后更新</strong>：2026-03-19</p>
+</div> <nav class="pager"> <a class="pager__link" href="/diffusion-models-knowledge-base/03-ddpm-and-ddim/"> <span>上一篇</span> <strong>第三章：DDPM 和 DDIM（DDPM and DDIM）</strong> </a> <a class="pager__link" href="/diffusion-models-knowledge-base/05-conditional-diffusion-models/"> <span>下一篇</span> <strong>第五章：条件扩散模型（Conditional Diffusion Models）</strong> </a> </nav> </article> </section>  </main> <footer class="site-footer"> <div class="site-footer__inner"> <p>Vinci Knowledge Base</p> <p>Source directory: <code>/Users/superone77/Documents/知识库/projects</code></p> </div> </footer> </div> </body></html>
