@@ -1,0 +1,683 @@
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>第十一章：Agent 评估与监控（Agent Evaluation and Monitoring） | Vinci Knowledge Base</title><meta name="description" content="第十一章：Agent 评估与监控（Agent Evaluation and Monitoring） Agent 评估与监控是确保 Agent 系统质量和性能的关键环节，通过定义评估指标、建立基准测试、实时监控和持续优化，确保 Agent 系统可靠、高效、安全。 11.1 评估基础 11.1.1 Agent 评估的定义 Agent 评估是指评估 Agent 系"><meta name="generator" content="Vinci Knowledge Base"><link rel="stylesheet" href="/_astro/_doc_.CY2v1inF.css"></head> <body> <div class="page-shell"> <header class="site-header"> <div class="site-header__inner"> <a class="brand" href="/"> <span class="brand__eyebrow">GitHub Pages Knowledge Site</span> <span class="brand__name">Vinci Knowledge Base</span> </a> <nav class="site-nav"> <a href="/">Projects</a> </nav> </div> </header> <main class="page-main">  <section class="article-hero"> <div> <p class="eyebrow">Knowledge Article</p> <h1>第十一章：Agent 评估与监控（Agent Evaluation and Monitoring）</h1> <p class="article-hero__breadcrumbs"> <a href="/">Home</a> <span>/</span> <a href="/ai-agent-development/">AI Agent 智能体开发知识库</a> </p> </div> <div class="meta-card"> <p><strong>Project</strong> AI Agent 智能体开发知识库</p> <p><strong>Source</strong> <code>knowledge/11-agent-evaluation-and-monitoring.md</code></p> <p><strong>Sections</strong> 14</p> </div> </section> <section class="content-grid"> <aside class="toc-card"> <p class="toc-card__title">本页目录</p> <ul class="toc-card__list"> <li class="toc-depth-1"> <a href="#第十一章agent-评估与监控agent-evaluation-and-monitoring">第十一章：Agent 评估与监控（Agent Evaluation and Monitoring）</a> </li><li class="toc-depth-2"> <a href="#111-评估基础">11.1 评估基础</a> </li><li class="toc-depth-3"> <a href="#1111-agent-评估的定义">11.1.1 Agent 评估的定义</a> </li><li class="toc-depth-3"> <a href="#1112-评估指标">11.1.2 评估指标</a> </li><li class="toc-depth-2"> <a href="#112-基准测试">11.2 基准测试</a> </li><li class="toc-depth-3"> <a href="#1121-agent-基准测试概述">11.2.1 Agent 基准测试概述</a> </li><li class="toc-depth-3"> <a href="#1122-常用-agent-基准测试">11.2.2 常用 Agent 基准测试</a> </li><li class="toc-depth-2"> <a href="#113-监控系统">11.3 监控系统</a> </li><li class="toc-depth-3"> <a href="#1131-实时监控">11.3.1 实时监控</a> </li><li class="toc-depth-3"> <a href="#1132-监控最佳实践">11.3.2 监控最佳实践</a> </li><li class="toc-depth-2"> <a href="#114-评估与监控代码示例">11.4 评估与监控代码示例</a> </li><li class="toc-depth-1"> <a href="#配置日志">配置日志</a> </li><li class="toc-depth-1"> <a href="#使用示例">使用示例</a> </li><li class="toc-depth-2"> <a href="#小结第十一章全部完成">小结（第十一章全部完成）</a> </li> </ul> </aside> <article class="prose-card"> <div class="prose"><h1 id="第十一章agent-评估与监控agent-evaluation-and-monitoring" tabindex="-1">第十一章：Agent 评估与监控（Agent Evaluation and Monitoring） <a class="heading-anchor" href="#第十一章agent-评估与监控agent-evaluation-and-monitoring" aria-hidden="true">#</a></h1>
+<p>Agent 评估与监控是确保 Agent 系统质量和性能的关键环节，通过定义评估指标、建立基准测试、实时监控和持续优化，确保 Agent 系统可靠、高效、安全。</p>
+<h2 id="111-评估基础" tabindex="-1">11.1 评估基础 <a class="heading-anchor" href="#111-评估基础" aria-hidden="true">#</a></h2>
+<h3 id="1111-agent-评估的定义" tabindex="-1">11.1.1 Agent 评估的定义 <a class="heading-anchor" href="#1111-agent-评估的定义" aria-hidden="true">#</a></h3>
+<p>Agent 评估是指评估 Agent 系统的性能、质量、可靠性和安全性的过程，通过定义评估指标、建立基准测试和持续优化，确保 Agent 系统满足业务需求。</p>
+<h4>Agent 评估的定义</h4>
+<p>Agent 评估是指评估 Agent 系统的性能、质量、可靠性和安全性的过程，包括定义评估目标、选择评估方法、收集评估数据、分析评估结果和优化 Agent 系统。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong>arXiv（2025）</strong>：LLM Agents 的评估和基准测试是一个复杂且发展不足的领域，提供了 LLM Agent 评估的新兴领域的深入概述。</li>
+<li><strong><a href="http://LXT.ai">LXT.ai</a>（2025）</strong>：用这个综合框架掌握 AI Agent 评估，学习性能指标、安全测试和企业级基准测试策略，以将 39% 的 AI 项目失败率降低到可接受的水平。</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，Agent 评估包括：</p>
+<ol>
+<li><strong>评估目标定义</strong>：定义评估的目标和成功标准</li>
+<li><strong>评估方法选择</strong>：选择合适的评估方法和工具</li>
+<li><strong>基准测试建立</strong>：建立基准测试和对比</li>
+<li><strong>评估数据收集</strong>：收集评估数据（性能、质量、可靠性、安全性）</li>
+<li><strong>评估结果分析</strong>：分析评估结果，识别问题和改进空间</li>
+<li><strong>Agent 优化</strong>：基于评估结果优化 Agent 系统</li>
+</ol>
+<h4>Agent 评估的核心机制</h4>
+<p><strong>1. 评估目标定义</strong></p>
+<p>定义评估的目标和成功标准，如任务完成率、响应时间、准确性、资源利用率等。</p>
+<p><strong>2. 评估方法选择</strong></p>
+<p>选择合适的评估方法和工具，如基于规则的评估、基于学习的评估、基于用户反馈的评估等。</p>
+<p><strong>3. 基准测试建立</strong></p>
+<p>建立基准测试和对比，包括基线模型、最先进的模型、行业基准等。</p>
+<p><strong>4. 评估数据收集</strong></p>
+<p>收集评估数据，包括性能指标、质量指标、可靠性指标、安全指标等。</p>
+<p><strong>5. 评估结果分析</strong></p>
+<p>分析评估结果，识别问题和改进空间，形成优化建议。</p>
+<p><strong>6. Agent 优化</strong></p>
+<p>基于评估结果优化 Agent 系统，提高性能、质量、可靠性和安全性。</p>
+<h4>Agent 评估的优势与劣势</h4>
+<table>
+<thead>
+<tr>
+<th>优势</th>
+<th>劣势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>识别问题和改进空间</td>
+<td>评估成本高</td>
+</tr>
+<tr>
+<td>支持持续优化</td>
+<td>评估方法复杂</td>
+</tr>
+<tr>
+<td>提高系统质量</td>
+<td>需要建立基准</td>
+</tr>
+<tr>
+<td>支持决策制定</td>
+<td>可能产生过度优化</td>
+</tr>
+</tbody>
+</table>
+<h3 id="1112-评估指标" tabindex="-1">11.1.2 评估指标 <a class="heading-anchor" href="#1112-评估指标" aria-hidden="true">#</a></h3>
+<p>评估指标是评估 Agent 系统性能的量化标准，包括性能指标、质量指标、可靠性指标和安全指标等。</p>
+<h4>评估指标的定义</h4>
+<p>评估指标是评估 Agent 系统性能的量化标准，包括性能指标（如响应时间、吞吐量、资源利用率）、质量指标（如准确性、一致性、鲁棒性）、可靠性指标（如可用性、稳定性、错误率）和安全指标（如隐私保护、合规性、对抗攻击防御）。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong>arXiv（2025）</strong>：LLM Agents 的评估和基准测试引入了一个二维分类法，将现有工作组织为评估目标（评估什么，如 Agent 行为、能力、可靠性和安全性）和评估过程（如何评估，包括交互模式、数据集、基准、指标计算和工具化）。</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，评估指标包括：</p>
+<ol>
+<li><strong>性能指标</strong>：响应时间、吞吐量、资源利用率、成本</li>
+<li><strong>质量指标</strong>：准确性、一致性、鲁棒性、可解释性</li>
+<li><strong>可靠性指标</strong>：可用性、稳定性、错误率、恢复时间</li>
+<li><strong>安全指标</strong>：隐私保护、合规性、对抗攻击防御、安全评估</li>
+<li><strong>用户体验指标</strong>：满意度、可用性、易用性</li>
+</ol>
+<h4>评估指标的核心机制</h4>
+<p><strong>1. 性能指标</strong></p>
+<p>评估 Agent 系统的性能，如响应时间、吞吐量、资源利用率、成本等。</p>
+<p><strong>2. 质量指标</strong></p>
+<p>评估 Agent 系统的质量，如准确性、一致性、鲁棒性、可解释性等。</p>
+<p><strong>3. 可靠性指标</strong></p>
+<p>评估 Agent 系统的可靠性，如可用性、稳定性、错误率、恢复时间等。</p>
+<p><strong>4. 安全指标</strong></p>
+<p>评估 Agent 系统的安全性，如隐私保护、合规性、对抗攻击防御、安全评估等。</p>
+<p><strong>5. 用户体验指标</strong></p>
+<p>评估用户对 Agent 系统的体验，如满意度、可用性、易用性等。</p>
+<h4>评估指标的优势与劣势</h4>
+<table>
+<thead>
+<tr>
+<th>指标类型</th>
+<th>优势</th>
+<th>劣势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>性能指标</strong></td>
+<td>量化性能，易于比较</td>
+<td>可能忽略用户体验</td>
+</tr>
+<tr>
+<td><strong>质量指标</strong></td>
+<td>评估输出质量</td>
+<td>难以量化</td>
+</tr>
+<tr>
+<td><strong>可靠性指标</strong></td>
+<td>评估系统稳定性</td>
+<td>需要长期监控</td>
+</tr>
+<tr>
+<td><strong>安全指标</strong></td>
+<td>评估系统安全性</td>
+<td>安全评估复杂</td>
+</tr>
+<tr>
+<td><strong>用户体验指标</strong></td>
+<td>反映用户需求</td>
+<td>主观性强</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="112-基准测试" tabindex="-1">11.2 基准测试 <a class="heading-anchor" href="#112-基准测试" aria-hidden="true">#</a></h2>
+<h3 id="1121-agent-基准测试概述" tabindex="-1">11.2.1 Agent 基准测试概述 <a class="heading-anchor" href="#1121-agent-基准测试概述" aria-hidden="true">#</a></h3>
+<p>Agent 基准测试是指评估 Agent 系统在特定任务和环境中的性能，通过与基线模型、最先进的模型和行业基准进行对比，评估 Agent 系统的性能和质量。</p>
+<h4>Agent 基准测试概述的定义</h4>
+<p>Agent 基准测试是指评估 Agent 系统在特定任务和环境中的性能，通过与基线模型、最先进的模型和行业基准进行对比，评估 Agent 系统的性能和质量。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong><a href="http://Evidently.ai">Evidently.ai</a>（2025）</strong>：我们将 10 个 AI Agent 基准设计为评估不同的 LLMs 在现实场景中作为 Agents 的性能。</li>
+<li><strong>o-mega（2025）</strong>：这导致了 2024–2025 年专门基准的开发，专注于 Web 导航、软件操作、多工具使用和整体自主性等事项。</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，Agent 基准测试包括：</p>
+<ol>
+<li><strong>基准选择</strong>：选择合适的基准测试（如 ALFWorld、WebShop、AgentBench）</li>
+<li><strong>基线模型选择</strong>：选择基线模型（如基线 LLM、简单 Agent）</li>
+<li><strong>最先进模型选择</strong>：选择最先进的模型（如 SOTA Agent）</li>
+<li><strong>评估环境配置</strong>：配置评估环境和参数</li>
+<li><strong>评估执行</strong>：执行基准测试，收集评估数据</li>
+<li><strong>结果分析</strong>：分析评估结果，对比不同 Agent 的性能</li>
+</ol>
+<h4>Agent 基准测试概述的核心机制</h4>
+<p><strong>1. 基准选择</strong></p>
+<p>选择合适的基准测试，根据应用场景选择相关的基准（如规划、工具使用、决策、自主性）。</p>
+<p><strong>2. 基线模型选择</strong></p>
+<p>选择基线模型，用于对比和评估改进效果。</p>
+<p><strong>3. 最先进模型选择</strong></p>
+<p>选择最先进的模型，用于对比和评估目标性能。</p>
+<p><strong>4. 评估环境配置</strong></p>
+<p>配置评估环境和参数，确保评估的一致性和可重复性。</p>
+<p><strong>5. 评估执行</strong></p>
+<p>执行基准测试，收集评估数据和日志。</p>
+<p><strong>6. 结果分析</strong></p>
+<p>分析评估结果，对比不同 Agent 的性能，识别优势和劣势。</p>
+<h4>Agent 基准测试概述的优势与劣势</h4>
+<table>
+<thead>
+<tr>
+<th>优势</th>
+<th>劣势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>标准化评估</td>
+<td>基准可能不匹配实际需求</td>
+</tr>
+<tr>
+<td>支持性能对比</td>
+<td>基准测试成本高</td>
+</tr>
+<tr>
+<td>识别性能差距</td>
+<td>可能过度依赖基准</td>
+</tr>
+<tr>
+<td>支持持续优化</td>
+<td>基准更新频繁</td>
+</tr>
+</tbody>
+</table>
+<h3 id="1122-常用-agent-基准测试" tabindex="-1">11.2.2 常用 Agent 基准测试 <a class="heading-anchor" href="#1122-常用-agent-基准测试" aria-hidden="true">#</a></h3>
+<p>常用的 Agent 基准测试包括 ALFWorld、WebShop、AgentBench、ToolBench、Planning Benchmarks 等，用于评估 Agent 的规划能力、工具使用能力、决策能力和自主性。</p>
+<h4>常用 Agent 基准测试的定义</h4>
+<p>常用的 Agent 基准测试包括 ALFWorld、WebShop、AgentBench、ToolBench、Planning Benchmarks 等，用于评估 Agent 的规划能力、工具使用能力、决策能力和自主性。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong><a href="http://Evidently.ai">Evidently.ai</a>（2025）</strong>：10 AI Agent 基准，包括 ALFWorld、WebShop、ToolBench、Planning Benchmarks。</li>
+<li><strong>o-mega（2025）</strong>：2024–2025 年专门基准的开发，专注于 Web 导航、软件操作、多工具使用和整体自主性。</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，常用的 Agent 基准测试包括：</p>
+<ol>
+<li><strong>ALFWorld</strong>：评估 Agent 的规划能力</li>
+<li><strong>WebShop</strong>：评估 Agent 的决策能力</li>
+<li><strong>AgentBench</strong>：评估 Agent 的综合能力</li>
+<li><strong>ToolBench</strong>：评估 Agent 的工具使用能力</li>
+<li><strong>Planning Benchmarks</strong>：评估 Agent 的规划能力</li>
+</ol>
+<h4>常用 Agent 基准测试的核心机制</h4>
+<p><strong>1. ALFWorld</strong></p>
+<p>评估 Agent 的规划能力，通过在模拟环境中完成任务评估规划效果。</p>
+<p><strong>2. WebShop</strong></p>
+<p>评估 Agent 的决策能力，通过在电子商务环境中完成购物任务评估决策效果。</p>
+<p><strong>3. AgentBench</strong></p>
+<p>评估 Agent 的综合能力，通过多个任务和场景评估整体性能。</p>
+<p><strong>4. ToolBench</strong></p>
+<p>评估 Agent 的工具使用能力，通过工具调用任务评估工具使用效果。</p>
+<p><strong>5. Planning Benchmarks</strong></p>
+<p>评估 Agent 的规划能力，通过规划任务评估规划和执行效果。</p>
+<h4>常用 Agent 基准测试的优势与劣势</h4>
+<table>
+<thead>
+<tr>
+<th>基准</th>
+<th>核心能力</th>
+<th>优势</th>
+<th>劣势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ALFWorld</strong></td>
+<td>规划能力</td>
+<td>评估规划能力</td>
+<td>不适合所有场景</td>
+</tr>
+<tr>
+<td><strong>WebShop</strong></td>
+<td>决策能力</td>
+<td>评估决策能力</td>
+<td>仅适合电子商务</td>
+</tr>
+<tr>
+<td><strong>AgentBench</strong></td>
+<td>综合能力</td>
+<td>评估综合能力</td>
+<td>复杂度高</td>
+</tr>
+<tr>
+<td><strong>ToolBench</strong></td>
+<td>工具使用</td>
+<td>评估工具使用</td>
+<td>仅关注工具使用</td>
+</tr>
+<tr>
+<td><strong>Planning</strong></td>
+<td>规划能力</td>
+<td>评估规划</td>
+<td>不适合所有任务</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="113-监控系统" tabindex="-1">11.3 监控系统 <a class="heading-anchor" href="#113-监控系统" aria-hidden="true">#</a></h2>
+<h3 id="1131-实时监控" tabindex="-1">11.3.1 实时监控 <a class="heading-anchor" href="#1131-实时监控" aria-hidden="true">#</a></h3>
+<p>实时监控是指实时收集和分析 Agent 系统的运行数据，包括性能指标、质量指标、错误日志和用户反馈，及时发现和解决问题。</p>
+<h4>实时监控的定义</h4>
+<p>实时监控是指实时收集和分析 Agent 系统的运行数据，包括性能指标（如响应时间、吞吐量、资源利用率）、质量指标（如准确性、一致性、鲁棒性）、错误日志和用户反馈，及时发现和解决问题。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong><a href="http://LXT.ai">LXT.ai</a>（2025）</strong>：掌握 AI Agent 评估，学习性能指标、安全测试和企业级基准测试策略，以将 39% 的 AI 项目失败率降低到可接受的水平。</li>
+<li><strong>Powerdrill（2025）</strong>：自动化复杂任务，减少人工成本，提高效率。</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，实时监控包括：</p>
+<ol>
+<li><strong>指标收集</strong>：实时收集性能、质量、错误等指标</li>
+<li><strong>日志记录</strong>：详细记录 Agent 的运行日志</li>
+<li><strong>告警机制</strong>：设置告警规则，及时发现异常</li>
+<li><strong>可视化监控</strong>：提供可视化监控界面</li>
+<li><strong>异常检测</strong>：检测异常行为和错误</li>
+<li><strong>报告生成</strong>：生成监控报告，支持决策制定</li>
+</ol>
+<h4>实时监控的核心机制</h4>
+<p><strong>1. 指标收集</strong></p>
+<p>实时收集性能、质量、错误等指标，支持实时分析。</p>
+<p><strong>2. 日志记录</strong></p>
+<p>详细记录 Agent 的运行日志，包括请求、响应、错误、性能数据等。</p>
+<p><strong>3. 告警机制</strong></p>
+<p>设置告警规则，及时发现异常（如性能下降、错误率增加、资源耗尽）。</p>
+<p><strong>4. 可视化监控</strong></p>
+<p>提供可视化监控界面，实时展示 Agent 的运行状态和性能指标。</p>
+<p><strong>5. 异常检测</strong></p>
+<p>检测异常行为和错误，支持自动化恢复和人工干预。</p>
+<p><strong>6. 报告生成</strong></p>
+<p>生成监控报告，支持决策制定和持续优化。</p>
+<h4>实时监控的优势与劣势</h4>
+<table>
+<thead>
+<tr>
+<th>优势</th>
+<th>劣势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>实时发现和解决问题</td>
+<td>监控成本高</td>
+</tr>
+<tr>
+<td>支持持续优化</td>
+<td>需要设计监控规则</td>
+</tr>
+<tr>
+<td>提高系统可靠性</td>
+<td>可能产生误报</td>
+</tr>
+<tr>
+<td>支持决策制定</td>
+<td>需要存储和分析资源</td>
+</tr>
+</tbody>
+</table>
+<h3 id="1132-监控最佳实践" tabindex="-1">11.3.2 监控最佳实践 <a class="heading-anchor" href="#1132-监控最佳实践" aria-hidden="true">#</a></h3>
+<p>监控最佳实践是指在监控 Agent 系统时应该遵循的最佳实践，包括指标定义、监控架构、告警规则、数据分析和持续优化等。</p>
+<h4>监控最佳实践的定义</h4>
+<p>监控最佳实践是指在监控 Agent 系统时应该遵循的最佳实践，包括指标定义、监控架构、告警规则、数据分析和持续优化等，确保监控的有效性和效率。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong><a href="http://LXT.ai">LXT.ai</a>（2025）</strong>：学习性能指标、安全测试和企业级基准测试策略，以降低 AI 项目失败率。</li>
+<li><strong>o-mega（2025）</strong>：专注于 web 导航、软件操作、多工具使用和整体自主性等事项。</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，监控最佳实践包括：</p>
+<ol>
+<li><strong>指标定义</strong>：定义清晰、可量化的评估指标</li>
+<li><strong>监控架构</strong>：设计合理的监控架构，支持分布式监控</li>
+<li><strong>告警规则</strong>：设置合理的告警规则，避免误报</li>
+<li><strong>数据分析</strong>：定期分析监控数据，识别趋势和问题</li>
+<li><strong>持续优化</strong>：基于监控数据持续优化 Agent 系统</li>
+<li><strong>团队协作</strong>：建立监控团队，支持快速响应和问题解决</li>
+</ol>
+<h4>监控最佳实践的核心原则</h4>
+<p><strong>1. 指标定义</strong></p>
+<p>定义清晰、可量化的评估指标，确保监控的有效性。</p>
+<p><strong>2. 监控架构</strong></p>
+<p>设计合理的监控架构，支持分布式监控和负载均衡。</p>
+<p><strong>3. 告警规则</strong></p>
+<p>设置合理的告警规则，避免误报和漏报。</p>
+<p><strong>4. 数据分析</strong></p>
+<p>定期分析监控数据，识别趋势、异常和改进空间。</p>
+<p><strong>5. 持续优化</strong></p>
+<p>基于监控数据持续优化 Agent 系统，提高性能和可靠性。</p>
+<p><strong>6. 团队协作</strong></p>
+<p>建立监控团队，支持快速响应和问题解决，确保问题及时解决。</p>
+<h4>监控最佳实践的优势与劣势</h4>
+<table>
+<thead>
+<tr>
+<th>实践</th>
+<th>优势</th>
+<th>劣势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>指标定义</strong></td>
+<td>量化性能，易于分析</td>
+<td>指标定义复杂</td>
+</tr>
+<tr>
+<td><strong>监控架构</strong></td>
+<td>支持分布式监控</td>
+<td>架构设计复杂度高</td>
+</tr>
+<tr>
+<td><strong>告警规则</strong></td>
+<td>及时发现异常</td>
+<td>可能误报</td>
+</tr>
+<tr>
+<td><strong>数据分析</strong></td>
+<td>识别改进空间</td>
+<td>需要数据分析能力</td>
+</tr>
+<tr>
+<td><strong>持续优化</strong></td>
+<td>持续改进系统</td>
+<td>优化成本高</td>
+</tr>
+<tr>
+<td><strong>团队协作</strong></td>
+<td>快速响应问题</td>
+<td>协调成本高</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="114-评估与监控代码示例" tabindex="-1">11.4 评估与监控代码示例 <a class="heading-anchor" href="#114-评估与监控代码示例" aria-hidden="true">#</a></h2>
+<p>以下代码示例展示如何实现一个简单的 Agent 监控系统：</p>
+<pre class="hljs"><code><span class="hljs-string">&quot;&quot;&quot;
+Agent 监控系统示例
+
+这个示例展示如何实现一个简单的 Agent 监控系统，
+收集性能指标、错误日志和用户反馈。
+&quot;&quot;&quot;</span>
+
+<span class="hljs-keyword">import</span> os
+<span class="hljs-keyword">import</span> logging
+<span class="hljs-keyword">import</span> time
+<span class="hljs-keyword">from</span> typing <span class="hljs-keyword">import</span> <span class="hljs-type">Dict</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">List</span>, <span class="hljs-type">Optional</span>
+<span class="hljs-keyword">from</span> dataclasses <span class="hljs-keyword">import</span> dataclass
+<span class="hljs-keyword">from</span> enum <span class="hljs-keyword">import</span> Enum
+<span class="hljs-keyword">from</span> datetime <span class="hljs-keyword">import</span> datetime
+
+<span class="hljs-keyword">from</span> langchain_openai <span class="hljs-keyword">import</span> ChatOpenAI
+<span class="hljs-keyword">from</span> langchain.prompts <span class="hljs-keyword">import</span> ChatPromptTemplate
+
+<span class="hljs-comment"># 配置日志</span>
+logging.basicConfig(
+    level=logging.INFO,
+    <span class="hljs-built_in">format</span>=<span class="hljs-string">&#x27;%(asctime)s - %(name)s - %(levelname)s - %(message)s&#x27;</span>
+)
+logger = logging.getLogger(__name__)
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">MetricType</span>(<span class="hljs-title class_ inherited__">Enum</span>):
+    <span class="hljs-string">&quot;&quot;&quot;指标类型&quot;&quot;&quot;</span>
+    PERFORMANCE = <span class="hljs-string">&quot;performance&quot;</span>
+    QUALITY = <span class="hljs-string">&quot;quality&quot;</span>
+    RELIABILITY = <span class="hljs-string">&quot;reliability&quot;</span>
+    SECURITY = <span class="hljs-string">&quot;security&quot;</span>
+    USER_EXPERIENCE = <span class="hljs-string">&quot;user_experience&quot;</span>
+
+<span class="hljs-meta">@dataclass</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Metric</span>:
+    <span class="hljs-string">&quot;&quot;&quot;指标&quot;&quot;&quot;</span>
+    metric_type: MetricType
+    name: <span class="hljs-built_in">str</span>
+    value: <span class="hljs-built_in">float</span>
+    unit: <span class="hljs-built_in">str</span>
+    timestamp: <span class="hljs-built_in">float</span>
+
+<span class="hljs-meta">@dataclass</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">LogEntry</span>:
+    <span class="hljs-string">&quot;&quot;&quot;日志条目&quot;&quot;&quot;</span>
+    level: <span class="hljs-built_in">str</span>
+    message: <span class="hljs-built_in">str</span>
+    timestamp: <span class="hljs-built_in">float</span>
+    context: <span class="hljs-type">Dict</span>[<span class="hljs-built_in">str</span>, <span class="hljs-type">Any</span>]
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">AgentMonitor</span>:
+    <span class="hljs-string">&quot;&quot;&quot;Agent 监控器&quot;&quot;&quot;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">
+        self,
+        name: <span class="hljs-built_in">str</span>,
+        agent_name: <span class="hljs-built_in">str</span>
+    </span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        初始化 Agent 监控器
+
+        Args:
+            name: 监控器名称
+            agent_name: Agent 名称
+        &quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.name = name
+        <span class="hljs-variable language_">self</span>.agent_name = agent_name
+
+        <span class="hljs-comment"># 初始化指标收集</span>
+        <span class="hljs-variable language_">self</span>.metrics: <span class="hljs-type">List</span>[Metric] = []
+
+        <span class="hljs-comment"># 初始化日志记录</span>
+        <span class="hljs-variable language_">self</span>.logs: <span class="hljs-type">List</span>[LogEntry] = []
+
+        <span class="hljs-comment"># 初始化告警规则</span>
+        <span class="hljs-variable language_">self</span>.alert_rules = {
+            <span class="hljs-string">&quot;max_response_time&quot;</span>: <span class="hljs-number">5.0</span>,  <span class="hljs-comment"># 最大响应时间（秒）</span>
+            <span class="hljs-string">&quot;min_success_rate&quot;</span>: <span class="hljs-number">0.95</span>,  <span class="hljs-comment"># 最小成功率</span>
+            <span class="hljs-string">&quot;max_error_rate&quot;</span>: <span class="hljs-number">0.05</span>  <span class="hljs-comment"># 最大错误率</span>
+        }
+
+        <span class="hljs-comment"># 初始化 LLM（用于生成分析）</span>
+        <span class="hljs-variable language_">self</span>.llm = ChatOpenAI(model=<span class="hljs-string">&quot;gpt-4&quot;</span>, temperature=<span class="hljs-number">0.0</span>)
+        <span class="hljs-variable language_">self</span>.prompt = ChatPromptTemplate.from_messages([
+            (<span class="hljs-string">&quot;system&quot;</span>, <span class="hljs-string">f&quot;你是一个监控专家，帮助分析 <span class="hljs-subst">{agent_name}</span> 的监控数据。&quot;</span>),
+            (<span class="hljs-string">&quot;user&quot;</span>, <span class="hljs-string">&quot;请分析以下监控数据，提供改进建议：\n{metrics}\n{logs}&quot;</span>)
+        ])
+
+        logger.info(<span class="hljs-string">f&quot;Agent 监控器 &#x27;<span class="hljs-subst">{self.name}</span>&#x27; 初始化完成&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">record_metric</span>(<span class="hljs-params">self, metric_type: MetricType, name: <span class="hljs-built_in">str</span>, value: <span class="hljs-built_in">float</span>, unit: <span class="hljs-built_in">str</span> = <span class="hljs-string">&quot;&quot;</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        记录指标
+
+        Args:
+            metric_type: 指标类型
+            name: 指标名称
+            value: 指标值
+            unit: 单位
+        &quot;&quot;&quot;</span>
+        metric = Metric(
+            metric_type=metric_type,
+            name=name,
+            value=value,
+            unit=unit,
+            timestamp=time.time()
+        )
+        <span class="hljs-variable language_">self</span>.metrics.append(metric)
+
+        <span class="hljs-comment"># 检查告警规则</span>
+        <span class="hljs-variable language_">self</span>._check_alert_rules(metric)
+
+        logger.info(<span class="hljs-string">f&quot;记录指标：<span class="hljs-subst">{metric_type.value}</span> - <span class="hljs-subst">{name}</span> = <span class="hljs-subst">{value}</span> <span class="hljs-subst">{unit}</span>&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">log</span>(<span class="hljs-params">self, level: <span class="hljs-built_in">str</span>, message: <span class="hljs-built_in">str</span>, context: <span class="hljs-type">Dict</span>[<span class="hljs-built_in">str</span>, <span class="hljs-type">Any</span>] = <span class="hljs-literal">None</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        记录日志
+
+        Args:
+            level: 日志级别（INFO、WARNING、ERROR）
+            message: 日志消息
+            context: 日志上下文
+        &quot;&quot;&quot;</span>
+        log_entry = LogEntry(
+            level=level,
+            message=message,
+            timestamp=time.time(),
+            context=context <span class="hljs-keyword">or</span> {}
+        )
+        <span class="hljs-variable language_">self</span>.logs.append(log_entry)
+
+        logger.info(<span class="hljs-string">f&quot;记录日志：[<span class="hljs-subst">{level}</span>] <span class="hljs-subst">{message}</span>&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_check_alert_rules</span>(<span class="hljs-params">self, metric: Metric</span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        检查告警规则
+
+        Args:
+            metric: 指标
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 检查最大响应时间</span>
+        <span class="hljs-keyword">if</span> metric.name == <span class="hljs-string">&quot;response_time&quot;</span> <span class="hljs-keyword">and</span> metric.value &gt; <span class="hljs-variable language_">self</span>.alert_rules[<span class="hljs-string">&quot;max_response_time&quot;</span>]:
+            <span class="hljs-variable language_">self</span>.log(<span class="hljs-string">&quot;WARNING&quot;</span>, <span class="hljs-string">f&quot;响应时间超过阈值：<span class="hljs-subst">{metric.value}</span>秒&quot;</span>, {<span class="hljs-string">&quot;metric&quot;</span>: metric.name, <span class="hljs-string">&quot;value&quot;</span>: metric.value, <span class="hljs-string">&quot;threshold&quot;</span>: <span class="hljs-variable language_">self</span>.alert_rules[<span class="hljs-string">&quot;max_response_time&quot;</span>]})
+            logger.warning(<span class="hljs-string">f&quot;告警：响应时间超过阈值：<span class="hljs-subst">{metric.value}</span>秒&quot;</span>)
+
+        <span class="hljs-comment"># 检查最小成功率</span>
+        <span class="hljs-keyword">if</span> metric.name == <span class="hljs-string">&quot;success_rate&quot;</span> <span class="hljs-keyword">and</span> metric.value &lt; <span class="hljs-variable language_">self</span>.alert_rules[<span class="hljs-string">&quot;min_success_rate&quot;</span>]:
+            <span class="hljs-variable language_">self</span>.log(<span class="hljs-string">&quot;WARNING&quot;</span>, <span class="hljs-string">f&quot;成功率低于阈值：<span class="hljs-subst">{metric.value:<span class="hljs-number">.2</span>%}</span>&quot;</span>, {<span class="hljs-string">&quot;metric&quot;</span>: metric.name, <span class="hljs-string">&quot;value&quot;</span>: metric.value, <span class="hljs-string">&quot;threshold&quot;</span>: <span class="hljs-variable language_">self</span>.alert_rules[<span class="hljs-string">&quot;min_success_rate&quot;</span>]})
+            logger.warning(<span class="hljs-string">f&quot;告警：成功率低于阈值：<span class="hljs-subst">{metric.value:<span class="hljs-number">.2</span>%}</span>&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">analyze_metrics</span>(<span class="hljs-params">self</span>) -&gt; <span class="hljs-built_in">str</span>:
+        <span class="hljs-string">&quot;&quot;&quot;
+        分析指标
+
+        Returns:
+            分析结果
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 统计最近指标</span>
+        recent_metrics = [m <span class="hljs-keyword">for</span> m <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.metrics <span class="hljs-keyword">if</span> time.time() - m.timestamp &lt; <span class="hljs-number">3600</span>]  <span class="hljs-comment"># 最近 1 小时</span>
+
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> recent_metrics:
+            <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;暂无足够数据进行&quot;</span>
+
+        <span class="hljs-comment"># 计算平均响应时间</span>
+        response_times = [m.value <span class="hljs-keyword">for</span> m <span class="hljs-keyword">in</span> recent_metrics <span class="hljs-keyword">if</span> m.name == <span class="hljs-string">&quot;response_time&quot;</span>]
+        avg_response_time = <span class="hljs-built_in">sum</span>(response_times) / <span class="hljs-built_in">len</span>(response_times) <span class="hljs-keyword">if</span> response_times <span class="hljs-keyword">else</span> <span class="hljs-number">0</span>
+
+        <span class="hljs-comment"># 计算平均成功率</span>
+        success_rates = [m.value <span class="hljs-keyword">for</span> m <span class="hljs-keyword">in</span> recent_metrics <span class="hljs-keyword">if</span> m.name == <span class="hljs-string">&quot;success_rate&quot;</span>]
+        avg_success_rate = <span class="hljs-built_in">sum</span>(success_rates) / <span class="hljs-built_in">len</span>(success_rates) <span class="hljs-keyword">if</span> success_rates <span class="hljs-keyword">else</span> <span class="hljs-number">0</span>
+
+        <span class="hljs-comment"># 生成分析</span>
+        analysis = <span class="hljs-string">f&quot;&quot;&quot;
+        监控数据分析报告
+        ===================
+        监控对象：<span class="hljs-subst">{self.agent_name}</span>
+        分析时间：<span class="hljs-subst">{datetime.now().strftime(<span class="hljs-string">&#x27;%Y-%m-%d %H:%M:%S&#x27;</span>)}</span>
+        最近 1 小时指标：
+        - 平均响应时间：<span class="hljs-subst">{avg_response_time:<span class="hljs-number">.2</span>f}</span>秒
+        - 平均成功率：<span class="hljs-subst">{avg_success_rate:<span class="hljs-number">.2</span>%}</span>
+
+        性能评估：
+        - 响应时间：<span class="hljs-subst">{<span class="hljs-string">&#x27;良好&#x27;</span> <span class="hljs-keyword">if</span> avg_response_time &lt; <span class="hljs-number">3.0</span> <span class="hljs-keyword">else</span> <span class="hljs-string">&#x27;需要优化&#x27;</span> <span class="hljs-keyword">if</span> avg_response_time &lt; <span class="hljs-number">5.0</span> <span class="hljs-keyword">else</span> <span class="hljs-string">&#x27;警告&#x27;</span>}</span>
+        - 成功率：<span class="hljs-subst">{<span class="hljs-string">&#x27;优秀&#x27;</span> <span class="hljs-keyword">if</span> avg_success_rate &gt; <span class="hljs-number">0.98</span> <span class="hljs-keyword">else</span> <span class="hljs-string">&#x27;良好&#x27;</span> <span class="hljs-keyword">if</span> avg_success_rate &gt; <span class="hljs-number">0.95</span> <span class="hljs-keyword">else</span> <span class="hljs-string">&#x27;需要改进&#x27;</span> <span class="hljs-keyword">if</span> avg_success_rate &gt; <span class="hljs-number">0.90</span> <span class="hljs-keyword">else</span> <span class="hljs-string">&#x27;警告&#x27;</span>}</span>
+
+        改进建议：
+        - 如果响应时间 &gt; 5.0秒，建议优化 Agent 的推理能力或工具调用效率
+        - 如果成功率 &lt; 0.95，建议优化 Agent 的规划能力或错误处理机制
+        - 持续监控并定期分析数据，以识别性能趋势和异常
+        &quot;&quot;&quot;</span>
+
+        logger.info(<span class="hljs-string">f&quot;生成分析：<span class="hljs-subst">{analysis}</span>&quot;</span>)
+
+        <span class="hljs-keyword">return</span> analysis
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">get_metrics_summary</span>(<span class="hljs-params">self</span>) -&gt; <span class="hljs-type">Dict</span>[<span class="hljs-built_in">str</span>, <span class="hljs-type">Any</span>]:
+        <span class="hljs-string">&quot;&quot;&quot;
+        获取指标摘要
+
+        Returns:
+            指标摘要
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 统计所有指标</span>
+        summary = {
+            <span class="hljs-string">&quot;total_metrics&quot;</span>: <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.metrics),
+            <span class="hljs-string">&quot;total_logs&quot;</span>: <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.logs),
+            <span class="hljs-string">&quot;metrics_by_type&quot;</span>: {},
+            <span class="hljs-string">&quot;recent_metrics&quot;</span>: []
+        }
+
+        <span class="hljs-comment"># 按类型统计指标</span>
+        <span class="hljs-keyword">for</span> metric <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.metrics:
+            <span class="hljs-keyword">if</span> metric.metric_type.value <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> summary[<span class="hljs-string">&quot;metrics_by_type&quot;</span>]:
+                summary[<span class="hljs-string">&quot;metrics_by_type&quot;</span>][metric.metric_type.value] = []
+            summary[<span class="hljs-string">&quot;metrics_by_type&quot;</span>][metric.metric_type.value].append({
+                <span class="hljs-string">&quot;name&quot;</span>: metric.name,
+                <span class="hljs-string">&quot;value&quot;</span>: metric.value,
+                <span class="hljs-string">&quot;unit&quot;</span>: metric.unit,
+                <span class="hljs-string">&quot;timestamp&quot;</span>: metric.timestamp
+            })
+
+        <span class="hljs-comment"># 最近指标（最近 10 条）</span>
+        summary[<span class="hljs-string">&quot;recent_metrics&quot;</span>] = [m <span class="hljs-keyword">for</span> m <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.metrics[-<span class="hljs-number">10</span>:]]
+
+        <span class="hljs-keyword">return</span> summary
+
+<span class="hljs-comment"># 使用示例</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">main</span>():
+    <span class="hljs-string">&quot;&quot;&quot;主函数&quot;&quot;&quot;</span>
+    <span class="hljs-comment"># 创建 Agent 监控器</span>
+    monitor = AgentMonitor(
+        name=<span class="hljs-string">&quot;AgentMonitor&quot;</span>,
+        agent_name=<span class="hljs-string">&quot;MyAgent&quot;</span>
+    )
+
+    <span class="hljs-comment"># 模拟记录指标</span>
+    monitor.record_metric(MetricType.PERFORMANCE, <span class="hljs-string">&quot;response_time&quot;</span>, <span class="hljs-number">2.5</span>, <span class="hljs-string">&quot;秒&quot;</span>)
+    monitor.record_metric(MetricType.PERFORMANCE, <span class="hljs-string">&quot;response_time&quot;</span>, <span class="hljs-number">3.8</span>, <span class="hljs-string">&quot;秒&quot;</span>)
+    monitor.record_metric(MetricType.PERFORMANCE, <span class="hljs-string">&quot;response_time&quot;</span>, <span class="hljs-number">4.2</span>, <span class="hljs-string">&quot;秒&quot;</span>)
+    monitor.record_metric(MetricType.QUALITY, <span class="hljs-string">&quot;success_rate&quot;</span>, <span class="hljs-number">0.98</span>, <span class="hljs-string">&quot;%&quot;</span>)
+
+    <span class="hljs-comment"># 模拟记录日志</span>
+    monitor.log(<span class="hljs-string">&quot;INFO&quot;</span>, <span class="hljs-string">&quot;Agent 成功完成任务 A&quot;</span>)
+    monitor.log(<span class="hljs-string">&quot;INFO&quot;</span>, <span class="hljs-string">&quot;Agent 成功完成任务 B&quot;</span>)
+    monitor.log(<span class="hljs-string">&quot;WARNING&quot;</span>, <span class="hljs-string">&quot;Agent 响应时间较长&quot;</span>, {<span class="hljs-string">&quot;task&quot;</span>: <span class="hljs-string">&quot;task C&quot;</span>, <span class="hljs-string">&quot;response_time&quot;</span>: <span class="hljs-number">5.2</span>})
+    monitor.log(<span class="hljs-string">&quot;ERROR&quot;</span>, <span class="hljs-string">&quot;Agent 执行失败&quot;</span>, {<span class="hljs-string">&quot;task&quot;</span>: <span class="hljs-string">&quot;task D&quot;</span>, <span class="hljs-string">&quot;error&quot;</span>: <span class="hljs-string">&quot;tool not found&quot;</span>})
+
+    <span class="hljs-comment"># 分析指标</span>
+    analysis = monitor.analyze_metrics()
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n&quot;</span> + <span class="hljs-string">&quot;=&quot;</span>*<span class="hljs-number">60</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Agent 监控分析&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;=&quot;</span>*<span class="hljs-number">60</span>)
+    <span class="hljs-built_in">print</span>(analysis)
+
+    <span class="hljs-comment"># 获取指标摘要</span>
+    summary = monitor.get_metrics_summary()
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n指标摘要：&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;总指标数：<span class="hljs-subst">{summary[<span class="hljs-string">&#x27;total_metrics&#x27;</span>]}</span>&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;总日志数：<span class="hljs-subst">{summary[<span class="hljs-string">&#x27;total_logs&#x27;</span>]}</span>&quot;</span>)
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    main()
+</code></pre>
+<hr>
+<h2 id="小结第十一章全部完成" tabindex="-1">小结（第十一章全部完成） <a class="heading-anchor" href="#小结第十一章全部完成" aria-hidden="true">#</a></h2>
+<p>本章详细介绍了 Agent 评估与监控的核心概念和实践，包括评估基础、基准测试、监控系统等内容，帮助开发者建立有效的评估和监控体系。</p>
+<p><strong>评估基础</strong></p>
+<ul>
+<li><strong>Agent 评估的定义</strong>：定义、核心机制、优势与劣势</li>
+<li><strong>评估指标</strong>：定义、核心机制、优势与劣势</li>
+</ul>
+<p><strong>基准测试</strong></p>
+<ul>
+<li><strong>Agent 基准测试概述</strong>：定义、核心机制、优势与劣势</li>
+<li><strong>常用 Agent 基准测试</strong>：定义、核心机制、优势与劣势</li>
+</ul>
+<p><strong>监控系统</strong></p>
+<ul>
+<li><strong>实时监控</strong>：定义、核心机制、优势与劣势</li>
+<li><strong>监控最佳实践</strong>：定义、核心原则、优势与劣势</li>
+</ul>
+<hr>
+<p><em>文档版本：v1.0</em>
+<em>最后更新：2026-03-18</em></p>
+</div> <nav class="pager"> <a class="pager__link" href="/ai-agent-development/10-agent-autonomous-learning/"> <span>上一篇</span> <strong>第十章：Agent 自主学习（Agent Autonomous Learning）</strong> </a> <a class="pager__link" href="/ai-agent-development/12-agent-safety-and-alignment/"> <span>下一篇</span> <strong>第十二章：Agent 安全与对齐（Agent Safety and Alignment）</strong> </a> </nav> </article> </section>  </main> <footer class="site-footer"> <div class="site-footer__inner"> <p>Vinci Knowledge Base</p> <p>Source directory: <code>/Users/superone77/Documents/知识库/projects</code></p> </div> </footer> </div> </body></html>

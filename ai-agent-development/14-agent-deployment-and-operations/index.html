@@ -1,0 +1,1693 @@
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>第十四章：Agent 部署与运维（Agent Deployment and Operations） | Vinci Knowledge Base</title><meta name="description" content="第十四章：Agent 部署与运维（Agent Deployment and Operations） 掌握 AI Agent 系统的部署、监控、优化和运维，将 Agent 从原型系统升级为生产级应用 14.1 部署基础 14.1.1 Agent 部署的定义 Agent 部署是指将开发完成的 Agent 系统从开发/测试环境部署到生产环境，使 Agent 能够为"><meta name="generator" content="Vinci Knowledge Base"><link rel="stylesheet" href="/_astro/_doc_.CY2v1inF.css"></head> <body> <div class="page-shell"> <header class="site-header"> <div class="site-header__inner"> <a class="brand" href="/"> <span class="brand__eyebrow">GitHub Pages Knowledge Site</span> <span class="brand__name">Vinci Knowledge Base</span> </a> <nav class="site-nav"> <a href="/">Projects</a> </nav> </div> </header> <main class="page-main">  <section class="article-hero"> <div> <p class="eyebrow">Knowledge Article</p> <h1>第十四章：Agent 部署与运维（Agent Deployment and Operations）</h1> <p class="article-hero__breadcrumbs"> <a href="/">Home</a> <span>/</span> <a href="/ai-agent-development/">AI Agent 智能体开发知识库</a> </p> </div> <div class="meta-card"> <p><strong>Project</strong> AI Agent 智能体开发知识库</p> <p><strong>Source</strong> <code>knowledge/14-agent-deployment-and-operations.md</code></p> <p><strong>Sections</strong> 122</p> </div> </section> <section class="content-grid"> <aside class="toc-card"> <p class="toc-card__title">本页目录</p> <ul class="toc-card__list"> <li class="toc-depth-1"> <a href="#第十四章agent-部署与运维agent-deployment-and-operations">第十四章：Agent 部署与运维（Agent Deployment and Operations）</a> </li><li class="toc-depth-2"> <a href="#141-部署基础">14.1 部署基础</a> </li><li class="toc-depth-3"> <a href="#1411-agent-部署的定义">14.1.1 Agent 部署的定义</a> </li><li class="toc-depth-3"> <a href="#1412-部署架构类型">14.1.2 部署架构类型</a> </li><li class="toc-depth-3"> <a href="#1413-部署流程">14.1.3 部署流程</a> </li><li class="toc-depth-2"> <a href="#142-langserve-部署">14.2 LangServe 部署</a> </li><li class="toc-depth-3"> <a href="#1421-langserve-简介">14.2.1 LangServe 简介</a> </li><li class="toc-depth-3"> <a href="#1422-langserve-基础部署">14.2.2 LangServe 基础部署</a> </li><li class="toc-depth-1"> <a href="#apppy">app.py</a> </li><li class="toc-depth-1"> <a href="#1-创建-llm">1. 创建 LLM</a> </li><li class="toc-depth-1"> <a href="#2-创建-prompt">2. 创建 Prompt</a> </li><li class="toc-depth-1"> <a href="#3-创建-chain">3. 创建 Chain</a> </li><li class="toc-depth-1"> <a href="#4-创建-fastapi-应用">4. 创建 FastAPI 应用</a> </li><li class="toc-depth-1"> <a href="#5-添加-cors-支持">5. 添加 CORS 支持</a> </li><li class="toc-depth-1"> <a href="#6-添加-chain-路由">6. 添加 Chain 路由</a> </li><li class="toc-depth-1"> <a href="#7-运行应用">7. 运行应用</a> </li><li class="toc-depth-3"> <a href="#1423-langserve-高级部署">14.2.3 LangServe 高级部署</a> </li><li class="toc-depth-1"> <a href="#agentapppy">agent_app.py</a> </li><li class="toc-depth-1"> <a href="#1-定义工具">1. 定义工具</a> </li><li class="toc-depth-1"> <a href="#2-创建-llm">2. 创建 LLM</a> </li><li class="toc-depth-1"> <a href="#3-创建-prompt">3. 创建 Prompt</a> </li><li class="toc-depth-1"> <a href="#4-创建-agent">4. 创建 Agent</a> </li><li class="toc-depth-1"> <a href="#5-创建-fastapi-应用">5. 创建 FastAPI 应用</a> </li><li class="toc-depth-1"> <a href="#6-添加-agent-路由">6. 添加 Agent 路由</a> </li><li class="toc-depth-1"> <a href="#graphapppy">graph_app.py</a> </li><li class="toc-depth-1"> <a href="#1-定义状态">1. 定义状态</a> </li><li class="toc-depth-1"> <a href="#2-定义节点">2. 定义节点</a> </li><li class="toc-depth-1"> <a href="#3-创建图">3. 创建图</a> </li><li class="toc-depth-1"> <a href="#4-添加记忆">4. 添加记忆</a> </li><li class="toc-depth-1"> <a href="#5-创建-fastapi-应用-1">5. 创建 FastAPI 应用</a> </li><li class="toc-depth-1"> <a href="#6-添加-graph-路由">6. 添加 Graph 路由</a> </li><li class="toc-depth-3"> <a href="#1424-langserve-容器化部署">14.2.4 LangServe 容器化部署</a> </li><li class="toc-depth-1"> <a href="#dockerfile">Dockerfile</a> </li><li class="toc-depth-1"> <a href="#设置工作目录">设置工作目录</a> </li><li class="toc-depth-1"> <a href="#复制依赖文件">复制依赖文件</a> </li><li class="toc-depth-1"> <a href="#安装依赖">安装依赖</a> </li><li class="toc-depth-1"> <a href="#复制应用代码">复制应用代码</a> </li><li class="toc-depth-1"> <a href="#暴露端口">暴露端口</a> </li><li class="toc-depth-1"> <a href="#启动应用">启动应用</a> </li><li class="toc-depth-3"> <a href="#1425-langserve-kubernetes-部署">14.2.5 LangServe Kubernetes 部署</a> </li><li class="toc-depth-1"> <a href="#deploymentyaml">deployment.yaml</a> </li><li class="toc-depth-1"> <a href="#serviceyaml">service.yaml</a> </li><li class="toc-depth-1"> <a href="#ingressyaml">ingress.yaml</a> </li><li class="toc-depth-2"> <a href="#143-云平台部署">14.3 云平台部署</a> </li><li class="toc-depth-3"> <a href="#1431-云平台选择">14.3.1 云平台选择</a> </li><li class="toc-depth-3"> <a href="#1432-google-kubernetes-engine-gke-部署实践">14.3.2 Google Kubernetes Engine (GKE) 部署实践</a> </li><li class="toc-depth-1"> <a href="#安装-gcloud-cli">安装 gcloud CLI</a> </li><li class="toc-depth-1"> <a href="#初始化-gcloud">初始化 gcloud</a> </li><li class="toc-depth-1"> <a href="#安装-kubectl">安装 kubectl</a> </li><li class="toc-depth-1"> <a href="#创建-gke-集群">创建 GKE 集群</a> </li><li class="toc-depth-1"> <a href="#构建并推送-docker-镜像到-google-artifact-registry">构建并推送 Docker 镜像到 Google Artifact Registry</a> </li><li class="toc-depth-1"> <a href="#部署到-gke">部署到 GKE</a> </li><li class="toc-depth-1"> <a href="#hpayaml">hpa.yaml</a> </li><li class="toc-depth-1"> <a href="#安装-cloud-logging-和-monitoring">安装 Cloud Logging 和 Monitoring</a> </li><li class="toc-depth-3"> <a href="#1433-azure-kubernetes-service-aks-部署实践">14.3.3 Azure Kubernetes Service (AKS) 部署实践</a> </li><li class="toc-depth-1"> <a href="#安装-azure-cli">安装 Azure CLI</a> </li><li class="toc-depth-1"> <a href="#登录-azure">登录 Azure</a> </li><li class="toc-depth-1"> <a href="#创建资源组">创建资源组</a> </li><li class="toc-depth-1"> <a href="#创建-aks-集群">创建 AKS 集群</a> </li><li class="toc-depth-1"> <a href="#获取-aks-凭证">获取 AKS 凭证</a> </li><li class="toc-depth-1"> <a href="#构建-docker-镜像-1">构建 Docker 镜像</a> </li><li class="toc-depth-1"> <a href="#部署到-aks">部署到 AKS</a> </li><li class="toc-depth-1"> <a href="#启用-azure-monitor">启用 Azure Monitor</a> </li><li class="toc-depth-3"> <a href="#1434-云平台部署最佳实践">14.3.4 云平台部署最佳实践</a> </li><li class="toc-depth-2"> <a href="#144-可观测性与监控">14.4 可观测性与监控</a> </li><li class="toc-depth-3"> <a href="#1441-可观测性基础">14.4.1 可观测性基础</a> </li><li class="toc-depth-3"> <a href="#1442-日志管理">14.4.2 日志管理</a> </li><li class="toc-depth-1"> <a href="#配置结构化日志">配置结构化日志</a> </li><li class="toc-depth-1"> <a href="#使用结构化日志">使用结构化日志</a> </li><li class="toc-depth-3"> <a href="#1443-指标监控">14.4.3 指标监控</a> </li><li class="toc-depth-1"> <a href="#prometheus-deploymentyaml">prometheus-deployment.yaml</a> </li><li class="toc-depth-1"> <a href="#prometheus-configyaml">prometheus-config.yaml</a> </li><li class="toc-depth-3"> <a href="#1444-分布式追踪">14.4.4 分布式追踪</a> </li><li class="toc-depth-1"> <a href="#设置-langsmith-api-key">设置 LangSmith API Key</a> </li><li class="toc-depth-1"> <a href="#创建-llm">创建 LLM</a> </li><li class="toc-depth-1"> <a href="#自动追踪所有-langchain-调用">自动追踪所有 LangChain 调用</a> </li><li class="toc-depth-1"> <a href="#配置-tracer">配置 Tracer</a> </li><li class="toc-depth-1"> <a href="#配置-jaeger-exporter">配置 Jaeger Exporter</a> </li><li class="toc-depth-1"> <a href="#使用-tracer">使用 Tracer</a> </li><li class="toc-depth-1"> <a href="#jaeger-deploymentyaml">jaeger-deployment.yaml</a> </li><li class="toc-depth-2"> <a href="#145-性能优化">14.5 性能优化</a> </li><li class="toc-depth-3"> <a href="#1451-延迟优化">14.5.1 延迟优化</a> </li><li class="toc-depth-1"> <a href="#使用更快的模型">使用更快的模型</a> </li><li class="toc-depth-1"> <a href="#gpt-4-turbo更快">GPT-4 Turbo（更快）</a> </li><li class="toc-depth-1"> <a href="#gpt-35-turbo最快">GPT-3.5 Turbo（最快）</a> </li><li class="toc-depth-1"> <a href="#流式响应">流式响应</a> </li><li class="toc-depth-1"> <a href="#启用缓存">启用缓存</a> </li><li class="toc-depth-1"> <a href="#第一次调用实际调用-llm">第一次调用（实际调用 LLM）</a> </li><li class="toc-depth-1"> <a href="#第二次调用从缓存返回">第二次调用（从缓存返回）</a> </li><li class="toc-depth-1"> <a href="#并发调用多个工具">并发调用多个工具</a> </li><li class="toc-depth-3"> <a href="#1452-成本优化">14.5.2 成本优化</a> </li><li class="toc-depth-1"> <a href="#根据任务选择合适的模型">根据任务选择合适的模型</a> </li><li class="toc-depth-1"> <a href="#优化前冗长的-prompt">优化前：冗长的 Prompt</a> </li><li class="toc-depth-1"> <a href="#优化后简洁的-prompt">优化后：简洁的 Prompt</a> </li><li class="toc-depth-1"> <a href="#批量调用减少-http-请求">批量调用（减少 HTTP 请求）</a> </li><li class="toc-depth-3"> <a href="#1453-吞吐量优化">14.5.3 吞吐量优化</a> </li><li class="toc-depth-1"> <a href="#并发处理多个请求">并发处理多个请求</a> </li><li class="toc-depth-1"> <a href="#使用连接池">使用连接池</a> </li><li class="toc-depth-1"> <a href="#serviceyaml-1">service.yaml</a> </li><li class="toc-depth-2"> <a href="#146-安全与合规">14.6 安全与合规</a> </li><li class="toc-depth-3"> <a href="#1461-安全措施">14.6.1 安全措施</a> </li><li class="toc-depth-3"> <a href="#1462-合规要求">14.6.2 合规要求</a> </li><li class="toc-depth-2"> <a href="#147-故障排查">14.7 故障排查</a> </li><li class="toc-depth-3"> <a href="#1471-常见问题">14.7.1 常见问题</a> </li><li class="toc-depth-3"> <a href="#1472-故障排查流程">14.7.2 故障排查流程</a> </li><li class="toc-depth-1"> <a href="#查看-pod-日志">查看 Pod 日志</a> </li><li class="toc-depth-1"> <a href="#查看特定容器的日志">查看特定容器的日志</a> </li><li class="toc-depth-1"> <a href="#查看之前的日志">查看之前的日志</a> </li><li class="toc-depth-1"> <a href="#查看-pod-状态">查看 Pod 状态</a> </li><li class="toc-depth-1"> <a href="#查看-pod-详情">查看 Pod 详情</a> </li><li class="toc-depth-1"> <a href="#进入-pod-调试">进入 Pod 调试</a> </li><li class="toc-depth-1"> <a href="#查看集群事件">查看集群事件</a> </li><li class="toc-depth-1"> <a href="#查看特定资源的事件">查看特定资源的事件</a> </li><li class="toc-depth-2"> <a href="#148-最佳实践总结">14.8 最佳实践总结</a> </li><li class="toc-depth-3"> <a href="#1481-部署最佳实践">14.8.1 部署最佳实践</a> </li><li class="toc-depth-3"> <a href="#1482-监控最佳实践">14.8.2 监控最佳实践</a> </li><li class="toc-depth-3"> <a href="#1483-优化最佳实践">14.8.3 优化最佳实践</a> </li><li class="toc-depth-3"> <a href="#1484-安全最佳实践">14.8.4 安全最佳实践</a> </li><li class="toc-depth-2"> <a href="#149-案例分析">14.9 案例分析</a> </li><li class="toc-depth-3"> <a href="#1491-企业客服-agent-部署案例">14.9.1 企业客服 Agent 部署案例</a> </li><li class="toc-depth-3"> <a href="#1492-数据分析-agent-部署案例">14.9.2 数据分析 Agent 部署案例</a> </li><li class="toc-depth-2"> <a href="#1410-总结">14.10 总结</a> </li> </ul> </aside> <article class="prose-card"> <div class="prose"><h1 id="第十四章agent-部署与运维agent-deployment-and-operations" tabindex="-1">第十四章：Agent 部署与运维（Agent Deployment and Operations） <a class="heading-anchor" href="#第十四章agent-部署与运维agent-deployment-and-operations" aria-hidden="true">#</a></h1>
+<blockquote>
+<p>掌握 AI Agent 系统的部署、监控、优化和运维，将 Agent 从原型系统升级为生产级应用</p>
+</blockquote>
+<hr>
+<h2 id="141-部署基础" tabindex="-1">14.1 部署基础 <a class="heading-anchor" href="#141-部署基础" aria-hidden="true">#</a></h2>
+<h3 id="1411-agent-部署的定义" tabindex="-1">14.1.1 Agent 部署的定义 <a class="heading-anchor" href="#1411-agent-部署的定义" aria-hidden="true">#</a></h3>
+<p>Agent 部署是指将开发完成的 Agent 系统从开发/测试环境部署到生产环境，使 Agent 能够为用户提供稳定、可靠、高性能的服务。部署过程包括环境准备、应用打包、服务发布、配置管理、监控告警等多个环节。</p>
+<p><strong>学术定义</strong>（来源：2024-2025 年最新研究）</p>
+<ul>
+<li><strong><a href="http://Kubiya.ai">Kubiya.ai</a>（2025）</strong>：AI Agent 部署最佳实践强调模块化设计、可观测性、治理、持续基准测试和灵活托管，以实现可扩展和合规的 AI 解决方案。</li>
+<li><strong>UiPath（2025）</strong>：通过 UiPath Orchestrator 或 Maestro 运行 agent，将 agent 部署为进程以继承生命周期管理、审计和治理。利用 AI Trust Layer：应用每租户权限、PII 脱敏、审计日志、限流和使用控制。</li>
+<li><strong>OnReach AI（2025）</strong>：利用模块化 AI Agent 架构，实现云原生架构，允许快速扩展和资源优化，这两者都是关键，因为 40% 的企业应用将包含任务特定的 AI Agent。</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，Agent 部署包括：</p>
+<ol>
+<li><strong>环境准备</strong>：配置生产环境（云平台、容器、网络、存储）</li>
+<li><strong>应用打包</strong>：将 Agent 应用打包为容器镜像、可执行文件或服务包</li>
+<li><strong>服务发布</strong>：将应用部署到生产环境（容器编排、服务发现、负载均衡）</li>
+<li><strong>配置管理</strong>：管理生产环境的配置（API 密钥、模型参数、服务配置）</li>
+<li><strong>监控告警</strong>：建立监控和告警系统（性能监控、错误监控、业务监控）</li>
+<li><strong>持续优化</strong>：基于监控数据持续优化 Agent 系统（性能优化、成本优化、稳定性优化）</li>
+</ol>
+<h4>Agent 部署的核心目标</h4>
+<table>
+<thead>
+<tr>
+<th>目标</th>
+<th>说明</th>
+<th>实现方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>高可用性</strong></td>
+<td>确保 Agent 服务 24/7 可用</td>
+<td>多实例部署、故障转移、健康检查</td>
+</tr>
+<tr>
+<td><strong>高性能</strong></td>
+<td>确保快速响应和高吞吐量</td>
+<td>负载均衡、缓存、并发处理</td>
+</tr>
+<tr>
+<td><strong>可扩展性</strong></td>
+<td>支持根据负载自动扩缩容</td>
+<td>水平扩展、自动扩缩容、资源调度</td>
+</tr>
+<tr>
+<td><strong>安全性</strong></td>
+<td>保护 Agent 系统免受攻击</td>
+<td>身份认证、权限控制、数据加密</td>
+</tr>
+<tr>
+<td><strong>可观测性</strong></td>
+<td>实时监控 Agent 的运行状态</td>
+<td>日志、指标、追踪</td>
+</tr>
+<tr>
+<td><strong>可维护性</strong></td>
+<td>简化运维和故障排查</td>
+<td>标准化部署、自动化运维、文档完善</td>
+</tr>
+</tbody>
+</table>
+<h3 id="1412-部署架构类型" tabindex="-1">14.1.2 部署架构类型 <a class="heading-anchor" href="#1412-部署架构类型" aria-hidden="true">#</a></h3>
+<p>根据不同的业务需求和技术约束，Agent 部署可以采用多种架构类型：</p>
+<h4>单机部署</h4>
+<p><strong>定义</strong>：将 Agent 部署在单一服务器或虚拟机上。</p>
+<p><strong>适用场景</strong>：</p>
+<ul>
+<li>原型验证阶段</li>
+<li>低负载应用</li>
+<li>内部工具</li>
+<li>开发和测试环境</li>
+</ul>
+<p><strong>优势</strong>：</p>
+<ul>
+<li>部署简单，成本低</li>
+<li>运维复杂度低</li>
+<li>无需复杂的基础设施</li>
+</ul>
+<p><strong>劣势</strong>：</p>
+<ul>
+<li>可用性低（单点故障）</li>
+<li>扩展性差</li>
+<li>资源利用率低</li>
+</ul>
+<h4>容器化部署</h4>
+<p><strong>定义</strong>：使用容器技术（如 Docker）打包 Agent 应用，实现应用的隔离和可移植性。</p>
+<p><strong>适用场景</strong>：</p>
+<ul>
+<li>中小规模应用</li>
+<li>多环境部署（开发、测试、生产）</li>
+<li>需要快速迭代和部署</li>
+</ul>
+<p><strong>优势</strong>：</p>
+<ul>
+<li>环境一致性：开发、测试、生产环境一致</li>
+<li>快速部署：容器启动速度快</li>
+<li>资源隔离：不同应用互不影响</li>
+<li>便于迁移：容器可在不同主机上运行</li>
+</ul>
+<p><strong>劣势</strong>：</p>
+<ul>
+<li>需要学习和使用容器技术</li>
+<li>需要容器编排系统（如 Kubernetes）</li>
+<li>容器镜像管理复杂</li>
+</ul>
+<h4>微服务部署</h4>
+<p><strong>定义</strong>：将 Agent 拆分为多个微服务，每个微服务独立部署和扩展。</p>
+<p><strong>适用场景</strong>：</p>
+<ul>
+<li>大规模企业应用</li>
+<li>高并发、高可用要求</li>
+<li>团队协作开发</li>
+</ul>
+<p><strong>优势</strong>：</p>
+<ul>
+<li>独立部署：每个微服务可以独立部署和扩展</li>
+<li>技术异构：不同微服务可以使用不同技术栈</li>
+<li>团队协作：不同团队可以独立开发和维护不同微服务</li>
+<li>容错性：单个微服务故障不会影响整个系统</li>
+</ul>
+<p><strong>劣势</strong>：</p>
+<ul>
+<li>系统复杂度高</li>
+<li>需要服务发现和负载均衡</li>
+<li>需要分布式追踪和监控</li>
+<li>运维成本高</li>
+</ul>
+<h4>云原生部署</h4>
+<p><strong>定义</strong>：使用云原生技术（容器、服务网格、不可变基础设施）部署 Agent 应用。</p>
+<p><strong>适用场景</strong>：</p>
+<ul>
+<li>大规模云平台应用</li>
+<li>需要自动扩缩容</li>
+<li>需要高可用和高性能</li>
+</ul>
+<p><strong>优势</strong>：</p>
+<ul>
+<li>自动化：部署、扩缩容、故障恢复自动化</li>
+<li>弹性：根据负载自动扩缩容</li>
+<li>可观测性：内置监控和日志</li>
+<li>成本优化：按需付费，资源利用率高</li>
+</ul>
+<p><strong>劣势</strong>：</p>
+<ul>
+<li>云原生技术学习曲线陡峭</li>
+<li>云平台锁定风险</li>
+<li>需要云平台专业知识</li>
+</ul>
+<h4>混合部署</h4>
+<p><strong>定义</strong>：结合多种部署架构，如部分服务容器化、部分服务微服务化、部分服务使用 Serverless。</p>
+<p><strong>适用场景</strong>：</p>
+<ul>
+<li>复杂企业应用</li>
+<li>需要平衡成本、性能、可维护性</li>
+<li>遗留系统和现代系统共存</li>
+</ul>
+<p><strong>优势</strong>：</p>
+<ul>
+<li>灵活性：可以根据不同服务的需求选择不同的部署方式</li>
+<li>成本优化：针对不同服务选择最优的部署方式</li>
+<li>渐进式迁移：逐步迁移遗留系统</li>
+</ul>
+<p><strong>劣势</strong>：</p>
+<ul>
+<li>系统复杂度高</li>
+<li>运维复杂度高</li>
+<li>需要统一监控和管理</li>
+</ul>
+<h3 id="1413-部署流程" tabindex="-1">14.1.3 部署流程 <a class="heading-anchor" href="#1413-部署流程" aria-hidden="true">#</a></h3>
+<h4>传统部署流程</h4>
+<p>传统部署流程通常包括以下步骤：</p>
+<pre class="hljs"><code>开发 → 测试 → 打包 → 部署 → 验证 → 上线
+</code></pre>
+<ol>
+<li><strong>开发</strong>：开发 Agent 应用</li>
+<li><strong>测试</strong>：在测试环境中测试应用</li>
+<li><strong>打包</strong>：将应用打包为可执行文件或安装包</li>
+<li><strong>部署</strong>：手动将应用部署到生产环境</li>
+<li><strong>验证</strong>：手动验证应用是否正常工作</li>
+<li><strong>上线</strong>：将应用上线给用户使用</li>
+</ol>
+<p><strong>问题</strong>：</p>
+<ul>
+<li>手动操作多，容易出错</li>
+<li>部署时间长，响应慢</li>
+<li>回滚困难</li>
+<li>难以追溯部署历史</li>
+</ul>
+<h4>CI/CD 部署流程</h4>
+<p>CI/CD（持续集成/持续部署）部署流程实现了自动化和持续化：</p>
+<pre class="hljs"><code>代码提交 → 自动测试 → 自动构建 → 自动部署 → 自动验证 → 自动上线
+</code></pre>
+<ol>
+<li><strong>代码提交</strong>：开发者提交代码到版本控制系统（如 Git）</li>
+<li><strong>自动测试</strong>：自动运行单元测试、集成测试</li>
+<li><strong>自动构建</strong>：自动构建应用（容器镜像、安装包等）</li>
+<li><strong>自动部署</strong>：自动将应用部署到测试或预生产环境</li>
+<li><strong>自动验证</strong>：自动验证部署是否成功</li>
+<li><strong>自动上线</strong>：自动将应用部署到生产环境</li>
+</ol>
+<p><strong>优势</strong>：</p>
+<ul>
+<li>自动化程度高，减少人为错误</li>
+<li>部署速度快，响应快</li>
+<li>易于回滚</li>
+<li>可追溯部署历史</li>
+<li>支持频繁发布</li>
+</ul>
+<p><strong>工具</strong>：</p>
+<ul>
+<li><strong>持续集成</strong>：GitHub Actions、GitLab CI、Jenkins、CircleCI</li>
+<li><strong>持续部署</strong>：ArgoCD、Flux、Jenkins X、Tekton</li>
+<li><strong>容器编排</strong>：Kubernetes、Docker Swarm、OpenShift</li>
+<li><strong>服务网格</strong>：Istio、Linkerd、Consul Connect</li>
+</ul>
+<h4>渐进式部署流程</h4>
+<p>渐进式部署（Gradual Deployment）采用渐进式策略降低部署风险：</p>
+<pre class="hljs"><code>小规模部署 → 灰度发布 → 全量部署 → 监控观察
+</code></pre>
+<ol>
+<li><strong>小规模部署</strong>：先部署到小规模环境（如 5% 的流量）</li>
+<li><strong>灰度发布</strong>：逐步增加流量（10%、25%、50%、100%）</li>
+<li><strong>全量部署</strong>：所有流量都指向新版本</li>
+<li><strong>监控观察</strong>：持续监控应用的健康状况</li>
+</ol>
+<p><strong>策略类型</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>说明</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>蓝绿部署</strong></td>
+<td>同时维护两套环境（蓝和绿），切换流量</td>
+<td>快速回滚、零停机部署</td>
+</tr>
+<tr>
+<td><strong>金丝雀发布</strong></td>
+<td>先部署到小部分用户，逐步扩大</td>
+<td>降低发布风险、A/B 测试</td>
+</tr>
+<tr>
+<td><strong>滚动更新</strong></td>
+<td>逐个实例更新，保持服务可用</td>
+<td>零停机部署、简单可靠</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="142-langserve-部署" tabindex="-1">14.2 LangServe 部署 <a class="heading-anchor" href="#142-langserve-部署" aria-hidden="true">#</a></h2>
+<h3 id="1421-langserve-简介" tabindex="-1">14.2.1 LangServe 简介 <a class="heading-anchor" href="#1421-langserve-简介" aria-hidden="true">#</a></h3>
+<p>LangServe 是 LangChain 生态中的部署框架，专门用于将 LangChain 的 Chain、Agent 和 Runnable 对象部署为生产级 API 服务。LangServe 基于 FastAPI 构建，提供了自动化的 API 生成、类型验证、流式响应等特性。</p>
+<p><strong>核心特性</strong>（来源：LangChain Blog, 2023-2025）：</p>
+<ol>
+<li><strong>自动化 API 生成</strong>：自动生成 REST API 接口，无需手动编写</li>
+<li><strong>类型安全</strong>：基于 Pydantic 的输入输出验证，确保类型安全</li>
+<li><strong>流式响应</strong>：支持流式输出，提升用户体验</li>
+<li><strong>异步支持</strong>：基于 FastAPI 的异步处理，提高并发性能</li>
+<li><strong>自动文档</strong>：自动生成 API 文档（Swagger UI）</li>
+<li><strong>易部署</strong>：支持 Docker、Kubernetes 等容器化部署</li>
+<li><strong>与 LangGraph 集成</strong>：支持 LangGraph 工作流的部署</li>
+</ol>
+<h4>LangServe 架构</h4>
+<pre class="hljs"><code>┌─────────────┐
+│   Client    │
+│  (前端应用)  │
+└──────┬──────┘
+       │ HTTP/gRPC
+       ▼
+┌─────────────────────────────────┐
+│        LangServe Server         │
+│  (FastAPI + LangChain/Agent)   │
+│  ┌─────────────────────────┐   │
+│  │   Runnable Interface    │   │
+│  │   (Chain/Agent/LangGraph)  │
+│  └─────────────────────────┘   │
+└──────────┬──────────────────────┘
+           │
+           ▼
+┌─────────────────────────────────┐
+│     Backend Services           │
+│  - LLM API (OpenAI/Anthropic) │
+│  - VectorDB (Pinecone/Weaviate) │
+│  - Tools (API/Databases)      │
+└─────────────────────────────────┘
+</code></pre>
+<h3 id="1422-langserve-基础部署" tabindex="-1">14.2.2 LangServe 基础部署 <a class="heading-anchor" href="#1422-langserve-基础部署" aria-hidden="true">#</a></h3>
+<h4>安装 LangServe</h4>
+<pre class="hljs"><code>pip install <span class="hljs-string">&quot;langserve[all]&quot;</span>
+</code></pre>
+<h4>创建简单的 LangServe 应用</h4>
+<p><strong>Step 1: 创建 LangChain Runnable</strong></p>
+<pre class="hljs"><code><span class="hljs-comment"># app.py</span>
+<span class="hljs-keyword">from</span> langchain_openai <span class="hljs-keyword">import</span> ChatOpenAI
+<span class="hljs-keyword">from</span> langchain_core.prompts <span class="hljs-keyword">import</span> ChatPromptTemplate
+<span class="hljs-keyword">from</span> langchain_core.output_parsers <span class="hljs-keyword">import</span> StrOutputParser
+<span class="hljs-keyword">from</span> langserve <span class="hljs-keyword">import</span> add_routes
+<span class="hljs-keyword">from</span> fastapi <span class="hljs-keyword">import</span> FastAPI
+<span class="hljs-keyword">from</span> fastapi.middleware.cors <span class="hljs-keyword">import</span> CORSMiddleware
+
+<span class="hljs-comment"># 1. 创建 LLM</span>
+llm = ChatOpenAI(model=<span class="hljs-string">&quot;gpt-4&quot;</span>, temperature=<span class="hljs-number">0.7</span>)
+
+<span class="hljs-comment"># 2. 创建 Prompt</span>
+prompt = ChatPromptTemplate.from_messages([
+    (<span class="hljs-string">&quot;system&quot;</span>, <span class="hljs-string">&quot;You are a helpful assistant.&quot;</span>),
+    (<span class="hljs-string">&quot;user&quot;</span>, <span class="hljs-string">&quot;{input}&quot;</span>)
+])
+
+<span class="hljs-comment"># 3. 创建 Chain</span>
+chain = prompt | llm | StrOutputParser()
+
+<span class="hljs-comment"># 4. 创建 FastAPI 应用</span>
+app = FastAPI(
+    title=<span class="hljs-string">&quot;LangServe Demo&quot;</span>,
+    version=<span class="hljs-string">&quot;1.0.0&quot;</span>,
+    description=<span class="hljs-string">&quot;A simple LangChain API deployed with LangServe&quot;</span>
+)
+
+<span class="hljs-comment"># 5. 添加 CORS 支持</span>
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[<span class="hljs-string">&quot;*&quot;</span>],
+    allow_credentials=<span class="hljs-literal">True</span>,
+    allow_methods=[<span class="hljs-string">&quot;*&quot;</span>],
+    allow_headers=[<span class="hljs-string">&quot;*&quot;</span>],
+)
+
+<span class="hljs-comment"># 6. 添加 Chain 路由</span>
+add_routes(
+    app,
+    chain,
+    path=<span class="hljs-string">&quot;/chain&quot;</span>,
+    tags=[<span class="hljs-string">&quot;Chain&quot;</span>]
+)
+
+<span class="hljs-comment"># 7. 运行应用</span>
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    <span class="hljs-keyword">import</span> uvicorn
+    uvicorn.run(app, host=<span class="hljs-string">&quot;0.0.0.0&quot;</span>, port=<span class="hljs-number">8000</span>)
+</code></pre>
+<p><strong>Step 2: 启动服务</strong></p>
+<pre class="hljs"><code>python app.py
+</code></pre>
+<p>服务将在 <code>http://localhost:8000</code> 启动。</p>
+<p><strong>Step 3: 访问 API 文档</strong></p>
+<ul>
+<li>Swagger UI: <code>http://localhost:8000/docs</code></li>
+<li>ReDoc: <code>http://localhost:8000/redoc</code></li>
+</ul>
+<p><strong>Step 4: 调用 API</strong></p>
+<pre class="hljs"><code>curl -X POST <span class="hljs-string">&quot;http://localhost:8000/chain/invoke&quot;</span> \
+  -H <span class="hljs-string">&quot;Content-Type: application/json&quot;</span> \
+  -d <span class="hljs-string">&#x27;{&quot;input&quot;: &quot;Hello, world!&quot;}&#x27;</span>
+</code></pre>
+<h3 id="1423-langserve-高级部署" tabindex="-1">14.2.3 LangServe 高级部署 <a class="heading-anchor" href="#1423-langserve-高级部署" aria-hidden="true">#</a></h3>
+<h4>部署 Agent</h4>
+<pre class="hljs"><code><span class="hljs-comment"># agent_app.py</span>
+<span class="hljs-keyword">from</span> langchain_openai <span class="hljs-keyword">import</span> ChatOpenAI
+<span class="hljs-keyword">from</span> langchain.agents <span class="hljs-keyword">import</span> create_tool_calling_agent, AgentExecutor
+<span class="hljs-keyword">from</span> langchain_core.prompts <span class="hljs-keyword">import</span> ChatPromptTemplate, MessagesPlaceholder
+<span class="hljs-keyword">from</span> langchain_core.tools <span class="hljs-keyword">import</span> tool
+<span class="hljs-keyword">from</span> langserve <span class="hljs-keyword">import</span> add_routes
+<span class="hljs-keyword">from</span> fastapi <span class="hljs-keyword">import</span> FastAPI
+
+<span class="hljs-comment"># 1. 定义工具</span>
+<span class="hljs-meta">@tool</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">get_weather</span>(<span class="hljs-params">location: <span class="hljs-built_in">str</span></span>) -&gt; <span class="hljs-built_in">str</span>:
+    <span class="hljs-string">&quot;&quot;&quot;获取指定位置的天气信息&quot;&quot;&quot;</span>
+    <span class="hljs-comment"># 模拟天气 API</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-string">f&quot;<span class="hljs-subst">{location}</span> 的天气：晴天，25°C&quot;</span>
+
+<span class="hljs-meta">@tool</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">search_web</span>(<span class="hljs-params">query: <span class="hljs-built_in">str</span></span>) -&gt; <span class="hljs-built_in">str</span>:
+    <span class="hljs-string">&quot;&quot;&quot;搜索网络信息&quot;&quot;&quot;</span>
+    <span class="hljs-comment"># 模拟搜索 API</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-string">f&quot;搜索结果：关于 &#x27;<span class="hljs-subst">{query}</span>&#x27; 的相关信息...&quot;</span>
+
+<span class="hljs-comment"># 2. 创建 LLM</span>
+llm = ChatOpenAI(model=<span class="hljs-string">&quot;gpt-4&quot;</span>, temperature=<span class="hljs-number">0</span>)
+
+<span class="hljs-comment"># 3. 创建 Prompt</span>
+prompt = ChatPromptTemplate.from_messages([
+    (<span class="hljs-string">&quot;system&quot;</span>, <span class="hljs-string">&quot;You are a helpful assistant.&quot;</span>),
+    MessagesPlaceholder(variable_name=<span class="hljs-string">&quot;chat_history&quot;</span>),
+    (<span class="hljs-string">&quot;human&quot;</span>, <span class="hljs-string">&quot;{input}&quot;</span>),
+    MessagesPlaceholder(variable_name=<span class="hljs-string">&quot;agent_scratchpad&quot;</span>)
+])
+
+<span class="hljs-comment"># 4. 创建 Agent</span>
+tools = [get_weather, search_web]
+agent = create_tool_calling_agent(llm, tools, prompt)
+agent_executor = AgentExecutor(
+    agent=agent,
+    tools=tools,
+    verbose=<span class="hljs-literal">True</span>,
+    return_intermediate_steps=<span class="hljs-literal">True</span>
+)
+
+<span class="hljs-comment"># 5. 创建 FastAPI 应用</span>
+app = FastAPI(title=<span class="hljs-string">&quot;Agent API&quot;</span>)
+
+<span class="hljs-comment"># 6. 添加 Agent 路由</span>
+add_routes(
+    app,
+    agent_executor,
+    path=<span class="hljs-string">&quot;/agent&quot;</span>,
+    tags=[<span class="hljs-string">&quot;Agent&quot;</span>]
+)
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    <span class="hljs-keyword">import</span> uvicorn
+    uvicorn.run(app, host=<span class="hljs-string">&quot;0.0.0.0&quot;</span>, port=<span class="hljs-number">8000</span>)
+</code></pre>
+<h4>部署 LangGraph 工作流</h4>
+<pre class="hljs"><code><span class="hljs-comment"># graph_app.py</span>
+<span class="hljs-keyword">from</span> langchain_openai <span class="hljs-keyword">import</span> ChatOpenAI
+<span class="hljs-keyword">from</span> langgraph.graph <span class="hljs-keyword">import</span> StateGraph, END
+<span class="hljs-keyword">from</span> langgraph.checkpoint.memory <span class="hljs-keyword">import</span> MemorySaver
+<span class="hljs-keyword">from</span> langserve <span class="hljs-keyword">import</span> add_routes
+<span class="hljs-keyword">from</span> fastapi <span class="hljs-keyword">import</span> FastAPI
+<span class="hljs-keyword">from</span> typing <span class="hljs-keyword">import</span> TypedDict, Annotated
+<span class="hljs-keyword">import</span> operator
+
+<span class="hljs-comment"># 1. 定义状态</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">GraphState</span>(<span class="hljs-title class_ inherited__">TypedDict</span>):
+    messages: Annotated[<span class="hljs-built_in">list</span>, operator.add]
+
+<span class="hljs-comment"># 2. 定义节点</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">reasoning_node</span>(<span class="hljs-params">state: GraphState</span>):
+    llm = ChatOpenAI(model=<span class="hljs-string">&quot;gpt-4&quot;</span>)
+    response = llm.invoke(state[<span class="hljs-string">&quot;messages&quot;</span>])
+    <span class="hljs-keyword">return</span> {<span class="hljs-string">&quot;messages&quot;</span>: [response]}
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">action_node</span>(<span class="hljs-params">state: GraphState</span>):
+    <span class="hljs-comment"># 执行工具调用</span>
+    <span class="hljs-comment"># ...</span>
+    <span class="hljs-keyword">return</span> {<span class="hljs-string">&quot;messages&quot;</span>: []}
+
+<span class="hljs-comment"># 3. 创建图</span>
+workflow = StateGraph(GraphState)
+workflow.add_node(<span class="hljs-string">&quot;reasoning&quot;</span>, reasoning_node)
+workflow.add_node(<span class="hljs-string">&quot;action&quot;</span>, action_node)
+
+workflow.set_entry_point(<span class="hljs-string">&quot;reasoning&quot;</span>)
+workflow.add_edge(<span class="hljs-string">&quot;reasoning&quot;</span>, <span class="hljs-string">&quot;action&quot;</span>)
+workflow.add_edge(<span class="hljs-string">&quot;action&quot;</span>, END)
+
+<span class="hljs-comment"># 4. 添加记忆</span>
+memory = MemorySaver()
+app_graph = workflow.<span class="hljs-built_in">compile</span>(checkpointer=memory)
+
+<span class="hljs-comment"># 5. 创建 FastAPI 应用</span>
+app = FastAPI(title=<span class="hljs-string">&quot;LangGraph API&quot;</span>)
+
+<span class="hljs-comment"># 6. 添加 Graph 路由</span>
+add_routes(
+    app,
+    app_graph,
+    path=<span class="hljs-string">&quot;/graph&quot;</span>,
+    tags=[<span class="hljs-string">&quot;Graph&quot;</span>]
+)
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    <span class="hljs-keyword">import</span> uvicorn
+    uvicorn.run(app, host=<span class="hljs-string">&quot;0.0.0.0&quot;</span>, port=<span class="hljs-number">8000</span>)
+</code></pre>
+<h3 id="1424-langserve-容器化部署" tabindex="-1">14.2.4 LangServe 容器化部署 <a class="heading-anchor" href="#1424-langserve-容器化部署" aria-hidden="true">#</a></h3>
+<h4>创建 Dockerfile</h4>
+<pre class="hljs"><code><span class="hljs-comment"># Dockerfile</span>
+<span class="hljs-keyword">FROM</span> python:<span class="hljs-number">3.11</span>-slim
+
+<span class="hljs-comment"># 设置工作目录</span>
+<span class="hljs-keyword">WORKDIR</span><span class="language-bash"> /app</span>
+
+<span class="hljs-comment"># 复制依赖文件</span>
+<span class="hljs-keyword">COPY</span><span class="language-bash"> requirements.txt .</span>
+
+<span class="hljs-comment"># 安装依赖</span>
+<span class="hljs-keyword">RUN</span><span class="language-bash"> pip install --no-cache-dir -r requirements.txt</span>
+
+<span class="hljs-comment"># 复制应用代码</span>
+<span class="hljs-keyword">COPY</span><span class="language-bash"> . .</span>
+
+<span class="hljs-comment"># 暴露端口</span>
+<span class="hljs-keyword">EXPOSE</span> <span class="hljs-number">8000</span>
+
+<span class="hljs-comment"># 启动应用</span>
+<span class="hljs-keyword">CMD</span><span class="language-bash"> [<span class="hljs-string">&quot;python&quot;</span>, <span class="hljs-string">&quot;app.py&quot;</span>]</span>
+</code></pre>
+<h4>requirements.txt</h4>
+<pre class="hljs"><code>fastapi
+uvicorn
+langchain
+langchain-openai
+langserve
+pydantic
+</code></pre>
+<h4>构建 Docker 镜像</h4>
+<pre class="hljs"><code>docker build -t langserve-app:latest .
+</code></pre>
+<h4>运行容器</h4>
+<pre class="hljs"><code>docker run -d \
+  --name langserve-app \
+  -p 8000:8000 \
+  -e OPENAI_API_KEY=<span class="hljs-string">&quot;your-api-key&quot;</span> \
+  langserve-app:latest
+</code></pre>
+<h3 id="1425-langserve-kubernetes-部署" tabindex="-1">14.2.5 LangServe Kubernetes 部署 <a class="heading-anchor" href="#1425-langserve-kubernetes-部署" aria-hidden="true">#</a></h3>
+<h4>创建 Kubernetes Deployment</h4>
+<pre class="hljs"><code><span class="hljs-comment"># deployment.yaml</span>
+<span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1</span>
+<span class="hljs-attr">kind:</span> <span class="hljs-string">Deployment</span>
+<span class="hljs-attr">metadata:</span>
+  <span class="hljs-attr">name:</span> <span class="hljs-string">langserve-app</span>
+<span class="hljs-attr">spec:</span>
+  <span class="hljs-attr">replicas:</span> <span class="hljs-number">3</span>
+  <span class="hljs-attr">selector:</span>
+    <span class="hljs-attr">matchLabels:</span>
+      <span class="hljs-attr">app:</span> <span class="hljs-string">langserve-app</span>
+  <span class="hljs-attr">template:</span>
+    <span class="hljs-attr">metadata:</span>
+      <span class="hljs-attr">labels:</span>
+        <span class="hljs-attr">app:</span> <span class="hljs-string">langserve-app</span>
+    <span class="hljs-attr">spec:</span>
+      <span class="hljs-attr">containers:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">langserve-app</span>
+        <span class="hljs-attr">image:</span> <span class="hljs-string">langserve-app:latest</span>
+        <span class="hljs-attr">ports:</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-attr">containerPort:</span> <span class="hljs-number">8000</span>
+        <span class="hljs-attr">env:</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">OPENAI_API_KEY</span>
+          <span class="hljs-attr">valueFrom:</span>
+            <span class="hljs-attr">secretKeyRef:</span>
+              <span class="hljs-attr">name:</span> <span class="hljs-string">openai-secret</span>
+              <span class="hljs-attr">key:</span> <span class="hljs-string">api-key</span>
+        <span class="hljs-attr">resources:</span>
+          <span class="hljs-attr">requests:</span>
+            <span class="hljs-attr">memory:</span> <span class="hljs-string">&quot;512Mi&quot;</span>
+            <span class="hljs-attr">cpu:</span> <span class="hljs-string">&quot;500m&quot;</span>
+          <span class="hljs-attr">limits:</span>
+            <span class="hljs-attr">memory:</span> <span class="hljs-string">&quot;1Gi&quot;</span>
+            <span class="hljs-attr">cpu:</span> <span class="hljs-string">&quot;1000m&quot;</span>
+        <span class="hljs-attr">livenessProbe:</span>
+          <span class="hljs-attr">httpGet:</span>
+            <span class="hljs-attr">path:</span> <span class="hljs-string">/health</span>
+            <span class="hljs-attr">port:</span> <span class="hljs-number">8000</span>
+          <span class="hljs-attr">initialDelaySeconds:</span> <span class="hljs-number">30</span>
+          <span class="hljs-attr">periodSeconds:</span> <span class="hljs-number">10</span>
+        <span class="hljs-attr">readinessProbe:</span>
+          <span class="hljs-attr">httpGet:</span>
+            <span class="hljs-attr">path:</span> <span class="hljs-string">/health</span>
+            <span class="hljs-attr">port:</span> <span class="hljs-number">8000</span>
+          <span class="hljs-attr">initialDelaySeconds:</span> <span class="hljs-number">10</span>
+          <span class="hljs-attr">periodSeconds:</span> <span class="hljs-number">5</span>
+</code></pre>
+<h4>创建 Kubernetes Service</h4>
+<pre class="hljs"><code><span class="hljs-comment"># service.yaml</span>
+<span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span>
+<span class="hljs-attr">kind:</span> <span class="hljs-string">Service</span>
+<span class="hljs-attr">metadata:</span>
+  <span class="hljs-attr">name:</span> <span class="hljs-string">langserve-app</span>
+<span class="hljs-attr">spec:</span>
+  <span class="hljs-attr">type:</span> <span class="hljs-string">LoadBalancer</span>
+  <span class="hljs-attr">selector:</span>
+    <span class="hljs-attr">app:</span> <span class="hljs-string">langserve-app</span>
+  <span class="hljs-attr">ports:</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-attr">protocol:</span> <span class="hljs-string">TCP</span>
+    <span class="hljs-attr">port:</span> <span class="hljs-number">80</span>
+    <span class="hljs-attr">targetPort:</span> <span class="hljs-number">8000</span>
+</code></pre>
+<h4>创建 Ingress（可选）</h4>
+<pre class="hljs"><code><span class="hljs-comment"># ingress.yaml</span>
+<span class="hljs-attr">apiVersion:</span> <span class="hljs-string">networking.k8s.io/v1</span>
+<span class="hljs-attr">kind:</span> <span class="hljs-string">Ingress</span>
+<span class="hljs-attr">metadata:</span>
+  <span class="hljs-attr">name:</span> <span class="hljs-string">langserve-app</span>
+  <span class="hljs-attr">annotations:</span>
+    <span class="hljs-attr">cert-manager.io/cluster-issuer:</span> <span class="hljs-string">&quot;letsencrypt-prod&quot;</span>
+<span class="hljs-attr">spec:</span>
+  <span class="hljs-attr">tls:</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-attr">hosts:</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-string">api.yourdomain.com</span>
+    <span class="hljs-attr">secretName:</span> <span class="hljs-string">langserve-tls</span>
+  <span class="hljs-attr">rules:</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-attr">host:</span> <span class="hljs-string">api.yourdomain.com</span>
+    <span class="hljs-attr">http:</span>
+      <span class="hljs-attr">paths:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">path:</span> <span class="hljs-string">/</span>
+        <span class="hljs-attr">pathType:</span> <span class="hljs-string">Prefix</span>
+        <span class="hljs-attr">backend:</span>
+          <span class="hljs-attr">service:</span>
+            <span class="hljs-attr">name:</span> <span class="hljs-string">langserve-app</span>
+            <span class="hljs-attr">port:</span>
+              <span class="hljs-attr">number:</span> <span class="hljs-number">80</span>
+</code></pre>
+<h4>部署到 Kubernetes</h4>
+<pre class="hljs"><code>kubectl apply -f deployment.yaml
+kubectl apply -f service.yaml
+kubectl apply -f ingress.yaml
+</code></pre>
+<hr>
+<h2 id="143-云平台部署" tabindex="-1">14.3 云平台部署 <a class="heading-anchor" href="#143-云平台部署" aria-hidden="true">#</a></h2>
+<h3 id="1431-云平台选择" tabindex="-1">14.3.1 云平台选择 <a class="heading-anchor" href="#1431-云平台选择" aria-hidden="true">#</a></h3>
+<p>根据不同的需求，可以选择不同的云平台部署 Agent 系统：</p>
+<h4>AWS (Amazon Web Services)</h4>
+<p><strong>核心服务</strong>：</p>
+<ul>
+<li><strong>Amazon EC2</strong>: 虚拟机，用于部署容器和微服务</li>
+<li><strong>Amazon EKS</strong>: 托管 Kubernetes 服务，用于容器编排</li>
+<li><strong>Amazon Lambda</strong>: Serverless 计算，用于事件驱动型 Agent</li>
+<li><strong>Amazon SageMaker</strong>: 机器学习平台，用于模型训练和部署</li>
+<li><strong>Amazon Bedrock</strong>: 托管 LLM 服务，提供 GPT-4、Claude、Llama 等模型</li>
+<li><strong>Amazon DynamoDB</strong>: NoSQL 数据库，用于存储 Agent 记忆</li>
+<li><strong>Amazon OpenSearch</strong>: 搜索引擎，用于语义检索</li>
+</ul>
+<p><strong>优势</strong>：</p>
+<ul>
+<li>服务全面，覆盖计算、存储、数据库、AI/ML</li>
+<li>成熟稳定，企业级支持</li>
+<li>丰富的生态系统和集成</li>
+</ul>
+<p><strong>适用场景</strong>：</p>
+<ul>
+<li>企业级大规模部署</li>
+<li>需要高可用和高性能</li>
+<li>已使用 AWS 生态系统</li>
+</ul>
+<h4>Google Cloud Platform (GCP)</h4>
+<p><strong>核心服务</strong>：</p>
+<ul>
+<li><strong>Google Cloud Run</strong>: 无服务器容器部署</li>
+<li><strong>Google Kubernetes Engine (GKE)</strong>: 托管 Kubernetes 服务</li>
+<li><strong>Google Cloud Functions</strong>: Serverless 计算</li>
+<li><strong>Vertex AI</strong>: AI/ML 平台，提供模型训练和部署</li>
+<li><strong>BigQuery</strong>: 数据仓库，用于数据分析</li>
+<li><strong>Firestore</strong>: NoSQL 数据库</li>
+<li><strong>AlloyDB</strong>: PostgreSQL 兼容数据库</li>
+</ul>
+<p><strong>优势</strong>：</p>
+<ul>
+<li>Cloud Native 支持，与 Kubernetes 集成良好</li>
+<li>强大的数据分析能力（BigQuery）</li>
+<li>先进的 AI/ML 服务（Vertex AI）</li>
+</ul>
+<p><strong>适用场景</strong>：</p>
+<ul>
+<li>需要 Cloud Native 部署</li>
+<li>依赖 Google 生态系统</li>
+<li>需要强大的数据分析能力</li>
+</ul>
+<h4>Microsoft Azure</h4>
+<p><strong>核心服务</strong>：</p>
+<ul>
+<li><strong>Azure Container Instances (ACI)</strong>: 容器实例</li>
+<li><strong>Azure Kubernetes Service (AKS)</strong>: 托管 Kubernetes 服务</li>
+<li><strong>Azure Functions</strong>: Serverless 计算</li>
+<li><strong>Azure OpenAI Service</strong>: 托管 LLM 服务（GPT-4、DALL-E）</li>
+<li><strong>Azure AI Foundry</strong>: AI/ML 平台，提供模型训练和部署</li>
+<li><strong>Azure Cosmos DB</strong>: 全局分布式数据库</li>
+<li><strong>Azure Cognitive Search</strong>: 搜索引擎，用于语义检索</li>
+</ul>
+<p><strong>优势</strong>：</p>
+<ul>
+<li>与 Microsoft 生态系统集成良好</li>
+<li>企业级安全和合规支持</li>
+<li>丰富的 AI 服务</li>
+</ul>
+<p><strong>适用场景</strong>：</p>
+<ul>
+<li>使用 Microsoft 生态系统</li>
+<li>需要企业级安全和合规</li>
+<li>企业级应用部署</li>
+</ul>
+<h4>云平台对比（来源：2025 年最新研究）</h4>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>AWS</th>
+<th>GCP</th>
+<th>Azure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>服务全面性</strong></td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>⭐⭐⭐⭐</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Cloud Native</strong></td>
+<td>⭐⭐⭐⭐</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>AI/ML 能力</strong></td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>企业级支持</strong></td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>⭐⭐⭐⭐</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>数据分析</strong></td>
+<td>⭐⭐⭐⭐</td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>成本</strong></td>
+<td>⭐⭐⭐</td>
+<td>⭐⭐⭐⭐</td>
+<td>⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<h3 id="1432-google-kubernetes-engine-gke-部署实践" tabindex="-1">14.3.2 Google Kubernetes Engine (GKE) 部署实践 <a class="heading-anchor" href="#1432-google-kubernetes-engine-gke-部署实践" aria-hidden="true">#</a></h3>
+<p><strong>来源</strong>：DEV Community, 2025</p>
+<h4>Step 1: 准备环境</h4>
+<pre class="hljs"><code><span class="hljs-comment"># 安装 gcloud CLI</span>
+curl https://sdk.cloud.google.com | bash
+
+<span class="hljs-comment"># 初始化 gcloud</span>
+gcloud init
+
+<span class="hljs-comment"># 安装 kubectl</span>
+gcloud components install kubectl
+
+<span class="hljs-comment"># 创建 GKE 集群</span>
+gcloud container clusters create langserve-cluster \
+  --zone=us-central1-a \
+  --machine-type=e2-medium \
+  --num-nodes=3 \
+  --enable-autoscaling \
+  --min-nodes=2 \
+  --max-nodes=5 \
+  --scopes=cloud-platform
+</code></pre>
+<h4>Step 2: 部署 LangServe 应用</h4>
+<pre class="hljs"><code><span class="hljs-comment"># 构建并推送 Docker 镜像到 Google Artifact Registry</span>
+gcloud auth configure-docker us-central1-docker.pkg.dev
+docker build -t us-central1-docker.pkg.dev/your-project/your-repo/langserve-app:latest .
+docker push us-central1-docker.pkg.dev/your-project/your-repo/langserve-app:latest
+
+<span class="hljs-comment"># 部署到 GKE</span>
+kubectl apply -f deployment.yaml
+kubectl apply -f service.yaml
+</code></pre>
+<h4>Step 3: 配置自动扩缩容</h4>
+<pre class="hljs"><code><span class="hljs-comment"># hpa.yaml</span>
+<span class="hljs-attr">apiVersion:</span> <span class="hljs-string">autoscaling/v2</span>
+<span class="hljs-attr">kind:</span> <span class="hljs-string">HorizontalPodAutoscaler</span>
+<span class="hljs-attr">metadata:</span>
+  <span class="hljs-attr">name:</span> <span class="hljs-string">langserve-app-hpa</span>
+<span class="hljs-attr">spec:</span>
+  <span class="hljs-attr">scaleTargetRef:</span>
+    <span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1</span>
+    <span class="hljs-attr">kind:</span> <span class="hljs-string">Deployment</span>
+    <span class="hljs-attr">name:</span> <span class="hljs-string">langserve-app</span>
+  <span class="hljs-attr">minReplicas:</span> <span class="hljs-number">2</span>
+  <span class="hljs-attr">maxReplicas:</span> <span class="hljs-number">10</span>
+  <span class="hljs-attr">metrics:</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-attr">type:</span> <span class="hljs-string">Resource</span>
+    <span class="hljs-attr">resource:</span>
+      <span class="hljs-attr">name:</span> <span class="hljs-string">cpu</span>
+      <span class="hljs-attr">target:</span>
+        <span class="hljs-attr">type:</span> <span class="hljs-string">Utilization</span>
+        <span class="hljs-attr">averageUtilization:</span> <span class="hljs-number">70</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-attr">type:</span> <span class="hljs-string">Resource</span>
+    <span class="hljs-attr">resource:</span>
+      <span class="hljs-attr">name:</span> <span class="hljs-string">memory</span>
+      <span class="hljs-attr">target:</span>
+        <span class="hljs-attr">type:</span> <span class="hljs-string">Utilization</span>
+        <span class="hljs-attr">averageUtilization:</span> <span class="hljs-number">80</span>
+</code></pre>
+<pre class="hljs"><code>kubectl apply -f hpa.yaml
+</code></pre>
+<h4>Step 4: 配置监控和日志</h4>
+<pre class="hljs"><code><span class="hljs-comment"># 安装 Cloud Logging 和 Monitoring</span>
+gcloud container clusters update langserve-cluster \
+  --zone=us-central1-a \
+  --enable-cloud-logging \
+  --enable-cloud-monitoring
+</code></pre>
+<h3 id="1433-azure-kubernetes-service-aks-部署实践" tabindex="-1">14.3.3 Azure Kubernetes Service (AKS) 部署实践 <a class="heading-anchor" href="#1433-azure-kubernetes-service-aks-部署实践" aria-hidden="true">#</a></h3>
+<h4>Step 1: 准备环境</h4>
+<pre class="hljs"><code><span class="hljs-comment"># 安装 Azure CLI</span>
+curl -sL https://aka.ms/InstallAzureCLIDeb | <span class="hljs-built_in">sudo</span> bash
+
+<span class="hljs-comment"># 登录 Azure</span>
+az login
+
+<span class="hljs-comment"># 创建资源组</span>
+az group create --name langserve-rg --location eastus
+
+<span class="hljs-comment"># 创建 AKS 集群</span>
+az aks create \
+  --resource-group langserve-rg \
+  --name langserve-cluster \
+  --node-count 3 \
+  --node-vm-size Standard_DS2_v2 \
+  --enable-cluster-autoscaler \
+  --min-count 2 \
+  --max-count 5 \
+  --enable-managed-identity
+
+<span class="hljs-comment"># 获取 AKS 凭证</span>
+az aks get-credentials --resource-group langserve-rg --name langserve-cluster
+</code></pre>
+<h4>Step 2: 部署 LangServe 应用</h4>
+<pre class="hljs"><code><span class="hljs-comment"># 构建 Docker 镜像</span>
+az acr build --registry langserveacr --image langserve-app:latest .
+
+<span class="hljs-comment"># 部署到 AKS</span>
+kubectl apply -f deployment.yaml
+kubectl apply -f service.yaml
+</code></pre>
+<h4>Step 3: 配置 Azure Monitor</h4>
+<pre class="hljs"><code><span class="hljs-comment"># 启用 Azure Monitor</span>
+az aks enable-addons \
+  --resource-group langserve-rg \
+  --name langserve-cluster \
+  --addons monitoring \
+  --workspace-resource-id /subscriptions/your-sub-id/resourceGroups/your-rg/providers/Microsoft.OperationalInsights/workspaces/your-workspace
+</code></pre>
+<h3 id="1434-云平台部署最佳实践" tabindex="-1">14.3.4 云平台部署最佳实践 <a class="heading-anchor" href="#1434-云平台部署最佳实践" aria-hidden="true">#</a></h3>
+<p><strong>1. 多环境管理</strong></p>
+<ul>
+<li>使用不同的资源组和命名空间管理不同环境（dev、staging、prod）</li>
+<li>使用基础设施即代码（IaC）工具（Terraform、Pulumi）管理资源</li>
+<li>使用 GitOps 工具（ArgoCD、Flux）实现自动化部署</li>
+</ul>
+<p><strong>2. 高可用设计</strong></p>
+<ul>
+<li>跨多个可用区（Availability Zones）部署</li>
+<li>使用负载均衡器分发流量</li>
+<li>配置健康检查和自动故障转移</li>
+</ul>
+<p><strong>3. 自动扩缩容</strong></p>
+<ul>
+<li>配置 Horizontal Pod Autoscaler (HPA)</li>
+<li>配置 Cluster Autoscaler 自动扩展节点</li>
+<li>基于指标（CPU、内存、自定义指标）触发扩缩容</li>
+</ul>
+<p><strong>4. 安全与合规</strong></p>
+<ul>
+<li>使用 Secret 管理敏感信息（API 密钥、数据库凭证）</li>
+<li>配置网络策略限制 Pod 间通信</li>
+<li>启用 RBAC（基于角色的访问控制）</li>
+<li>定期更新和打补丁</li>
+</ul>
+<p><strong>5. 成本优化</strong></p>
+<ul>
+<li>使用 Spot 实例降低成本（适合无状态服务）</li>
+<li>配置资源限制和请求</li>
+<li>使用成本监控和告警</li>
+<li>定期审查和优化资源使用</li>
+</ul>
+<hr>
+<h2 id="144-可观测性与监控" tabindex="-1">14.4 可观测性与监控 <a class="heading-anchor" href="#144-可观测性与监控" aria-hidden="true">#</a></h2>
+<h3 id="1441-可观测性基础" tabindex="-1">14.4.1 可观测性基础 <a class="heading-anchor" href="#1441-可观测性基础" aria-hidden="true">#</a></h3>
+<p>可观测性（Observability）是指通过外部输出来理解系统内部状态的能力。可观测性由三个核心支柱组成：</p>
+<table>
+<thead>
+<tr>
+<th>支柱</th>
+<th>说明</th>
+<th>工具示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Logs（日志）</strong></td>
+<td>记录系统事件和操作</td>
+<td>Elasticsearch、Cloud Logging、Loki</td>
+</tr>
+<tr>
+<td><strong>Metrics（指标）</strong></td>
+<td>数值化的性能数据</td>
+<td>Prometheus、CloudWatch、Grafana</td>
+</tr>
+<tr>
+<td><strong>Traces（追踪）</strong></td>
+<td>请求的端到端追踪</td>
+<td>Jaeger、Zipkin、LangSmith</td>
+</tr>
+</tbody>
+</table>
+<h4>Agent 可观测性的重要性</h4>
+<p><strong>来源</strong>：OpenTelemetry Blog, 2025</p>
+<ul>
+<li>Agent 系统具有非确定性（相同输入可能产生不同输出）</li>
+<li>Agent 系统涉及多个组件（LLM、工具、向量数据库、工作流）</li>
+<li>Agent 系统需要调试复杂的行为和决策过程</li>
+<li>Agent 系统需要确保质量和安全</li>
+</ul>
+<h3 id="1442-日志管理" tabindex="-1">14.4.2 日志管理 <a class="heading-anchor" href="#1442-日志管理" aria-hidden="true">#</a></h3>
+<h4>日志级别</h4>
+<table>
+<thead>
+<tr>
+<th>级别</th>
+<th>说明</th>
+<th>使用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DEBUG</strong></td>
+<td>详细调试信息</td>
+<td>开发和调试</td>
+</tr>
+<tr>
+<td><strong>INFO</strong></td>
+<td>常规操作信息</td>
+<td>正常运行</td>
+</tr>
+<tr>
+<td><strong>WARNING</strong></td>
+<td>警告信息</td>
+<td>可能的问题</td>
+</tr>
+<tr>
+<td><strong>ERROR</strong></td>
+<td>错误信息</td>
+<td>需要处理的错误</td>
+</tr>
+<tr>
+<td><strong>CRITICAL</strong></td>
+<td>严重错误</td>
+<td>系统无法继续运行</td>
+</tr>
+</tbody>
+</table>
+<h4>日志最佳实践</h4>
+<p><strong>1. 结构化日志</strong></p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> logging
+<span class="hljs-keyword">import</span> json
+<span class="hljs-keyword">from</span> datetime <span class="hljs-keyword">import</span> datetime
+
+<span class="hljs-comment"># 配置结构化日志</span>
+logger = logging.getLogger(<span class="hljs-string">&quot;agent&quot;</span>)
+logger.setLevel(logging.INFO)
+
+handler = logging.StreamHandler()
+handler.setFormatter(logging.Formatter(<span class="hljs-string">&#x27;%(message)s&#x27;</span>))
+logger.addHandler(handler)
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">log_event</span>(<span class="hljs-params">level, message, **kwargs</span>):
+    log_entry = {
+        <span class="hljs-string">&quot;timestamp&quot;</span>: datetime.utcnow().isoformat(),
+        <span class="hljs-string">&quot;level&quot;</span>: level,
+        <span class="hljs-string">&quot;message&quot;</span>: message,
+        **kwargs
+    }
+    logger.info(json.dumps(log_entry))
+
+<span class="hljs-comment"># 使用结构化日志</span>
+log_event(<span class="hljs-string">&quot;INFO&quot;</span>, <span class="hljs-string">&quot;Agent started&quot;</span>, agent_id=<span class="hljs-string">&quot;agent-001&quot;</span>, user_id=<span class="hljs-string">&quot;user-123&quot;</span>)
+log_event(<span class="hljs-string">&quot;WARNING&quot;</span>, <span class="hljs-string">&quot;Tool call failed&quot;</span>, tool=<span class="hljs-string">&quot;weather_api&quot;</span>, error=<span class="hljs-string">&quot;timeout&quot;</span>)
+</code></pre>
+<p><strong>2. 日志聚合</strong></p>
+<p>使用集中式日志系统收集和分析日志：</p>
+<ul>
+<li><strong>ELK Stack</strong>：Elasticsearch + Logstash + Kibana</li>
+<li><strong>EFK Stack</strong>：Elasticsearch + Fluentd + Kibana</li>
+<li><strong>Cloud Logging</strong>：Google Cloud Logging、AWS CloudWatch Logs</li>
+</ul>
+<p><strong>3. 日志保留策略</strong></p>
+<ul>
+<li>根据合规要求设置日志保留期限</li>
+<li>使用压缩和归档降低存储成本</li>
+<li>使用日志查询和过滤快速定位问题</li>
+</ul>
+<h3 id="1443-指标监控" tabindex="-1">14.4.3 指标监控 <a class="heading-anchor" href="#1443-指标监控" aria-hidden="true">#</a></h3>
+<h4>核心指标</h4>
+<table>
+<thead>
+<tr>
+<th>类别</th>
+<th>指标</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>性能指标</strong></td>
+<td>响应时间、吞吐量、延迟</td>
+<td>Agent 系统的性能表现</td>
+</tr>
+<tr>
+<td><strong>资源指标</strong></td>
+<td>CPU 使用率、内存使用率、网络流量</td>
+<td>资源利用情况</td>
+</tr>
+<tr>
+<td><strong>业务指标</strong></td>
+<td>任务完成率、用户满意度、错误率</td>
+<td>业务目标的达成情况</td>
+</tr>
+<tr>
+<td><strong>成本指标</strong></td>
+<td>API 调用成本、Token 消耗、基础设施成本</td>
+<td>运营成本</td>
+</tr>
+</tbody>
+</table>
+<h4>Prometheus + Grafana 监控栈</h4>
+<p><strong>安装 Prometheus</strong></p>
+<pre class="hljs"><code><span class="hljs-comment"># prometheus-deployment.yaml</span>
+<span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1</span>
+<span class="hljs-attr">kind:</span> <span class="hljs-string">Deployment</span>
+<span class="hljs-attr">metadata:</span>
+  <span class="hljs-attr">name:</span> <span class="hljs-string">prometheus</span>
+<span class="hljs-attr">spec:</span>
+  <span class="hljs-attr">replicas:</span> <span class="hljs-number">1</span>
+  <span class="hljs-attr">selector:</span>
+    <span class="hljs-attr">matchLabels:</span>
+      <span class="hljs-attr">app:</span> <span class="hljs-string">prometheus</span>
+  <span class="hljs-attr">template:</span>
+    <span class="hljs-attr">metadata:</span>
+      <span class="hljs-attr">labels:</span>
+        <span class="hljs-attr">app:</span> <span class="hljs-string">prometheus</span>
+    <span class="hljs-attr">spec:</span>
+      <span class="hljs-attr">containers:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">prometheus</span>
+        <span class="hljs-attr">image:</span> <span class="hljs-string">prom/prometheus:latest</span>
+        <span class="hljs-attr">ports:</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-attr">containerPort:</span> <span class="hljs-number">9090</span>
+        <span class="hljs-attr">volumeMounts:</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">config</span>
+          <span class="hljs-attr">mountPath:</span> <span class="hljs-string">/etc/prometheus</span>
+      <span class="hljs-attr">volumes:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">config</span>
+        <span class="hljs-attr">configMap:</span>
+          <span class="hljs-attr">name:</span> <span class="hljs-string">prometheus-config</span>
+</code></pre>
+<p><strong>配置 Prometheus</strong></p>
+<pre class="hljs"><code><span class="hljs-comment"># prometheus-config.yaml</span>
+<span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span>
+<span class="hljs-attr">kind:</span> <span class="hljs-string">ConfigMap</span>
+<span class="hljs-attr">metadata:</span>
+  <span class="hljs-attr">name:</span> <span class="hljs-string">prometheus-config</span>
+<span class="hljs-attr">data:</span>
+  <span class="hljs-attr">prometheus.yml:</span> <span class="hljs-string">|
+    global:
+      scrape_interval: 15s
+</span>
+    <span class="hljs-attr">scrape_configs:</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-attr">job_name:</span> <span class="hljs-string">&#x27;langserve-app&#x27;</span>
+      <span class="hljs-attr">kubernetes_sd_configs:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">role:</span> <span class="hljs-string">pod</span>
+      <span class="hljs-attr">relabel_configs:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">source_labels:</span> [<span class="hljs-string">__meta_kubernetes_pod_label_app</span>]
+        <span class="hljs-attr">action:</span> <span class="hljs-string">keep</span>
+        <span class="hljs-attr">regex:</span> <span class="hljs-string">langserve-app</span>
+</code></pre>
+<p><strong>安装 Grafana</strong></p>
+<pre class="hljs"><code>kubectl create namespace monitoring
+helm repo add grafana https://grafana.github.io/helm-charts
+helm install grafana grafana/grafana --namespace monitoring
+</code></pre>
+<p><strong>创建 Grafana Dashboard</strong></p>
+<p>在 Grafana 中创建自定义 Dashboard，监控以下指标：</p>
+<ul>
+<li>Agent 请求数（QPS）</li>
+<li>平均响应时间（P50、P95、P99）</li>
+<li>错误率</li>
+<li>CPU 和内存使用率</li>
+<li>Token 消耗和成本</li>
+</ul>
+<h3 id="1444-分布式追踪" tabindex="-1">14.4.4 分布式追踪 <a class="heading-anchor" href="#1444-分布式追踪" aria-hidden="true">#</a></h3>
+<h4>追踪的价值</h4>
+<p>分布式追踪可以追踪请求在多个服务之间的完整路径，帮助定位性能瓶颈和错误。</p>
+<p><strong>来源</strong>：Langfuse Blog, 2024；OpenTelemetry Blog, 2025</p>
+<ul>
+<li>理解 Agent 的完整执行流程</li>
+<li>定位性能瓶颈和慢查询</li>
+<li>分析工具调用链和工作流执行</li>
+<li>支持调试和错误诊断</li>
+</ul>
+<h4>LangSmith 追踪</h4>
+<p><strong>LangSmith</strong> 是 LangChain 官方的追踪和调试平台。</p>
+<p><strong>集成 LangSmith</strong></p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> os
+<span class="hljs-keyword">from</span> langchain_openai <span class="hljs-keyword">import</span> ChatOpenAI
+<span class="hljs-keyword">from</span> langsmith <span class="hljs-keyword">import</span> LangSmith
+
+<span class="hljs-comment"># 设置 LangSmith API Key</span>
+os.environ[<span class="hljs-string">&quot;LANGCHAIN_TRACING_V2&quot;</span>] = <span class="hljs-string">&quot;true&quot;</span>
+os.environ[<span class="hljs-string">&quot;LANGCHAIN_API_KEY&quot;</span>] = <span class="hljs-string">&quot;your-langsmith-api-key&quot;</span>
+os.environ[<span class="hljs-string">&quot;LANGCHAIN_PROJECT&quot;</span>] = <span class="hljs-string">&quot;your-project-name&quot;</span>
+
+<span class="hljs-comment"># 创建 LLM</span>
+llm = ChatOpenAI(model=<span class="hljs-string">&quot;gpt-4&quot;</span>)
+
+<span class="hljs-comment"># 自动追踪所有 LangChain 调用</span>
+response = llm.invoke(<span class="hljs-string">&quot;Hello, world!&quot;</span>)
+</code></pre>
+<p><strong>LangSmith 功能</strong></p>
+<ul>
+<li><strong>Tracing</strong>：追踪 Agent 的完整执行流程</li>
+<li><strong>Evaluation</strong>：评估 Agent 的性能和质量</li>
+<li><strong>Debugging</strong>：调试 Agent 的行为和决策</li>
+<li><strong>Monitoring</strong>：监控 Agent 的运行状态</li>
+<li><strong>Cost Tracking</strong>：追踪 API 调用成本</li>
+</ul>
+<h4>OpenTelemetry 集成</h4>
+<p><strong>OpenTelemetry</strong> 是云原生的可观测性标准。</p>
+<p><strong>安装 OpenTelemetry</strong></p>
+<pre class="hljs"><code>pip install opentelemetry-api opentelemetry-sdk opentelemetry-instrumentation-langchain
+</code></pre>
+<p><strong>配置 OpenTelemetry</strong></p>
+<pre class="hljs"><code><span class="hljs-keyword">from</span> opentelemetry <span class="hljs-keyword">import</span> trace
+<span class="hljs-keyword">from</span> opentelemetry.sdk.trace <span class="hljs-keyword">import</span> TracerProvider
+<span class="hljs-keyword">from</span> opentelemetry.sdk.trace.export <span class="hljs-keyword">import</span> BatchSpanProcessor
+<span class="hljs-keyword">from</span> opentelemetry.exporter.jaeger.thrift <span class="hljs-keyword">import</span> JaegerExporter
+
+<span class="hljs-comment"># 配置 Tracer</span>
+trace.set_tracer_provider(TracerProvider())
+tracer = trace.get_tracer(__name__)
+
+<span class="hljs-comment"># 配置 Jaeger Exporter</span>
+jaeger_exporter = JaegerExporter(
+    agent_host_name=<span class="hljs-string">&quot;jaeger&quot;</span>,
+    agent_port=<span class="hljs-number">6831</span>,
+)
+
+span_processor = BatchSpanProcessor(jaeger_exporter)
+trace.get_tracer_provider().add_span_processor(span_processor)
+
+<span class="hljs-comment"># 使用 Tracer</span>
+<span class="hljs-keyword">with</span> tracer.start_as_current_span(<span class="hljs-string">&quot;agent-execution&quot;</span>):
+    <span class="hljs-comment"># Agent 代码</span>
+    llm.invoke(<span class="hljs-string">&quot;Hello, world!&quot;</span>)
+</code></pre>
+<h4>Jaeger 部署</h4>
+<pre class="hljs"><code><span class="hljs-comment"># jaeger-deployment.yaml</span>
+<span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1</span>
+<span class="hljs-attr">kind:</span> <span class="hljs-string">Deployment</span>
+<span class="hljs-attr">metadata:</span>
+  <span class="hljs-attr">name:</span> <span class="hljs-string">jaeger</span>
+<span class="hljs-attr">spec:</span>
+  <span class="hljs-attr">replicas:</span> <span class="hljs-number">1</span>
+  <span class="hljs-attr">selector:</span>
+    <span class="hljs-attr">matchLabels:</span>
+      <span class="hljs-attr">app:</span> <span class="hljs-string">jaeger</span>
+  <span class="hljs-attr">template:</span>
+    <span class="hljs-attr">metadata:</span>
+      <span class="hljs-attr">labels:</span>
+        <span class="hljs-attr">app:</span> <span class="hljs-string">jaeger</span>
+    <span class="hljs-attr">spec:</span>
+      <span class="hljs-attr">containers:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">jaeger</span>
+        <span class="hljs-attr">image:</span> <span class="hljs-string">jaegertracing/all-in-one:latest</span>
+        <span class="hljs-attr">ports:</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-attr">containerPort:</span> <span class="hljs-number">16686</span>
+        <span class="hljs-bullet">-</span> <span class="hljs-attr">containerPort:</span> <span class="hljs-number">14250</span>
+</code></pre>
+<hr>
+<h2 id="145-性能优化" tabindex="-1">14.5 性能优化 <a class="heading-anchor" href="#145-性能优化" aria-hidden="true">#</a></h2>
+<h3 id="1451-延迟优化" tabindex="-1">14.5.1 延迟优化 <a class="heading-anchor" href="#1451-延迟优化" aria-hidden="true">#</a></h3>
+<h4>延迟来源分析</h4>
+<table>
+<thead>
+<tr>
+<th>来源</th>
+<th>说明</th>
+<th>优化策略</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LLM 调用</strong></td>
+<td>LLM API 的响应时间</td>
+<td>使用更快的模型、流式响应、缓存</td>
+</tr>
+<tr>
+<td><strong>工具调用</strong></td>
+<td>工具 API 的响应时间</td>
+<td>优化工具代码、并发调用、缓存</td>
+</tr>
+<tr>
+<td><strong>网络传输</strong></td>
+<td>网络延迟</td>
+<td>使用 CDN、就近部署、压缩数据</td>
+</tr>
+<tr>
+<td><strong>序列化/反序列化</strong></td>
+<td>数据处理开销</td>
+<td>使用高效的数据格式（如 MessagePack）</td>
+</tr>
+<tr>
+<td><strong>等待 I/O</strong></td>
+<td>数据库、文件系统等 I/O 操作</td>
+<td>使用异步 I/O、连接池、缓存</td>
+</tr>
+</tbody>
+</table>
+<h4>优化策略</h4>
+<p><strong>1. 使用更快的模型</strong></p>
+<pre class="hljs"><code><span class="hljs-comment"># 使用更快的模型</span>
+<span class="hljs-keyword">from</span> langchain_openai <span class="hljs-keyword">import</span> ChatOpenAI
+
+<span class="hljs-comment"># GPT-4 Turbo（更快）</span>
+llm_fast = ChatOpenAI(model=<span class="hljs-string">&quot;gpt-4-turbo-preview&quot;</span>)
+
+<span class="hljs-comment"># GPT-3.5 Turbo（最快）</span>
+llm_fastest = ChatOpenAI(model=<span class="hljs-string">&quot;gpt-3.5-turbo&quot;</span>)
+</code></pre>
+<p><strong>2. 流式响应</strong></p>
+<pre class="hljs"><code><span class="hljs-keyword">from</span> langchain_openai <span class="hljs-keyword">import</span> ChatOpenAI
+
+llm = ChatOpenAI(model=<span class="hljs-string">&quot;gpt-4&quot;</span>, streaming=<span class="hljs-literal">True</span>)
+
+<span class="hljs-comment"># 流式响应</span>
+<span class="hljs-keyword">for</span> chunk <span class="hljs-keyword">in</span> llm.stream(<span class="hljs-string">&quot;Hello, world!&quot;</span>):
+    <span class="hljs-built_in">print</span>(chunk.content, end=<span class="hljs-string">&quot;&quot;</span>, flush=<span class="hljs-literal">True</span>)
+</code></pre>
+<p><strong>3. 缓存</strong></p>
+<pre class="hljs"><code><span class="hljs-keyword">from</span> langchain_openai <span class="hljs-keyword">import</span> ChatOpenAI
+<span class="hljs-keyword">from</span> langchain.cache <span class="hljs-keyword">import</span> InMemoryCache
+<span class="hljs-keyword">from</span> langchain.<span class="hljs-built_in">globals</span> <span class="hljs-keyword">import</span> set_llm_cache
+
+<span class="hljs-comment"># 启用缓存</span>
+set_llm_cache(InMemoryCache())
+
+llm = ChatOpenAI(model=<span class="hljs-string">&quot;gpt-4&quot;</span>)
+
+<span class="hljs-comment"># 第一次调用（实际调用 LLM）</span>
+response1 = llm.invoke(<span class="hljs-string">&quot;Hello, world!&quot;</span>)
+
+<span class="hljs-comment"># 第二次调用（从缓存返回）</span>
+response2 = llm.invoke(<span class="hljs-string">&quot;Hello, world!&quot;</span>)  <span class="hljs-comment"># 快得多</span>
+</code></pre>
+<p><strong>4. 并发工具调用</strong></p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> asyncio
+<span class="hljs-keyword">from</span> langchain_openai <span class="hljs-keyword">import</span> ChatOpenAI
+<span class="hljs-keyword">from</span> langchain.tools <span class="hljs-keyword">import</span> Tool
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">call_tool</span>(<span class="hljs-params">tool: Tool, <span class="hljs-built_in">input</span>: <span class="hljs-built_in">str</span></span>):
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">await</span> tool.arun(<span class="hljs-built_in">input</span>)
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">call_tools_concurrently</span>(<span class="hljs-params">tools: <span class="hljs-built_in">list</span>[Tool], inputs: <span class="hljs-built_in">list</span>[<span class="hljs-built_in">str</span>]</span>):
+    tasks = [call_tool(tool, <span class="hljs-built_in">input</span>) <span class="hljs-keyword">for</span> tool, <span class="hljs-built_in">input</span> <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>(tools, inputs)]
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">await</span> asyncio.gather(*tasks)
+
+<span class="hljs-comment"># 并发调用多个工具</span>
+tools = [tool1, tool2, tool3]
+inputs = [<span class="hljs-string">&quot;input1&quot;</span>, <span class="hljs-string">&quot;input2&quot;</span>, <span class="hljs-string">&quot;input3&quot;</span>]
+results = <span class="hljs-keyword">await</span> call_tools_concurrently(tools, inputs)
+</code></pre>
+<p><strong>来源</strong>：Aviso Blog, 2025；Stevens Online, 2026</p>
+<p>研究表明，缓存可以将输入成本降低约 90%，延迟降低约 75%。</p>
+<h3 id="1452-成本优化" tabindex="-1">14.5.2 成本优化 <a class="heading-anchor" href="#1452-成本优化" aria-hidden="true">#</a></h3>
+<h4>成本来源</h4>
+<table>
+<thead>
+<tr>
+<th>来源</th>
+<th>说明</th>
+<th>优化策略</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LLM API 调用</strong></td>
+<td>Token 消耗</td>
+<td>使用更小的模型、优化 Prompt、缓存</td>
+</tr>
+<tr>
+<td><strong>工具 API 调用</strong></td>
+<td>外部服务费用</td>
+<td>批量调用、缓存、选择更便宜的服务</td>
+</tr>
+<tr>
+<td><strong>基础设施成本</strong></td>
+<td>云平台费用</td>
+<td>自动扩缩容、使用 Spot 实例、资源优化</td>
+</tr>
+<tr>
+<td><strong>监控和日志成本</strong></td>
+<td>可观测性费用</td>
+<td>合理设置保留期限、采样率</td>
+</tr>
+</tbody>
+</table>
+<h4>优化策略</h4>
+<p><strong>1. 使用更小的模型</strong></p>
+<pre class="hljs"><code><span class="hljs-keyword">from</span> langchain_openai <span class="hljs-keyword">import</span> ChatOpenAI
+
+<span class="hljs-comment"># 根据任务选择合适的模型</span>
+llm_simple_task = ChatOpenAI(model=<span class="hljs-string">&quot;gpt-3.5-turbo&quot;</span>)  <span class="hljs-comment"># 简单任务</span>
+llm_complex_task = ChatOpenAI(model=<span class="hljs-string">&quot;gpt-4&quot;</span>)  <span class="hljs-comment"># 复杂任务</span>
+</code></pre>
+<p><strong>2. 优化 Prompt</strong></p>
+<pre class="hljs"><code><span class="hljs-comment"># 优化前：冗长的 Prompt</span>
+prompt = <span class="hljs-string">&quot;&quot;&quot;
+You are a helpful AI assistant. Your task is to help users with their questions.
+Please provide clear and concise answers. If you don&#x27;t know the answer, say so.
+&quot;&quot;&quot;</span>
+
+<span class="hljs-comment"># 优化后：简洁的 Prompt</span>
+prompt = <span class="hljs-string">&quot;You are a helpful AI assistant. Provide clear and concise answers.&quot;</span>
+</code></pre>
+<p><strong>3. 批量调用</strong></p>
+<pre class="hljs"><code><span class="hljs-keyword">from</span> langchain_openai <span class="hljs-keyword">import</span> ChatOpenAI
+
+llm = ChatOpenAI(model=<span class="hljs-string">&quot;gpt-3.5-turbo&quot;</span>)
+
+<span class="hljs-comment"># 批量调用（减少 HTTP 请求）</span>
+responses = llm.batch([<span class="hljs-string">&quot;Input 1&quot;</span>, <span class="hljs-string">&quot;Input 2&quot;</span>, <span class="hljs-string">&quot;Input 3&quot;</span>])
+</code></pre>
+<p><strong>4. 使用 Token 限制</strong></p>
+<pre class="hljs"><code><span class="hljs-keyword">from</span> langchain_openai <span class="hljs-keyword">import</span> ChatOpenAI
+
+llm = ChatOpenAI(
+    model=<span class="hljs-string">&quot;gpt-3.5-turbo&quot;</span>,
+    max_tokens=<span class="hljs-number">1000</span>,  <span class="hljs-comment"># 限制输出 Token 数</span>
+    temperature=<span class="hljs-number">0.7</span>
+)
+</code></pre>
+<p><strong>来源</strong>：Stevens Online, 2026；Aviso Blog, 2025</p>
+<p>研究表明，优化 Prompt 和使用更小的模型可以降低 50-70% 的成本。</p>
+<h3 id="1453-吞吐量优化" tabindex="-1">14.5.3 吞吐量优化 <a class="heading-anchor" href="#1453-吞吐量优化" aria-hidden="true">#</a></h3>
+<h4>并发处理</h4>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> asyncio
+<span class="hljs-keyword">from</span> langchain_openai <span class="hljs-keyword">import</span> ChatOpenAI
+
+llm = ChatOpenAI(model=<span class="hljs-string">&quot;gpt-3.5-turbo&quot;</span>)
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">process_request</span>(<span class="hljs-params"><span class="hljs-built_in">input</span>: <span class="hljs-built_in">str</span></span>):
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">await</span> llm.ainvoke(<span class="hljs-built_in">input</span>)
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">process_batch</span>(<span class="hljs-params">inputs: <span class="hljs-built_in">list</span>[<span class="hljs-built_in">str</span>]</span>):
+    tasks = [process_request(<span class="hljs-built_in">input</span>) <span class="hljs-keyword">for</span> <span class="hljs-built_in">input</span> <span class="hljs-keyword">in</span> inputs]
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">await</span> asyncio.gather(*tasks)
+
+<span class="hljs-comment"># 并发处理多个请求</span>
+inputs = [<span class="hljs-string">&quot;Input 1&quot;</span>, <span class="hljs-string">&quot;Input 2&quot;</span>, <span class="hljs-string">&quot;Input 3&quot;</span>] * <span class="hljs-number">10</span>
+results = <span class="hljs-keyword">await</span> process_batch(inputs)
+</code></pre>
+<h4>连接池</h4>
+<pre class="hljs"><code><span class="hljs-keyword">from</span> langchain_openai <span class="hljs-keyword">import</span> ChatOpenAI
+<span class="hljs-keyword">from</span> langchain_community.utilities.requests <span class="hljs-keyword">import</span> Requests
+
+<span class="hljs-comment"># 使用连接池</span>
+requests_wrapper = Requests(
+    headers={<span class="hljs-string">&quot;User-Agent&quot;</span>: <span class="hljs-string">&quot;LangChain&quot;</span>},
+    timeout=<span class="hljs-number">30</span>,
+    max_retries=<span class="hljs-number">3</span>,
+    pool_connections=<span class="hljs-number">10</span>,
+    pool_maxsize=<span class="hljs-number">10</span>
+)
+
+llm = ChatOpenAI(
+    model=<span class="hljs-string">&quot;gpt-3.5-turbo&quot;</span>,
+    requests_wrapper=requests_wrapper
+)
+</code></pre>
+<h4>负载均衡</h4>
+<p>使用 Kubernetes Service 实现负载均衡：</p>
+<pre class="hljs"><code><span class="hljs-comment"># service.yaml</span>
+<span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span>
+<span class="hljs-attr">kind:</span> <span class="hljs-string">Service</span>
+<span class="hljs-attr">metadata:</span>
+  <span class="hljs-attr">name:</span> <span class="hljs-string">langserve-app</span>
+<span class="hljs-attr">spec:</span>
+  <span class="hljs-attr">type:</span> <span class="hljs-string">LoadBalancer</span>
+  <span class="hljs-attr">selector:</span>
+    <span class="hljs-attr">app:</span> <span class="hljs-string">langserve-app</span>
+  <span class="hljs-attr">ports:</span>
+  <span class="hljs-bullet">-</span> <span class="hljs-attr">protocol:</span> <span class="hljs-string">TCP</span>
+    <span class="hljs-attr">port:</span> <span class="hljs-number">80</span>
+    <span class="hljs-attr">targetPort:</span> <span class="hljs-number">8000</span>
+</code></pre>
+<hr>
+<h2 id="146-安全与合规" tabindex="-1">14.6 安全与合规 <a class="heading-anchor" href="#146-安全与合规" aria-hidden="true">#</a></h2>
+<h3 id="1461-安全措施" tabindex="-1">14.6.1 安全措施 <a class="heading-anchor" href="#1461-安全措施" aria-hidden="true">#</a></h3>
+<h4>1. 身份认证与授权</h4>
+<pre class="hljs"><code><span class="hljs-keyword">from</span> fastapi <span class="hljs-keyword">import</span> FastAPI, Depends, HTTPException, status
+<span class="hljs-keyword">from</span> fastapi.security <span class="hljs-keyword">import</span> HTTPBearer, HTTPAuthorizationCredentials
+
+app = FastAPI()
+security = HTTPBearer()
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">verify_token</span>(<span class="hljs-params">credentials: HTTPAuthorizationCredentials = Depends(<span class="hljs-params">security</span>)</span>):
+    token = credentials.credentials
+    <span class="hljs-comment"># 验证 Token</span>
+    <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> verify_api_token(token):
+        <span class="hljs-keyword">raise</span> HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=<span class="hljs-string">&quot;Invalid token&quot;</span>
+        )
+    <span class="hljs-keyword">return</span> token
+
+<span class="hljs-meta">@app.post(<span class="hljs-params"><span class="hljs-string">&quot;/agent/invoke&quot;</span></span>)</span>
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">agent_invoke</span>(<span class="hljs-params">token: <span class="hljs-built_in">str</span> = Depends(<span class="hljs-params">verify_token</span>), <span class="hljs-built_in">input</span>: <span class="hljs-built_in">str</span> = <span class="hljs-literal">None</span></span>):
+    <span class="hljs-comment"># Agent 逻辑</span>
+    <span class="hljs-keyword">return</span> {<span class="hljs-string">&quot;response&quot;</span>: <span class="hljs-string">&quot;Agent response&quot;</span>}
+</code></pre>
+<h4>2. 输入验证与过滤</h4>
+<pre class="hljs"><code><span class="hljs-keyword">from</span> fastapi <span class="hljs-keyword">import</span> FastAPI, HTTPException
+<span class="hljs-keyword">from</span> pydantic <span class="hljs-keyword">import</span> BaseModel, validator
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">AgentInput</span>(<span class="hljs-title class_ inherited__">BaseModel</span>):
+    <span class="hljs-built_in">input</span>: <span class="hljs-built_in">str</span>
+
+<span class="hljs-meta">    @validator(<span class="hljs-params"><span class="hljs-string">&#x27;input&#x27;</span></span>)</span>
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">validate_input</span>(<span class="hljs-params">cls, v</span>):
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">len</span>(v) &gt; <span class="hljs-number">10000</span>:
+            <span class="hljs-keyword">raise</span> ValueError(<span class="hljs-string">&quot;Input too long&quot;</span>)
+        <span class="hljs-comment"># 检查敏感词</span>
+        <span class="hljs-keyword">if</span> contains_sensitive_words(v):
+            <span class="hljs-keyword">raise</span> ValueError(<span class="hljs-string">&quot;Input contains sensitive words&quot;</span>)
+        <span class="hljs-keyword">return</span> v
+
+<span class="hljs-meta">@app.post(<span class="hljs-params"><span class="hljs-string">&quot;/agent/invoke&quot;</span></span>)</span>
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">agent_invoke</span>(<span class="hljs-params"><span class="hljs-built_in">input</span>: AgentInput</span>):
+    <span class="hljs-comment"># Agent 逻辑</span>
+    <span class="hljs-keyword">return</span> {<span class="hljs-string">&quot;response&quot;</span>: <span class="hljs-string">&quot;Agent response&quot;</span>}
+</code></pre>
+<h4>3. 输出过滤</h4>
+<pre class="hljs"><code><span class="hljs-keyword">from</span> fastapi <span class="hljs-keyword">import</span> FastAPI
+<span class="hljs-keyword">from</span> pydantic <span class="hljs-keyword">import</span> BaseModel
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">AgentResponse</span>(<span class="hljs-title class_ inherited__">BaseModel</span>):
+    response: <span class="hljs-built_in">str</span>
+
+<span class="hljs-meta">@app.post(<span class="hljs-params"><span class="hljs-string">&quot;/agent/invoke&quot;</span></span>)</span>
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">agent_invoke</span>(<span class="hljs-params"><span class="hljs-built_in">input</span>: <span class="hljs-built_in">str</span></span>):
+    <span class="hljs-comment"># Agent 逻辑</span>
+    response = generate_response(<span class="hljs-built_in">input</span>)
+
+    <span class="hljs-comment"># 过滤输出</span>
+    response = filter_sensitive_content(response)
+    response = mask_pii(response)
+
+    <span class="hljs-keyword">return</span> AgentResponse(response=response)
+</code></pre>
+<h4>4. API 限流</h4>
+<pre class="hljs"><code><span class="hljs-keyword">from</span> fastapi <span class="hljs-keyword">import</span> FastAPI, HTTPException, status
+<span class="hljs-keyword">from</span> fastapi.middleware <span class="hljs-keyword">import</span> Middleware
+<span class="hljs-keyword">from</span> slowapi <span class="hljs-keyword">import</span> Limiter, _rate_limit_exceeded_handler
+<span class="hljs-keyword">from</span> slowapi.util <span class="hljs-keyword">import</span> get_remote_address
+<span class="hljs-keyword">from</span> slowapi.errors <span class="hljs-keyword">import</span> RateLimitExceeded
+
+limiter = Limiter(key_func=get_remote_address)
+app = FastAPI()
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+<span class="hljs-meta">@app.post(<span class="hljs-params"><span class="hljs-string">&quot;/agent/invoke&quot;</span></span>)</span>
+<span class="hljs-meta">@limiter.limit(<span class="hljs-params"><span class="hljs-string">&quot;100/minute&quot;</span></span>)  </span><span class="hljs-comment"># 每分钟最多 100 次请求</span>
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">agent_invoke</span>(<span class="hljs-params"><span class="hljs-built_in">input</span>: <span class="hljs-built_in">str</span></span>):
+    <span class="hljs-comment"># Agent 逻辑</span>
+    <span class="hljs-keyword">return</span> {<span class="hljs-string">&quot;response&quot;</span>: <span class="hljs-string">&quot;Agent response&quot;</span>}
+</code></pre>
+<h3 id="1462-合规要求" tabindex="-1">14.6.2 合规要求 <a class="heading-anchor" href="#1462-合规要求" aria-hidden="true">#</a></h3>
+<h4>GDPR（通用数据保护条例）</h4>
+<ul>
+<li><strong>数据最小化</strong>：只收集必要的用户数据</li>
+<li><strong>用户同意</strong>：获取用户明确同意</li>
+<li><strong>数据访问权</strong>：允许用户访问和删除自己的数据</li>
+<li><strong>数据保护</strong>：加密存储和传输数据</li>
+</ul>
+<h4>HIPAA（健康保险可携带性和责任法案）</h4>
+<ul>
+<li><strong>安全措施</strong>：实施访问控制、加密、审计日志</li>
+<li><strong>业务关联协议</strong>：与供应商签署 BAA（Business Associate Agreement）</li>
+<li><strong>风险评估</strong>：定期进行风险评估</li>
+</ul>
+<h4>SOC2（服务组织控制报告）</h4>
+<ul>
+<li><strong>安全控制</strong>：实施安全控制和流程</li>
+<li><strong>可用性控制</strong>：确保服务的可用性</li>
+<li><strong>处理完整性控制</strong>：确保数据的完整性</li>
+<li><strong>保密性控制</strong>：保护数据的机密性</li>
+<li><strong>隐私控制</strong>：保护个人隐私</li>
+</ul>
+<hr>
+<h2 id="147-故障排查" tabindex="-1">14.7 故障排查 <a class="heading-anchor" href="#147-故障排查" aria-hidden="true">#</a></h2>
+<h3 id="1471-常见问题" tabindex="-1">14.7.1 常见问题 <a class="heading-anchor" href="#1471-常见问题" aria-hidden="true">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>可能原因</th>
+<th>解决方案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Agent 无响应</strong></td>
+<td>LLM API 超时、网络问题</td>
+<td>检查网络、增加超时时间、使用重试机制</td>
+</tr>
+<tr>
+<td><strong>Agent 返回错误结果</strong></td>
+<td>Prompt 不清晰、工具调用失败</td>
+<td>优化 Prompt、检查工具实现</td>
+</tr>
+<tr>
+<td><strong>Agent 性能差</strong></td>
+<td>LLM 模型慢、并发不足</td>
+<td>使用更快的模型、增加并发、启用缓存</td>
+</tr>
+<tr>
+<td><strong>成本过高</strong></td>
+<td>LLM 调用频繁、Token 消耗大</td>
+<td>优化 Prompt、使用缓存、选择更小的模型</td>
+</tr>
+<tr>
+<td><strong>安全事件</strong></td>
+<td>API 密钥泄露、输入攻击</td>
+<td>轮换 API 密钥、加强输入验证</td>
+</tr>
+</tbody>
+</table>
+<h3 id="1472-故障排查流程" tabindex="-1">14.7.2 故障排查流程 <a class="heading-anchor" href="#1472-故障排查流程" aria-hidden="true">#</a></h3>
+<h4>Step 1: 检查日志</h4>
+<pre class="hljs"><code><span class="hljs-comment"># 查看 Pod 日志</span>
+kubectl logs -f deployment/langserve-app
+
+<span class="hljs-comment"># 查看特定容器的日志</span>
+kubectl logs -f deployment/langserve-app -c langserve-app
+
+<span class="hljs-comment"># 查看之前的日志</span>
+kubectl logs --previous deployment/langserve-app
+</code></pre>
+<h4>Step 2: 检查指标</h4>
+<p>使用 Prometheus 和 Grafana 查看指标：</p>
+<ul>
+<li>请求错误率</li>
+<li>响应时间</li>
+<li>资源使用率</li>
+</ul>
+<h4>Step 3: 检查追踪</h4>
+<p>使用 LangSmith 或 Jaeger 查看分布式追踪：</p>
+<ul>
+<li>定位慢查询</li>
+<li>分析工具调用链</li>
+<li>检查错误路径</li>
+</ul>
+<h4>Step 4: 检查 Pod 状态</h4>
+<pre class="hljs"><code><span class="hljs-comment"># 查看 Pod 状态</span>
+kubectl get pods -l app=langserve-app
+
+<span class="hljs-comment"># 查看 Pod 详情</span>
+kubectl describe pod &lt;pod-name&gt;
+
+<span class="hljs-comment"># 进入 Pod 调试</span>
+kubectl <span class="hljs-built_in">exec</span> -it &lt;pod-name&gt; -- /bin/bash
+</code></pre>
+<h4>Step 5: 检查事件</h4>
+<pre class="hljs"><code><span class="hljs-comment"># 查看集群事件</span>
+kubectl get events --sort-by=.metadata.creationTimestamp
+
+<span class="hljs-comment"># 查看特定资源的事件</span>
+kubectl describe deployment langserve-app
+</code></pre>
+<hr>
+<h2 id="148-最佳实践总结" tabindex="-1">14.8 最佳实践总结 <a class="heading-anchor" href="#148-最佳实践总结" aria-hidden="true">#</a></h2>
+<h3 id="1481-部署最佳实践" tabindex="-1">14.8.1 部署最佳实践 <a class="heading-anchor" href="#1481-部署最佳实践" aria-hidden="true">#</a></h3>
+<ol>
+<li><strong>使用容器化部署</strong>：使用 Docker 和 Kubernetes 实现可移植和可扩展</li>
+<li><strong>实施 CI/CD</strong>：自动化构建、测试和部署流程</li>
+<li><strong>采用渐进式部署</strong>：使用蓝绿部署、金丝雀发布降低风险</li>
+<li><strong>多环境管理</strong>：分离开发、测试、生产环境</li>
+<li><strong>基础设施即代码</strong>：使用 Terraform、Pulumi 管理基础设施</li>
+</ol>
+<h3 id="1482-监控最佳实践" tabindex="-1">14.8.2 监控最佳实践 <a class="heading-anchor" href="#1482-监控最佳实践" aria-hidden="true">#</a></h3>
+<ol>
+<li><strong>三大支柱</strong>：Logs（日志）、Metrics（指标）、Traces（追踪）</li>
+<li><strong>集中化监控</strong>：使用统一的监控平台（如 Prometheus + Grafana）</li>
+<li><strong>告警机制</strong>：配置合适的告警规则和通知渠道</li>
+<li><strong>实时监控</strong>：实时监控关键指标（错误率、响应时间、成本）</li>
+<li><strong>历史分析</strong>：保留历史数据，支持趋势分析和容量规划</li>
+</ol>
+<h3 id="1483-优化最佳实践" tabindex="-1">14.8.3 优化最佳实践 <a class="heading-anchor" href="#1483-优化最佳实践" aria-hidden="true">#</a></h3>
+<ol>
+<li><strong>性能优先</strong>：优先优化延迟和吞吐量</li>
+<li><strong>成本意识</strong>：持续监控和优化成本</li>
+<li><strong>缓存策略</strong>：合理使用缓存降低延迟和成本</li>
+<li><strong>并发处理</strong>：使用异步和并发提高吞吐量</li>
+<li><strong>自动扩缩容</strong>：根据负载自动调整资源</li>
+</ol>
+<h3 id="1484-安全最佳实践" tabindex="-1">14.8.4 安全最佳实践 <a class="heading-anchor" href="#1484-安全最佳实践" aria-hidden="true">#</a></h3>
+<ol>
+<li><strong>最小权限原则</strong>：只授予必要的权限</li>
+<li><strong>零信任架构</strong>：假设网络不可信，每次访问都验证</li>
+<li><strong>深度防御</strong>：多层安全防护</li>
+<li><strong>定期审计</strong>：定期审计安全配置和访问日志</li>
+<li><strong>漏洞管理</strong>：及时修复漏洞和更新依赖</li>
+</ol>
+<hr>
+<h2 id="149-案例分析" tabindex="-1">14.9 案例分析 <a class="heading-anchor" href="#149-案例分析" aria-hidden="true">#</a></h2>
+<h3 id="1491-企业客服-agent-部署案例" tabindex="-1">14.9.1 企业客服 Agent 部署案例 <a class="heading-anchor" href="#1491-企业客服-agent-部署案例" aria-hidden="true">#</a></h3>
+<p><strong>场景</strong>：一个大型电商企业部署客服 Agent 处理用户咨询。</p>
+<p><strong>架构</strong>：</p>
+<ul>
+<li><strong>前端</strong>：Web 应用和移动应用</li>
+<li><strong>API 网关</strong>：Kong API Gateway</li>
+<li><strong>LangServe 应用</strong>：部署在 GKE 上</li>
+<li><strong>LLM 服务</strong>：使用 Google Vertex AI（GPT-4 和 Claude 3.5）</li>
+<li><strong>向量数据库</strong>：Pinecone 用于知识检索</li>
+<li><strong>监控</strong>：Prometheus + Grafana + LangSmith</li>
+<li><strong>日志</strong>：Google Cloud Logging</li>
+</ul>
+<p><strong>部署流程</strong>：</p>
+<ol>
+<li>使用 Terraform 创建 GKE 集群</li>
+<li>使用 GitHub Actions 自动构建和部署</li>
+<li>使用 ArgoCD 实现 GitOps</li>
+<li>使用蓝绿部署策略降低风险</li>
+</ol>
+<p><strong>性能指标</strong>：</p>
+<ul>
+<li>平均响应时间：&lt; 2 秒</li>
+<li>并发处理能力：1000 QPS</li>
+<li>可用性：99.9%</li>
+<li>成本：$50K/月</li>
+</ul>
+<h3 id="1492-数据分析-agent-部署案例" tabindex="-1">14.9.2 数据分析 Agent 部署案例 <a class="heading-anchor" href="#1492-数据分析-agent-部署案例" aria-hidden="true">#</a></h3>
+<p><strong>场景</strong>：一个金融公司部署数据分析 Agent 处理财务数据。</p>
+<p><strong>架构</strong>：</p>
+<ul>
+<li><strong>前端</strong>：Jupyter Notebook 和 Web Dashboard</li>
+<li><strong>LangServe 应用</strong>：部署在 AWS EKS 上</li>
+<li><strong>LLM 服务</strong>：使用 AWS Bedrock（Claude 3.5 Sonnet）</li>
+<li><strong>数据仓库</strong>：BigQuery 用于存储和分析数据</li>
+<li><strong>监控</strong>：AWS CloudWatch + LangSmith</li>
+</ul>
+<p><strong>部署流程</strong>：</p>
+<ol>
+<li>使用 EKS 部署 LangServe 应用</li>
+<li>使用 S3 存储数据模型和配置</li>
+<li>使用 Lambda 触发定时任务</li>
+<li>使用 Auto Scaling 自动扩缩容</li>
+</ol>
+<p><strong>性能指标</strong>：</p>
+<ul>
+<li>平均响应时间：&lt; 10 秒（复杂查询）</li>
+<li>并发处理能力：100 QPS</li>
+<li>可用性：99.95%</li>
+<li>成本：$80K/月</li>
+</ul>
+<hr>
+<h2 id="1410-总结" tabindex="-1">14.10 总结 <a class="heading-anchor" href="#1410-总结" aria-hidden="true">#</a></h2>
+<p>本章介绍了 AI Agent 部署与运维的完整知识体系，包括：</p>
+<ol>
+<li><strong>部署基础</strong>：理解部署的定义、架构类型和部署流程</li>
+<li><strong>LangServe 部署</strong>：掌握 LangServe 的基础和高级部署</li>
+<li><strong>云平台部署</strong>：了解 AWS、GCP、Azure 的部署实践</li>
+<li><strong>可观测性与监控</strong>：实施日志、指标、追踪三大支柱</li>
+<li><strong>性能优化</strong>：优化延迟、成本、吞吐量</li>
+<li><strong>安全与合规</strong>：实施安全措施和满足合规要求</li>
+<li><strong>故障排查</strong>：掌握常见问题和故障排查流程</li>
+<li><strong>最佳实践</strong>：总结部署、监控、优化、安全的最佳实践</li>
+<li><strong>案例分析</strong>：学习企业级 Agent 部署案例</li>
+</ol>
+<p>通过掌握这些知识，开发者可以将 Agent 系统从原型升级为生产级应用，确保系统的稳定性、性能、安全性和可维护性。</p>
+<hr>
+<p><strong>参考文献</strong>：</p>
+<ol>
+<li>UiPath - Technical Tuesday: 10 best practices for building reliable AI agents in 2025</li>
+<li><a href="http://Kubiya.ai">Kubiya.ai</a> - AI Agent Deployment: Frameworks &amp; Best Practices (2025)</li>
+<li>n8n Blog - 15 best practices for deploying AI agents in production (2026)</li>
+<li>LangChain Blog - Introducing LangServe, best way to deploy your LangChains (2023)</li>
+<li>DEV Community - Streamline your LangChain deployments with LangServe (2025)</li>
+<li>Langfuse Blog - AI Agent Observability, Tracing &amp; Evaluation with Langfuse (2024)</li>
+<li>OpenTelemetry Blog - AI Agent Observability - Evolving Standards and Best Practices (2025)</li>
+<li>Aviso Blog - How to Evaluate AI Agents: Latency, Cost, Safety, ROI (2025)</li>
+<li>Stevens Online - The Hidden Economics of AI Agents: Managing Token Costs and Latency Trade-offs (2026)</li>
+<li>Medium - AI Performance Engineering (2025-2026 Edition) (2025)</li>
+</ol>
+</div> <nav class="pager"> <a class="pager__link" href="/ai-agent-development/13-autonomous-programming-agent/"> <span>上一篇</span> <strong>第十三章：自主编程 Agent（Autonomous Programming Agent）</strong> </a> <a class="pager__link" href="/ai-agent-development/15-comprehensive-practices/"> <span>下一篇</span> <strong>第十五章：综合实践案例（Comprehensive Practices）</strong> </a> </nav> </article> </section>  </main> <footer class="site-footer"> <div class="site-footer__inner"> <p>Vinci Knowledge Base</p> <p>Source directory: <code>/Users/superone77/Documents/知识库/projects</code></p> </div> </footer> </div> </body></html>

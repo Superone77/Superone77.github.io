@@ -1,0 +1,810 @@
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>附录 A：术语表（Terminology） | Vinci Knowledge Base</title><meta name="description" content="附录 A：术语表（Terminology） AI Agent 开发相关术语的权威定义和解释 A.1 Agent 相关术语 Agent（智能体、AI Agent） 定义 ：在生成式人工智能上下文中，AI agents（也称为复合 AI 系统或代理式 AI）是一类具有自主决策能力、能够自主在复杂环境中执行任务的智能体。 来源 ：Wikipedia（2024） 核"><meta name="generator" content="Vinci Knowledge Base"><link rel="stylesheet" href="/_astro/_doc_.CY2v1inF.css"></head> <body> <div class="page-shell"> <header class="site-header"> <div class="site-header__inner"> <a class="brand" href="/"> <span class="brand__eyebrow">GitHub Pages Knowledge Site</span> <span class="brand__name">Vinci Knowledge Base</span> </a> <nav class="site-nav"> <a href="/">Projects</a> </nav> </div> </header> <main class="page-main">  <section class="article-hero"> <div> <p class="eyebrow">Knowledge Article</p> <h1>附录 A：术语表（Terminology）</h1> <p class="article-hero__breadcrumbs"> <a href="/">Home</a> <span>/</span> <a href="/ai-agent-development/">AI Agent 智能体开发知识库</a> </p> </div> <div class="meta-card"> <p><strong>Project</strong> AI Agent 智能体开发知识库</p> <p><strong>Source</strong> <code>knowledge/appendix-terminology.md</code></p> <p><strong>Sections</strong> 95</p> </div> </section> <section class="content-grid"> <aside class="toc-card"> <p class="toc-card__title">本页目录</p> <ul class="toc-card__list"> <li class="toc-depth-1"> <a href="#附录-a术语表terminology">附录 A：术语表（Terminology）</a> </li><li class="toc-depth-2"> <a href="#a1-agent-相关术语">A.1 Agent 相关术语</a> </li><li class="toc-depth-3"> <a href="#agent智能体ai-agent">Agent（智能体、AI Agent）</a> </li><li class="toc-depth-3"> <a href="#react推理-行动循环">ReAct（推理 + 行动循环）</a> </li><li class="toc-depth-3"> <a href="#autogpt自主-gpt">AutoGPT（自主 GPT）</a> </li><li class="toc-depth-3"> <a href="#babyagi任务导向的自主智能体">BabyAGI（任务导向的自主智能体）</a> </li><li class="toc-depth-3"> <a href="#crewai多-agent-协作框架">CrewAI（多 Agent 协作框架）</a> </li><li class="toc-depth-3"> <a href="#langchainllm-应用开发框架">LangChain（LLM 应用开发框架）</a> </li><li class="toc-depth-3"> <a href="#langgraph基于图的-agent-工作流管理">LangGraph（基于图的 Agent 工作流管理）</a> </li><li class="toc-depth-3"> <a href="#langsmithagent-性能追踪和调试平台">LangSmith（Agent 性能追踪和调试平台）</a> </li><li class="toc-depth-3"> <a href="#langserveagent-服务部署和-api-化">LangServe（Agent 服务部署和 API 化）</a> </li><li class="toc-depth-3"> <a href="#lcellangchain-表达式语言">LCEL（LangChain 表达式语言）</a> </li><li class="toc-depth-3"> <a href="#memgpt记忆增强-agent">MemGPT（记忆增强 Agent）</a> </li><li class="toc-depth-3"> <a href="#vectordb向量数据库">VectorDB（向量数据库）</a> </li><li class="toc-depth-3"> <a href="#graph-memory图记忆">Graph Memory（图记忆）</a> </li><li class="toc-depth-3"> <a href="#rag检索增强生成">RAG（检索增强生成）</a> </li><li class="toc-depth-3"> <a href="#rlhf基于人类反馈的强化学习">RLHF（基于人类反馈的强化学习）</a> </li><li class="toc-depth-3"> <a href="#constitutional-ai基于原则的-ai">Constitutional AI（基于原则的 AI）</a> </li><li class="toc-depth-2"> <a href="#a2-架构相关术语">A.2 架构相关术语</a> </li><li class="toc-depth-3"> <a href="#perception感知感知能力">Perception（感知、感知能力）</a> </li><li class="toc-depth-3"> <a href="#planning规划规划能力">Planning（规划、规划能力）</a> </li><li class="toc-depth-3"> <a href="#action行动行动能力">Action（行动、行动能力）</a> </li><li class="toc-depth-3"> <a href="#memory记忆记忆能力">Memory（记忆、记忆能力）</a> </li><li class="toc-depth-3"> <a href="#reflection反思反思能力">Reflection（反思、反思能力）</a> </li><li class="toc-depth-3"> <a href="#reactive反应式反应式架构">Reactive（反应式、反应式架构）</a> </li><li class="toc-depth-3"> <a href="#deliberative审慎式审慎式架构">Deliberative（审慎式、审慎式架构）</a> </li><li class="toc-depth-3"> <a href="#hybrid混合式混合式架构">Hybrid（混合式、混合式架构）</a> </li><li class="toc-depth-3"> <a href="#learning学习型学习型架构">Learning（学习型、学习型架构）</a> </li><li class="toc-depth-3"> <a href="#sequential顺序顺序流程">Sequential（顺序、顺序流程）</a> </li><li class="toc-depth-3"> <a href="#hierarchical层次化层次流程">Hierarchical（层次化、层次流程）</a> </li><li class="toc-depth-3"> <a href="#concurrent并发并行流程">Concurrent（并发、并行流程）</a> </li><li class="toc-depth-3"> <a href="#handoff交接交接模式">Handoff（交接、交接模式）</a> </li><li class="toc-depth-3"> <a href="#orchestration编排编排模式">Orchestration（编排、编排模式）</a> </li><li class="toc-depth-2"> <a href="#a3-开发相关术语">A.3 开发相关术语</a> </li><li class="toc-depth-3"> <a href="#function-calling函数调用">Function Calling（函数调用）</a> </li><li class="toc-depth-3"> <a href="#tool-calling工具调用">Tool Calling（工具调用）</a> </li><li class="toc-depth-3"> <a href="#prompt-engineering提示词工程">Prompt Engineering（提示词工程）</a> </li><li class="toc-depth-3"> <a href="#fine-tuning微调">Fine-tuning（微调）</a> </li><li class="toc-depth-3"> <a href="#embedding嵌入">Embedding（嵌入）</a> </li><li class="toc-depth-3"> <a href="#vector-search向量搜索">Vector Search（向量搜索）</a> </li><li class="toc-depth-3"> <a href="#semantic-search语义搜索">Semantic Search（语义搜索）</a> </li><li class="toc-depth-3"> <a href="#hallucination幻觉">Hallucination（幻觉）</a> </li><li class="toc-depth-3"> <a href="#alignment对齐">Alignment（对齐）</a> </li><li class="toc-depth-3"> <a href="#safety安全">Safety（安全）</a> </li><li class="toc-depth-2"> <a href="#a4-评估相关术语">A.4 评估相关术语</a> </li><li class="toc-depth-3"> <a href="#benchmark基准测试">Benchmark（基准测试）</a> </li><li class="toc-depth-3"> <a href="#tracing追踪">Tracing（追踪）</a> </li><li class="toc-depth-3"> <a href="#latency延迟">Latency（延迟）</a> </li><li class="toc-depth-3"> <a href="#throughput吞吐量">Throughput（吞吐量）</a> </li><li class="toc-depth-3"> <a href="#accuracy准确率">Accuracy（准确率）</a> </li><li class="toc-depth-3"> <a href="#robustness鲁棒性">Robustness（鲁棒性）</a> </li><li class="toc-depth-3"> <a href="#consistency一致性">Consistency（一致性）</a> </li><li class="toc-depth-3"> <a href="#explainability可解释性">Explainability（可解释性）</a> </li><li class="toc-depth-2"> <a href="#a5-部署相关术语">A.5 部署相关术语</a> </li><li class="toc-depth-3"> <a href="#cloud-native云原生">Cloud-Native（云原生）</a> </li><li class="toc-depth-3"> <a href="#containerization容器化">Containerization（容器化）</a> </li><li class="toc-depth-3"> <a href="#microservices微服务">Microservices（微服务）</a> </li><li class="toc-depth-3"> <a href="#auto-scaling自动扩缩容">Auto-scaling（自动扩缩容）</a> </li><li class="toc-depth-3"> <a href="#blue-green-deployment蓝绿部署">Blue-Green Deployment（蓝绿部署）</a> </li><li class="toc-depth-3"> <a href="#canary-release金丝雀发布">Canary Release（金丝雀发布）</a> </li><li class="toc-depth-3"> <a href="#cicd持续集成持续部署">CI/CD（持续集成/持续部署）</a> </li><li class="toc-depth-3"> <a href="#observability可观测性">Observability（可观测性）</a> </li><li class="toc-depth-2"> <a href="#a6-其他术语">A.6 其他术语</a> </li><li class="toc-depth-3"> <a href="#llmlarge-language-model">LLM（Large Language Model）</a> </li><li class="toc-depth-3"> <a href="#apiapplication-programming-interface">API（Application Programming Interface）</a> </li><li class="toc-depth-3"> <a href="#rest-apirepresentational-state-transfer-api">REST API（Representational State Transfer API）</a> </li><li class="toc-depth-3"> <a href="#graphql">GraphQL</a> </li><li class="toc-depth-3"> <a href="#grpcgoogle-remote-procedure-call">gRPC（Google Remote Procedure Call）</a> </li><li class="toc-depth-3"> <a href="#docker">Docker</a> </li><li class="toc-depth-3"> <a href="#kubernetes">Kubernetes</a> </li><li class="toc-depth-3"> <a href="#npuneural-processing-unit">NPU（Neural Processing Unit）</a> </li><li class="toc-depth-3"> <a href="#tputensor-processing-unit">TPU（Tensor Processing Unit）</a> </li><li class="toc-depth-3"> <a href="#gpugraphics-processing-unit">GPU（Graphics Processing Unit）</a> </li><li class="toc-depth-3"> <a href="#agentic-ai代理式-ai">Agentic AI（代理式 AI）</a> </li><li class="toc-depth-3"> <a href="#compound-ai-system复合-ai-系统">Compound AI System（复合 AI 系统）</a> </li><li class="toc-depth-3"> <a href="#human-in-the-loop人在环路">Human-in-the-loop（人在环路）</a> </li><li class="toc-depth-3"> <a href="#zero-shot零样本">Zero-shot（零样本）</a> </li><li class="toc-depth-3"> <a href="#few-shot少样本">Few-shot（少样本）</a> </li><li class="toc-depth-3"> <a href="#multi-modal多模态">Multi-modal（多模态）</a> </li><li class="toc-depth-3"> <a href="#end-to-end端到端">End-to-end（端到端）</a> </li><li class="toc-depth-3"> <a href="#offline离线">Offline（离线）</a> </li><li class="toc-depth-3"> <a href="#online在线">Online（在线）</a> </li><li class="toc-depth-3"> <a href="#real-time实时">Real-time（实时）</a> </li><li class="toc-depth-3"> <a href="#batch批处理">Batch（批处理）</a> </li><li class="toc-depth-3"> <a href="#streaming流式">Streaming（流式）</a> </li><li class="toc-depth-3"> <a href="#sotastate-of-the-art">SOTA（State-of-the-art）</a> </li><li class="toc-depth-3"> <a href="#pocproof-of-concept">POC（Proof of Concept）</a> </li><li class="toc-depth-3"> <a href="#mvpminimum-viable-product">MVP（Minimum Viable Product）</a> </li><li class="toc-depth-3"> <a href="#roireturn-on-investment">ROI（Return on Investment）</a> </li><li class="toc-depth-3"> <a href="#kpikey-performance-indicator">KPI（Key Performance Indicator）</a> </li><li class="toc-depth-3"> <a href="#slaservice-level-agreement">SLA（Service Level Agreement）</a> </li><li class="toc-depth-3"> <a href="#gdprgeneral-data-protection-regulation">GDPR（General Data Protection Regulation）</a> </li><li class="toc-depth-3"> <a href="#hipaahealth-insurance-portability-and-accountability-act">HIPAA（Health Insurance Portability and Accountability Act）</a> </li><li class="toc-depth-3"> <a href="#soc2system-and-organization-controls-2">SOC2（System and Organization Controls 2）</a> </li><li class="toc-depth-2"> <a href="#结语">结语</a> </li> </ul> </aside> <article class="prose-card"> <div class="prose"><h1 id="附录-a术语表terminology" tabindex="-1">附录 A：术语表（Terminology） <a class="heading-anchor" href="#附录-a术语表terminology" aria-hidden="true">#</a></h1>
+<blockquote>
+<p>AI Agent 开发相关术语的权威定义和解释</p>
+</blockquote>
+<hr>
+<h2 id="a1-agent-相关术语" tabindex="-1">A.1 Agent 相关术语 <a class="heading-anchor" href="#a1-agent-相关术语" aria-hidden="true">#</a></h2>
+<h3 id="agent智能体ai-agent" tabindex="-1">Agent（智能体、AI Agent） <a class="heading-anchor" href="#agent智能体ai-agent" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：在生成式人工智能上下文中，AI agents（也称为复合 AI 系统或代理式 AI）是一类具有自主决策能力、能够自主在复杂环境中执行任务的智能体。</p>
+<p><strong>来源</strong>：Wikipedia（2024）</p>
+<p><strong>核心特征</strong>：</p>
+<ul>
+<li>自主决策</li>
+<li>复杂环境适应</li>
+<li>自主执行任务</li>
+</ul>
+<p><strong>类型</strong>：</p>
+<ul>
+<li>LLM agents</li>
+<li>传统基于规则的 agents</li>
+<li>强化学习 agents</li>
+<li>多 agents 系统</li>
+</ul>
+<hr>
+<h3 id="react推理-行动循环" tabindex="-1">ReAct（推理 + 行动循环） <a class="heading-anchor" href="#react推理-行动循环" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一种将推理（Reasoning）和行动（Action）结合的 Agent 模式，Agent 通过&quot;思考 → 行动 → 观察 → 思考&quot;的循环来完成任务。</p>
+<p><strong>工作流程</strong>：</p>
+<ol>
+<li>推理：思考当前状态和目标</li>
+<li>行动：执行具体的工具调用或操作</li>
+<li>观察：观察行动结果</li>
+<li>循环：重复上述步骤直到完成任务</li>
+</ol>
+<p><strong>应用</strong>：LangChain ReAct Agent、Tool Calling Agent</p>
+<hr>
+<h3 id="autogpt自主-gpt" tabindex="-1">AutoGPT（自主 GPT） <a class="heading-anchor" href="#autogpt自主-gpt" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一个开源的自主 Agent 项目，能够自主规划任务、调用工具、生成子任务，实现长期目标。</p>
+<p><strong>核心组件</strong>：</p>
+<ul>
+<li>LLM（大语言模型）</li>
+<li>Memory（记忆系统）</li>
+<li>Tools（工具库）</li>
+<li>Planner（规划器）</li>
+<li>Executor（执行器）</li>
+</ul>
+<p><strong>工作流程</strong>：
+Task Definition → Task Planning → Task Execution → Result Evaluation</p>
+<p><strong>架构模式</strong>：</p>
+<ul>
+<li>单一 Agent</li>
+<li>多 Agent</li>
+<li>Human-in-the-loop</li>
+</ul>
+<p><strong>项目地址</strong>：<a href="https://github.com/Significant-Gravitas/Auto-GPT">https://github.com/Significant-Gravitas/Auto-GPT</a></p>
+<hr>
+<h3 id="babyagi任务导向的自主智能体" tabindex="-1">BabyAGI（任务导向的自主智能体） <a class="heading-anchor" href="#babyagi任务导向的自主智能体" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一个简洁、清晰、可扩展的自主 Agent 项目，专注于任务导向的自主执行。</p>
+<p><strong>核心组件</strong>：</p>
+<ul>
+<li>Task Creation（任务创建）</li>
+<li>Task Prioritization（任务优先级）</li>
+<li>Task Execution（任务执行）</li>
+<li>Task Result Evaluation（任务结果评估）</li>
+</ul>
+<p><strong>工作流程</strong>：
+Objective → Task List → Task Prioritization → Task Execution → Loop</p>
+<p><strong>设计理念</strong>：简洁、清晰、可扩展</p>
+<p><strong>项目地址</strong>：<a href="https://github.com/yoheinakajima/babyagi">https://github.com/yoheinakajima/babyagi</a></p>
+<hr>
+<h3 id="crewai多-agent-协作框架" tabindex="-1">CrewAI（多 Agent 协作框架） <a class="heading-anchor" href="#crewai多-agent-协作框架" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一个用于构建多 Agent 协作系统的开源框架，支持 Agent 间的顺序协作、层次协作和并行协作。</p>
+<p><strong>核心概念</strong>：</p>
+<ul>
+<li><strong>Agents（智能体）</strong>：Role 定义、Goal 设置、Backstory 设置</li>
+<li><strong>Tasks（任务）</strong>：Task 定义、Task 描述、Tool 分配、Dependencies</li>
+<li><strong>Crews（团队）</strong>：Agent 集合、任务集合、Process 类型</li>
+<li><strong>Tools（工具）</strong>：工具库、工具使用、Tool 自定义</li>
+<li><strong>Processes（流程）</strong>：Sequential Process、Hierarchical Process、自定义 Process</li>
+</ul>
+<p><strong>流程类型</strong>：</p>
+<ul>
+<li>Sequential Process（顺序流程）：Agent 顺序执行任务</li>
+<li>Hierarchical Process（层次流程）：Manager Agent 分配任务给 Worker Agent</li>
+</ul>
+<p><strong>项目地址</strong>：<a href="https://github.com/joaomdmoura/crewAI">https://github.com/joaomdmoura/crewAI</a></p>
+<hr>
+<h3 id="langchainllm-应用开发框架" tabindex="-1">LangChain（LLM 应用开发框架） <a class="heading-anchor" href="#langchainllm-应用开发框架" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一个用于构建 LLM 应用的开源框架，提供 LLMs、Prompts、Memory、Tools、Agents、LangGraph、LangSmith 等功能。</p>
+<p><strong>核心组件</strong>：</p>
+<ul>
+<li><strong>LLMs</strong>：模型选择、参数配置、流式输出</li>
+<li><strong>Prompts</strong>：提示词模板、变量替换、Few-shot 示例</li>
+<li><strong>Memory</strong>：短期记忆、长期记忆、向量存储</li>
+<li><strong>Tools</strong>：工具注册、工具调用、工具装饰器</li>
+<li><strong>Output Parsers</strong>：输出解析、结构化输出</li>
+<li><strong>Agents</strong>：Agent 初始化、工具绑定、运行 Agent</li>
+<li><strong>LangGraph</strong>：图构建、状态管理、检查点、工作流执行</li>
+<li><strong>LangSmith</strong>：性能追踪、错误分析、用户行为分析</li>
+</ul>
+<p><strong>表达式语言（LCEL）</strong>：LangChain Expression Language，用于构建复杂的 LLM 应用</p>
+<p><strong>项目地址</strong>：<a href="https://github.com/langchain-ai/langchain">https://github.com/langchain-ai/langchain</a></p>
+<hr>
+<h3 id="langgraph基于图的-agent-工作流管理" tabindex="-1">LangGraph（基于图的 Agent 工作流管理） <a class="heading-anchor" href="#langgraph基于图的-agent-工作流管理" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：LangChain 的图式工作流管理工具，用于构建基于状态的复杂工作流，支持状态管理、检查点、分支、循环等。</p>
+<p><strong>核心功能</strong>：</p>
+<ul>
+<li><strong>图构建</strong>：定义 Agent 工作流图</li>
+<li><strong>状态管理</strong>：管理 Agent 的内部状态</li>
+<li><strong>检查点</strong>：保存和恢复工作流状态</li>
+<li><strong>工作流执行</strong>：执行复杂的工作流</li>
+</ul>
+<p><strong>应用</strong>：企业级 Agent 应用、复杂工作流、长期任务规划</p>
+<p><strong>文档</strong>：<a href="https://langchain-ai.github.io/langgraph/">https://langchain-ai.github.io/langgraph/</a></p>
+<hr>
+<h3 id="langsmithagent-性能追踪和调试平台" tabindex="-1">LangSmith（Agent 性能追踪和调试平台） <a class="heading-anchor" href="#langsmithagent-性能追踪和调试平台" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：LangChain 的性能追踪和调试平台，用于追踪 Agent 的执行过程、分析性能、调试错误、监控成本。</p>
+<p><strong>核心功能</strong>：</p>
+<ul>
+<li><strong>Tracing（追踪）</strong>：追踪 Agent 的执行过程</li>
+<li><strong>Performance Monitoring（性能监控）</strong>：监控 Agent 的性能指标</li>
+<li><strong>Error Analysis（错误分析）</strong>：分析 Agent 的错误原因</li>
+<li><strong>Cost Tracking（成本追踪）</strong>：追踪 Agent 的 API 调用成本</li>
+<li><strong>User Behavior Analysis（用户行为分析）</strong>：分析用户使用行为</li>
+</ul>
+<p><strong>文档</strong>：<a href="https://docs.smith.langchain.com/">https://docs.smith.langchain.com/</a></p>
+<hr>
+<h3 id="langserveagent-服务部署和-api-化" tabindex="-1">LangServe（Agent 服务部署和 API 化） <a class="heading-anchor" href="#langserveagent-服务部署和-api-化" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：LangChain 的 Agent 服务部署工具，用于将 Agent 部署为 REST API 服务。</p>
+<p><strong>核心功能</strong>：</p>
+<ul>
+<li><strong>REST API 部署</strong>：将 Agent 部署为 REST API</li>
+<li><strong>FastAPI 集成</strong>：基于 FastAPI 构建 API 服务</li>
+<li><strong>异步支持</strong>：支持异步调用</li>
+<li><strong>流式输出</strong>：支持流式输出</li>
+</ul>
+<p><strong>文档</strong>：<a href="https://python.langchain.com/docs/langserve">https://python.langchain.com/docs/langserve</a></p>
+<hr>
+<h3 id="lcellangchain-表达式语言" tabindex="-1">LCEL（LangChain 表达式语言） <a class="heading-anchor" href="#lcellangchain-表达式语言" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：LangChain Expression Language，一种用于构建复杂 LLM 应用的表达式语言。</p>
+<p><strong>特点</strong>：</p>
+<ul>
+<li>声明式编程</li>
+<li>可组合</li>
+<li>类型安全</li>
+<li>易于测试</li>
+</ul>
+<p><strong>示例</strong>：</p>
+<pre class="hljs"><code>chain = prompt | llm | parser
+result = chain.invoke({<span class="hljs-string">&quot;input&quot;</span>: <span class="hljs-string">&quot;Hello, world!&quot;</span>})
+</code></pre>
+<hr>
+<h3 id="memgpt记忆增强-agent" tabindex="-1">MemGPT（记忆增强 Agent） <a class="heading-anchor" href="#memgpt记忆增强-agent" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一种具有分层记忆结构的 Agent，能够管理长期记忆和短期记忆，支持语义相似性检索和缓存优先机制。</p>
+<p><strong>核心功能</strong>：</p>
+<ul>
+<li><strong>分层记忆结构</strong>：长期记忆、短期记忆</li>
+<li><strong>缓存优先机制</strong>：优先从缓存中检索记忆</li>
+<li><strong>语义相似性检索</strong>：基于语义相似性检索记忆</li>
+<li><strong>记忆管理</strong>：自动管理和清理记忆</li>
+</ul>
+<p><strong>应用</strong>：长期对话 Agent、个性化 Agent</p>
+<hr>
+<h3 id="vectordb向量数据库" tabindex="-1">VectorDB（向量数据库） <a class="heading-anchor" href="#vectordb向量数据库" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一种用于存储和检索向量的数据库，支持向量相似性搜索，用于实现 RAG（检索增强生成）。</p>
+<p><strong>核心功能</strong>：</p>
+<ul>
+<li><strong>向量化</strong>：将文本转换为向量</li>
+<li><strong>向量存储</strong>：存储向量数据</li>
+<li><strong>向量检索</strong>：基于相似性检索向量</li>
+<li><strong>重排序</strong>：对检索结果进行重排序</li>
+</ul>
+<p><strong>代表系统</strong>：Pinecone、Weaviate、Chroma、Qdrant</p>
+<hr>
+<h3 id="graph-memory图记忆" tabindex="-1">Graph Memory（图记忆） <a class="heading-anchor" href="#graph-memory图记忆" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一种基于知识图谱的记忆系统，用于存储和检索结构化知识，支持图查询和推理。</p>
+<p><strong>核心功能</strong>：</p>
+<ul>
+<li><strong>知识图谱构建</strong>：构建知识图谱</li>
+<li><strong>图查询</strong>：查询知识图谱</li>
+<li><strong>图推理</strong>：基于图进行推理</li>
+<li><strong>图嵌入</strong>：将图嵌入到向量空间</li>
+</ul>
+<p><strong>应用</strong>：知识管理、关系推理</p>
+<hr>
+<h3 id="rag检索增强生成" tabindex="-1">RAG（检索增强生成） <a class="heading-anchor" href="#rag检索增强生成" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：Retrieval-Augmented Generation，一种结合检索和生成的技术，通过检索外部知识来增强生成能力。</p>
+<p><strong>工作流程</strong>：</p>
+<ol>
+<li>检索：从外部知识库中检索相关信息</li>
+<li>生成：基于检索的信息生成答案</li>
+</ol>
+<p><strong>优势</strong>：</p>
+<ul>
+<li>减少幻觉</li>
+<li>提高准确性</li>
+<li>支持实时信息</li>
+</ul>
+<p><strong>应用</strong>：问答系统、知识库问答</p>
+<hr>
+<h3 id="rlhf基于人类反馈的强化学习" tabindex="-1">RLHF（基于人类反馈的强化学习） <a class="heading-anchor" href="#rlhf基于人类反馈的强化学习" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：Reinforcement Learning from Human Feedback，一种使用人类反馈来训练 LLM 的方法。</p>
+<p><strong>工作流程</strong>：</p>
+<ol>
+<li>收集人类反馈</li>
+<li>训练奖励模型</li>
+<li>使用强化学习优化 LLM</li>
+</ol>
+<p><strong>应用</strong>：对齐训练、提高 LLM 质量</p>
+<hr>
+<h3 id="constitutional-ai基于原则的-ai" tabindex="-1">Constitutional AI（基于原则的 AI） <a class="heading-anchor" href="#constitutional-ai基于原则的-ai" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一种基于预定义的原则来训练 LLM 的方法，使 LLM 遵循特定的道德和安全原则。</p>
+<p><strong>工作流程</strong>：</p>
+<ol>
+<li>定义原则（宪法）</li>
+<li>基于原则训练 LLM</li>
+<li>基于原则评估 LLM</li>
+</ol>
+<p><strong>应用</strong>：安全 LLM、合规 LLM</p>
+<hr>
+<h2 id="a2-架构相关术语" tabindex="-1">A.2 架构相关术语 <a class="heading-anchor" href="#a2-架构相关术语" aria-hidden="true">#</a></h2>
+<h3 id="perception感知感知能力" tabindex="-1">Perception（感知、感知能力） <a class="heading-anchor" href="#perception感知感知能力" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：Agent 观察环境状态的能力，包括输入接收、信息提取、上下文理解等。</p>
+<p><strong>能力</strong>：</p>
+<ul>
+<li>输入接收：接收用户输入、环境输入</li>
+<li>信息提取：从输入中提取关键信息</li>
+<li>上下文理解：理解输入的上下文</li>
+</ul>
+<p><strong>技术</strong>：LLM、多模态处理、NLP</p>
+<hr>
+<h3 id="planning规划规划能力" tabindex="-1">Planning（规划、规划能力） <a class="heading-anchor" href="#planning规划规划能力" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：Agent 制定行动计划的能力，包括目标分解、任务规划、资源分配等。</p>
+<p><strong>能力</strong>：</p>
+<ul>
+<li>目标分解：将复杂目标分解为子目标</li>
+<li>任务规划：制定任务执行顺序</li>
+<li>资源分配：分配计算资源和工具资源</li>
+</ul>
+<p><strong>技术</strong>：CoT（思维链）、ToT（思维树）、LangGraph</p>
+<hr>
+<h3 id="action行动行动能力" tabindex="-1">Action（行动、行动能力） <a class="heading-anchor" href="#action行动行动能力" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：Agent 执行具体操作的能力，包括工具调用、API 调用、状态更新等。</p>
+<p><strong>能力</strong>：</p>
+<ul>
+<li>工具调用：调用外部工具</li>
+<li>API 调用：调用外部 API</li>
+<li>状态更新：更新内部状态</li>
+</ul>
+<p><strong>技术</strong>：Function Calling、Tool Calling</p>
+<hr>
+<h3 id="memory记忆记忆能力" tabindex="-1">Memory（记忆、记忆能力） <a class="heading-anchor" href="#memory记忆记忆能力" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：Agent 存储和检索历史信息的能力，包括短期记忆、长期记忆、向量存储等。</p>
+<p><strong>类型</strong>：</p>
+<ul>
+<li><strong>短期记忆</strong>：存储当前对话和历史对话</li>
+<li><strong>长期记忆</strong>：存储长期知识和经验</li>
+<li><strong>向量存储</strong>：存储向量化知识</li>
+</ul>
+<p><strong>技术</strong>：LangChain Memory、VectorDB、Graph Memory</p>
+<hr>
+<h3 id="reflection反思反思能力" tabindex="-1">Reflection（反思、反思能力） <a class="heading-anchor" href="#reflection反思反思能力" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：Agent 从自己的行为中学习的能力，包括任务反思、行为反思、结果反思等。</p>
+<p><strong>类型</strong>：</p>
+<ul>
+<li><strong>任务反思</strong>：对已完成的任务进行反思</li>
+<li><strong>行为反思</strong>：对行为模式进行反思</li>
+<li><strong>结果反思</strong>：对执行结果进行反思</li>
+<li><strong>错误恢复</strong>：从错误中恢复</li>
+</ul>
+<p><strong>应用</strong>：自我优化、策略调整、错误预防</p>
+<hr>
+<h3 id="reactive反应式反应式架构" tabindex="-1">Reactive（反应式、反应式架构） <a class="heading-anchor" href="#reactive反应式反应式架构" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一种 Agent 架构，Agent 基于当前环境状态直接做出反应，无需复杂的规划。</p>
+<p><strong>特点</strong>：</p>
+<ul>
+<li>响应速度快</li>
+<li>无复杂规划</li>
+<li>基于规则</li>
+</ul>
+<p><strong>应用</strong>：简单任务、实时响应</p>
+<hr>
+<h3 id="deliberative审慎式审慎式架构" tabindex="-1">Deliberative（审慎式、审慎式架构） <a class="heading-anchor" href="#deliberative审慎式审慎式架构" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一种 Agent 架构，Agent 基于规划、推理做出决策，能够进行复杂的任务规划。</p>
+<p><strong>特点</strong>：</p>
+<ul>
+<li>基于规划</li>
+<li>推理能力强</li>
+<li>适合复杂任务</li>
+</ul>
+<p><strong>应用</strong>：复杂任务、长期规划</p>
+<hr>
+<h3 id="hybrid混合式混合式架构" tabindex="-1">Hybrid（混合式、混合式架构） <a class="heading-anchor" href="#hybrid混合式混合式架构" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一种 Agent 架构，结合反应式和审慎式的优点，既有快速响应能力，又有规划能力。</p>
+<p><strong>特点</strong>：</p>
+<ul>
+<li>响应速度快</li>
+<li>有规划能力</li>
+<li>灵活性强</li>
+</ul>
+<p><strong>应用</strong>：复杂场景、需要快速响应的任务</p>
+<hr>
+<h3 id="learning学习型学习型架构" tabindex="-1">Learning（学习型、学习型架构） <a class="heading-anchor" href="#learning学习型学习型架构" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一种 Agent 架构，Agent 能够从经验中学习，持续改进策略。</p>
+<p><strong>特点</strong>：</p>
+<ul>
+<li>从经验中学习</li>
+<li>持续改进</li>
+<li>自适应</li>
+</ul>
+<p><strong>技术</strong>：强化学习、在线学习、元学习</p>
+<p><strong>应用</strong>：复杂环境、需要持续优化的任务</p>
+<hr>
+<h3 id="sequential顺序顺序流程" tabindex="-1">Sequential（顺序、顺序流程） <a class="heading-anchor" href="#sequential顺序顺序流程" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一种 Agent 工作流程，任务按顺序依次执行。</p>
+<p><strong>特点</strong>：</p>
+<ul>
+<li>简单直观</li>
+<li>易于理解</li>
+<li>适合依赖关系明确的任务</li>
+</ul>
+<p><strong>应用</strong>：CrewAI Sequential Process</p>
+<hr>
+<h3 id="hierarchical层次化层次流程" tabindex="-1">Hierarchical（层次化、层次流程） <a class="heading-anchor" href="#hierarchical层次化层次流程" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一种 Agent 工作流程，Manager Agent 分配任务给 Worker Agent，形成层次结构。</p>
+<p><strong>特点</strong>：</p>
+<ul>
+<li>任务分配灵活</li>
+<li>适合复杂任务</li>
+<li>支持多 Agent 协作</li>
+</ul>
+<p><strong>应用</strong>：CrewAI Hierarchical Process</p>
+<hr>
+<h3 id="concurrent并发并行流程" tabindex="-1">Concurrent（并发、并行流程） <a class="heading-anchor" href="#concurrent并发并行流程" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一种 Agent 工作流程，多个任务并行执行。</p>
+<p><strong>特点</strong>：</p>
+<ul>
+<li>效率高</li>
+<li>资源利用率高</li>
+<li>适合独立任务</li>
+</ul>
+<p><strong>应用</strong>：并行处理、多 Agent 并行协作</p>
+<hr>
+<h3 id="handoff交接交接模式" tabindex="-1">Handoff（交接、交接模式） <a class="heading-anchor" href="#handoff交接交接模式" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一种 Agent 通信模式，Agent 将任务交接给另一个 Agent。</p>
+<p><strong>应用</strong>：多 Agent 协作、任务升级</p>
+<hr>
+<h3 id="orchestration编排编排模式" tabindex="-1">Orchestration（编排、编排模式） <a class="heading-anchor" href="#orchestration编排编排模式" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一种 Agent 工作流程管理方式，协调多个 Agent 和工具的执行。</p>
+<p><strong>应用</strong>：复杂工作流、多 Agent 系统</p>
+<p><strong>代表系统</strong>：Azure Agent Orchestration、Google Cloud Workflows</p>
+<hr>
+<h2 id="a3-开发相关术语" tabindex="-1">A.3 开发相关术语 <a class="heading-anchor" href="#a3-开发相关术语" aria-hidden="true">#</a></h2>
+<h3 id="function-calling函数调用" tabindex="-1">Function Calling（函数调用） <a class="heading-anchor" href="#function-calling函数调用" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：LLM 的一种能力，能够根据输入自动调用预定义的函数，并处理函数返回结果。</p>
+<p><strong>工作流程</strong>：</p>
+<ol>
+<li>LLM 分析输入，确定需要调用哪个函数</li>
+<li>LLM 生成函数调用参数</li>
+<li>执行函数调用</li>
+<li>LLM 处理函数返回结果</li>
+</ol>
+<p><strong>应用</strong>：工具调用、API 调用</p>
+<hr>
+<h3 id="tool-calling工具调用" tabindex="-1">Tool Calling（工具调用） <a class="heading-anchor" href="#tool-calling工具调用" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：Agent 调用外部工具的能力，包括 API 调用、数据库查询、文件操作等。</p>
+<p><strong>工作流程</strong>：</p>
+<ol>
+<li>Agent 分析任务，确定需要调用哪个工具</li>
+<li>Agent 生成工具调用参数</li>
+<li>执行工具调用</li>
+<li>Agent 处理工具返回结果</li>
+</ol>
+<p><strong>应用</strong>：扩展 Agent 能力、访问外部资源</p>
+<hr>
+<h3 id="prompt-engineering提示词工程" tabindex="-1">Prompt Engineering（提示词工程） <a class="heading-anchor" href="#prompt-engineering提示词工程" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：设计和优化提示词，使 LLM 生成更好的输出。</p>
+<p><strong>技术</strong>：</p>
+<ul>
+<li>Few-shot 示例</li>
+<li>Chain-of-Thought（CoT）</li>
+<li>Tree-of-Thought（ToT）</li>
+<li>自我反思</li>
+</ul>
+<hr>
+<h3 id="fine-tuning微调" tabindex="-1">Fine-tuning（微调） <a class="heading-anchor" href="#fine-tuning微调" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：在预训练模型的基础上，使用特定数据进一步训练模型，使其适应特定任务。</p>
+<p><strong>类型</strong>：</p>
+<ul>
+<li>全量微调：微调所有参数</li>
+<li>部分微调：只微调部分参数</li>
+<li>LoRA：Low-Rank Adaptation</li>
+</ul>
+<p><strong>应用</strong>：定制化 LLM、领域适配</p>
+<hr>
+<h3 id="embedding嵌入" tabindex="-1">Embedding（嵌入） <a class="heading-anchor" href="#embedding嵌入" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：将文本、图像等数据转换为向量表示的过程。</p>
+<p><strong>应用</strong>：</p>
+<ul>
+<li>语义搜索</li>
+<li>向量存储</li>
+<li>RAG</li>
+</ul>
+<hr>
+<h3 id="vector-search向量搜索" tabindex="-1">Vector Search（向量搜索） <a class="heading-anchor" href="#vector-search向量搜索" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：基于向量相似性搜索相似内容的技术。</p>
+<p><strong>应用</strong>：</p>
+<ul>
+<li>语义搜索</li>
+<li>推荐系统</li>
+<li>RAG</li>
+</ul>
+<hr>
+<h3 id="semantic-search语义搜索" tabindex="-1">Semantic Search（语义搜索） <a class="heading-anchor" href="#semantic-search语义搜索" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：基于语义相似性搜索内容的技术，而不是基于关键词匹配。</p>
+<p><strong>应用</strong>：</p>
+<ul>
+<li>问答系统</li>
+<li>知识库搜索</li>
+<li>文档检索</li>
+</ul>
+<hr>
+<h3 id="hallucination幻觉" tabindex="-1">Hallucination（幻觉） <a class="heading-anchor" href="#hallucination幻觉" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：LLM 生成不准确或虚构信息的现象。</p>
+<p><strong>原因</strong>：</p>
+<ul>
+<li>训练数据不足</li>
+<li>推理能力有限</li>
+<li>缺乏外部知识</li>
+</ul>
+<p><strong>解决方案</strong>：</p>
+<ul>
+<li>RAG（检索增强生成）</li>
+<li>神经符号融合</li>
+<li>事实核查</li>
+</ul>
+<hr>
+<h3 id="alignment对齐" tabindex="-1">Alignment（对齐） <a class="heading-anchor" href="#alignment对齐" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：使 AI 系统的行为与人类价值观和意图一致的过程。</p>
+<p><strong>方法</strong>：</p>
+<ul>
+<li>RLHF（基于人类反馈的强化学习）</li>
+<li>Constitutional AI（基于原则的 AI）</li>
+<li>指令微调</li>
+</ul>
+<p><strong>应用</strong>：安全 AI、合规 AI</p>
+<hr>
+<h3 id="safety安全" tabindex="-1">Safety（安全） <a class="heading-anchor" href="#safety安全" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：保护 AI 系统免受攻击和滥用的能力。</p>
+<p><strong>威胁</strong>：</p>
+<ul>
+<li>提示词注入</li>
+<li>越狱攻击</li>
+<li>数据泄露</li>
+<li>恶意使用</li>
+</ul>
+<p><strong>防护措施</strong>：</p>
+<ul>
+<li>输入验证</li>
+<li>输出过滤</li>
+<li>访问控制</li>
+<li>审计日志</li>
+</ul>
+<hr>
+<h2 id="a4-评估相关术语" tabindex="-1">A.4 评估相关术语 <a class="heading-anchor" href="#a4-评估相关术语" aria-hidden="true">#</a></h2>
+<h3 id="benchmark基准测试" tabindex="-1">Benchmark（基准测试） <a class="heading-anchor" href="#benchmark基准测试" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：用于评估 Agent 性能的标准测试集。</p>
+<p><strong>类型</strong>：</p>
+<ul>
+<li>ALFWorld</li>
+<li>WebShop</li>
+<li>AgentBench</li>
+<li>其他基准</li>
+</ul>
+<p><strong>作用</strong>：</p>
+<ul>
+<li>性能对比</li>
+<li>能力评估</li>
+<li>进展追踪</li>
+</ul>
+<hr>
+<h3 id="tracing追踪" tabindex="-1">Tracing（追踪） <a class="heading-anchor" href="#tracing追踪" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：追踪 Agent 的执行过程，记录每个步骤的输入、输出、中间状态等。</p>
+<p><strong>应用</strong>：</p>
+<ul>
+<li>调试</li>
+<li>性能分析</li>
+<li>错误分析</li>
+</ul>
+<p><strong>工具</strong>：LangSmith、W&amp;B</p>
+<hr>
+<h3 id="latency延迟" tabindex="-1">Latency（延迟） <a class="heading-anchor" href="#latency延迟" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：Agent 响应用户请求所需的时间。</p>
+<p><strong>指标</strong>：</p>
+<ul>
+<li>平均延迟</li>
+<li>P50、P95、P99 延迟</li>
+</ul>
+<p><strong>优化</strong>：</p>
+<ul>
+<li>模型优化</li>
+<li>缓存</li>
+<li>并发处理</li>
+</ul>
+<hr>
+<h3 id="throughput吞吐量" tabindex="-1">Throughput（吞吐量） <a class="heading-anchor" href="#throughput吞吐量" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：单位时间内 Agent 能够处理的请求数量。</p>
+<p><strong>指标</strong>：</p>
+<ul>
+<li>QPS（每秒查询数）</li>
+<li>TPM（每分钟事务数）</li>
+</ul>
+<p><strong>优化</strong>：</p>
+<ul>
+<li>并发处理</li>
+<li>资源扩展</li>
+<li>负载均衡</li>
+</ul>
+<hr>
+<h3 id="accuracy准确率" tabindex="-1">Accuracy（准确率） <a class="heading-anchor" href="#accuracy准确率" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：Agent 输出正确的比例。</p>
+<p><strong>评估方法</strong>：</p>
+<ul>
+<li>自动评估</li>
+<li>人工评估</li>
+<li>用户反馈</li>
+</ul>
+<hr>
+<h3 id="robustness鲁棒性" tabindex="-1">Robustness（鲁棒性） <a class="heading-anchor" href="#robustness鲁棒性" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：Agent 在面对噪声、对抗攻击、输入变化时保持性能的能力。</p>
+<p><strong>测试方法</strong>：</p>
+<ul>
+<li>噪声注入</li>
+<li>对抗攻击</li>
+<li>边界测试</li>
+</ul>
+<hr>
+<h3 id="consistency一致性" tabindex="-1">Consistency（一致性） <a class="heading-anchor" href="#consistency一致性" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：Agent 在相同输入下输出相同结果的能力。</p>
+<p><strong>测试方法</strong>：</p>
+<ul>
+<li>重复测试</li>
+<li>多版本对比</li>
+</ul>
+<hr>
+<h3 id="explainability可解释性" tabindex="-1">Explainability（可解释性） <a class="heading-anchor" href="#explainability可解释性" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：Agent 的决策过程能够被人类理解和解释的能力。</p>
+<p><strong>方法</strong>：</p>
+<ul>
+<li>决策日志</li>
+<li>CoT（思维链）</li>
+<li>可视化</li>
+</ul>
+<hr>
+<h2 id="a5-部署相关术语" tabindex="-1">A.5 部署相关术语 <a class="heading-anchor" href="#a5-部署相关术语" aria-hidden="true">#</a></h2>
+<h3 id="cloud-native云原生" tabindex="-1">Cloud-Native（云原生） <a class="heading-anchor" href="#cloud-native云原生" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一种应用开发和部署方法，充分利用云计算的优势。</p>
+<p><strong>特点</strong>：</p>
+<ul>
+<li>容器化</li>
+<li>微服务</li>
+<li>自动扩缩容</li>
+<li>DevOps</li>
+</ul>
+<p><strong>应用</strong>：云平台部署</p>
+<hr>
+<h3 id="containerization容器化" tabindex="-1">Containerization（容器化） <a class="heading-anchor" href="#containerization容器化" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：将应用及其依赖打包成容器的过程，使应用能够在任何环境中运行。</p>
+<p><strong>工具</strong>：Docker、Kubernetes</p>
+<p><strong>优势</strong>：</p>
+<ul>
+<li>环境一致性</li>
+<li>易于部署</li>
+<li>资源隔离</li>
+</ul>
+<hr>
+<h3 id="microservices微服务" tabindex="-1">Microservices（微服务） <a class="heading-anchor" href="#microservices微服务" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一种架构风格，将应用拆分为多个小型、独立的服务。</p>
+<p><strong>优势</strong>：</p>
+<ul>
+<li>独立部署</li>
+<li>技术栈灵活</li>
+<li>易于扩展</li>
+</ul>
+<hr>
+<h3 id="auto-scaling自动扩缩容" tabindex="-1">Auto-scaling（自动扩缩容） <a class="heading-anchor" href="#auto-scaling自动扩缩容" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：根据负载自动扩展或收缩资源的能力。</p>
+<p><strong>类型</strong>：</p>
+<ul>
+<li>水平扩展</li>
+<li>垂直扩展</li>
+</ul>
+<p><strong>工具</strong>：Kubernetes HPA、AWS Auto Scaling</p>
+<hr>
+<h3 id="blue-green-deployment蓝绿部署" tabindex="-1">Blue-Green Deployment（蓝绿部署） <a class="heading-anchor" href="#blue-green-deployment蓝绿部署" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一种部署策略，同时运行两个相同的环境（蓝和绿），通过切换流量实现零停机部署。</p>
+<p><strong>优势</strong>：</p>
+<ul>
+<li>零停机</li>
+<li>快速回滚</li>
+</ul>
+<hr>
+<h3 id="canary-release金丝雀发布" tabindex="-1">Canary Release（金丝雀发布） <a class="heading-anchor" href="#canary-release金丝雀发布" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一种部署策略，先向小部分用户发布新版本，逐步扩大范围。</p>
+<p><strong>优势</strong>：</p>
+<ul>
+<li>降低风险</li>
+<li>逐步验证</li>
+</ul>
+<hr>
+<h3 id="cicd持续集成持续部署" tabindex="-1">CI/CD（持续集成/持续部署） <a class="heading-anchor" href="#cicd持续集成持续部署" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一种软件开发实践，自动化构建、测试和部署流程。</p>
+<p><strong>工具</strong>：GitHub Actions、GitLab CI、Jenkins</p>
+<hr>
+<h3 id="observability可观测性" tabindex="-1">Observability（可观测性） <a class="heading-anchor" href="#observability可观测性" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：通过日志、指标、追踪等手段，监控和分析系统运行状态的能力。</p>
+<p><strong>三大支柱</strong>：</p>
+<ul>
+<li><strong>Logs（日志）</strong>：记录系统事件</li>
+<li><strong>Metrics（指标）</strong>：度量系统性能</li>
+<li><strong>Traces（追踪）</strong>：追踪请求路径</li>
+</ul>
+<p><strong>工具</strong>：</p>
+<ul>
+<li><strong>Logs</strong>：ELK Stack、Loki</li>
+<li><strong>Metrics</strong>：Prometheus、Grafana</li>
+<li><strong>Traces</strong>：Jaeger、OpenTelemetry</li>
+</ul>
+<hr>
+<h2 id="a6-其他术语" tabindex="-1">A.6 其他术语 <a class="heading-anchor" href="#a6-其他术语" aria-hidden="true">#</a></h2>
+<h3 id="llmlarge-language-model" tabindex="-1">LLM（Large Language Model） <a class="heading-anchor" href="#llmlarge-language-model" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：大语言模型，一种基于深度学习的语言模型，能够理解和生成自然语言。</p>
+<p><strong>代表模型</strong>：</p>
+<ul>
+<li>GPT-4、GPT-4 Turbo</li>
+<li>Claude 3、Claude 3.5</li>
+<li>Gemini Pro、Gemini 1.5</li>
+<li>Llama 3、Mistral</li>
+</ul>
+<hr>
+<h3 id="apiapplication-programming-interface" tabindex="-1">API（Application Programming Interface） <a class="heading-anchor" href="#apiapplication-programming-interface" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：应用程序编程接口，用于不同软件组件之间的通信。</p>
+<p><strong>类型</strong>：</p>
+<ul>
+<li>REST API</li>
+<li>GraphQL</li>
+<li>gRPC</li>
+</ul>
+<hr>
+<h3 id="rest-apirepresentational-state-transfer-api" tabindex="-1">REST API（Representational State Transfer API） <a class="heading-anchor" href="#rest-apirepresentational-state-transfer-api" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一种基于 HTTP 的 API 风格，使用 HTTP 方法（GET、POST、PUT、DELETE）操作资源。</p>
+<hr>
+<h3 id="graphql" tabindex="-1">GraphQL <a class="heading-anchor" href="#graphql" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一种查询语言，用于 API，允许客户端指定需要的数据。</p>
+<hr>
+<h3 id="grpcgoogle-remote-procedure-call" tabindex="-1">gRPC（Google Remote Procedure Call） <a class="heading-anchor" href="#grpcgoogle-remote-procedure-call" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一种高性能、开源的 RPC 框架，基于 HTTP/2 和 Protocol Buffers。</p>
+<hr>
+<h3 id="docker" tabindex="-1">Docker <a class="heading-anchor" href="#docker" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一个开源的容器化平台，用于构建、部署和运行容器。</p>
+<hr>
+<h3 id="kubernetes" tabindex="-1">Kubernetes <a class="heading-anchor" href="#kubernetes" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一个开源的容器编排平台，用于自动化部署、扩展和管理容器化应用。</p>
+<hr>
+<h3 id="npuneural-processing-unit" tabindex="-1">NPU（Neural Processing Unit） <a class="heading-anchor" href="#npuneural-processing-unit" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一种专门为神经网络推理设计的硬件加速器。</p>
+<p><strong>优势</strong>：</p>
+<ul>
+<li>高性能</li>
+<li>低功耗</li>
+<li>专用优化</li>
+</ul>
+<hr>
+<h3 id="tputensor-processing-unit" tabindex="-1">TPU（Tensor Processing Unit） <a class="heading-anchor" href="#tputensor-processing-unit" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：Google 专门为机器学习设计的硬件加速器。</p>
+<p><strong>优势</strong>：</p>
+<ul>
+<li>高性能</li>
+<li>高带宽</li>
+<li>低延迟</li>
+</ul>
+<hr>
+<h3 id="gpugraphics-processing-unit" tabindex="-1">GPU（Graphics Processing Unit） <a class="heading-anchor" href="#gpugraphics-processing-unit" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：图形处理器， originally 用于图形渲染，现在广泛用于机器学习。</p>
+<p><strong>优势</strong>：</p>
+<ul>
+<li>并行计算能力强</li>
+<li>适合大规模矩阵运算</li>
+</ul>
+<hr>
+<h3 id="agentic-ai代理式-ai" tabindex="-1">Agentic AI（代理式 AI） <a class="heading-anchor" href="#agentic-ai代理式-ai" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：下一代生成式人工智能，能够自主感知、推理并执行任务。</p>
+<p><strong>特征</strong>：</p>
+<ul>
+<li>自主感知</li>
+<li>自主推理</li>
+<li>自主执行</li>
+</ul>
+<p><strong>来源</strong>：MIT Sloan（2025）</p>
+<hr>
+<h3 id="compound-ai-system复合-ai-系统" tabindex="-1">Compound AI System（复合 AI 系统） <a class="heading-anchor" href="#compound-ai-system复合-ai-系统" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一种结合多种 AI 技术（LLM、工具、知识库等）的复杂系统。</p>
+<p><strong>应用</strong>：Agent 系统、多模态系统</p>
+<hr>
+<h3 id="human-in-the-loop人在环路" tabindex="-1">Human-in-the-loop（人在环路） <a class="heading-anchor" href="#human-in-the-loop人在环路" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一种系统设计，人类参与系统的决策和执行过程。</p>
+<p><strong>应用</strong>：Agent 协作、监督学习</p>
+<hr>
+<h3 id="zero-shot零样本" tabindex="-1">Zero-shot（零样本） <a class="heading-anchor" href="#zero-shot零样本" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：无需示例即可完成任务的 AI 系统。</p>
+<p><strong>应用</strong>：Zero-shot ReAct Agent</p>
+<hr>
+<h3 id="few-shot少样本" tabindex="-1">Few-shot（少样本） <a class="heading-anchor" href="#few-shot少样本" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：只需要少量示例即可完成任务的 AI 系统。</p>
+<p><strong>应用</strong>：Few-shot Prompting</p>
+<hr>
+<h3 id="multi-modal多模态" tabindex="-1">Multi-modal（多模态） <a class="heading-anchor" href="#multi-modal多模态" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：能够处理多种模态（文本、图像、视频、音频）的 AI 系统。</p>
+<p><strong>应用</strong>：多模态 Agent、GPT-4V、Claude 3.5</p>
+<hr>
+<h3 id="end-to-end端到端" tabindex="-1">End-to-end（端到端） <a class="heading-anchor" href="#end-to-end端到端" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：从输入到输出的完整流程，无需人工干预。</p>
+<p><strong>应用</strong>：端到端 Agent、端到端测试</p>
+<hr>
+<h3 id="offline离线" tabindex="-1">Offline（离线） <a class="heading-anchor" href="#offline离线" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：无需网络连接即可运行的系统。</p>
+<p><strong>应用</strong>：端侧 Agent、离线推理</p>
+<hr>
+<h3 id="online在线" tabindex="-1">Online（在线） <a class="heading-anchor" href="#online在线" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：需要网络连接才能运行的系统。</p>
+<p><strong>应用</strong>：云 Agent、在线推理</p>
+<hr>
+<h3 id="real-time实时" tabindex="-1">Real-time（实时） <a class="heading-anchor" href="#real-time实时" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：能够在用户请求后立即响应的系统。</p>
+<p><strong>应用</strong>：实时 Agent、实时监控</p>
+<hr>
+<h3 id="batch批处理" tabindex="-1">Batch（批处理） <a class="heading-anchor" href="#batch批处理" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：一次性处理多个请求的系统。</p>
+<p><strong>应用</strong>：批处理 Agent、批量数据分析</p>
+<hr>
+<h3 id="streaming流式" tabindex="-1">Streaming（流式） <a class="heading-anchor" href="#streaming流式" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：逐个输出结果的系统，无需等待全部结果生成。</p>
+<p><strong>应用</strong>：流式输出、实时聊天</p>
+<hr>
+<h3 id="sotastate-of-the-art" tabindex="-1">SOTA（State-of-the-art） <a class="heading-anchor" href="#sotastate-of-the-art" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：当前最先进的技术或方法。</p>
+<p><strong>应用</strong>：SOTA 模型、SOTA 方法</p>
+<hr>
+<h3 id="pocproof-of-concept" tabindex="-1">POC（Proof of Concept） <a class="heading-anchor" href="#pocproof-of-concept" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：概念验证，用于验证某个概念或想法的可行性。</p>
+<p><strong>应用</strong>：POC 项目、POC 测试</p>
+<hr>
+<h3 id="mvpminimum-viable-product" tabindex="-1">MVP（Minimum Viable Product） <a class="heading-anchor" href="#mvpminimum-viable-product" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：最小可行产品，包含核心功能的产品。</p>
+<p><strong>应用</strong>：MVP 发布、MVP 测试</p>
+<hr>
+<h3 id="roireturn-on-investment" tabindex="-1">ROI（Return on Investment） <a class="heading-anchor" href="#roireturn-on-investment" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：投资回报率，衡量投资收益的指标。</p>
+<p><strong>计算</strong>：(收益 - 成本) / 成本 × 100%</p>
+<hr>
+<h3 id="kpikey-performance-indicator" tabindex="-1">KPI（Key Performance Indicator） <a class="heading-anchor" href="#kpikey-performance-indicator" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：关键绩效指标，用于衡量系统或项目的绩效。</p>
+<p><strong>应用</strong>：</p>
+<ul>
+<li>Agent 性能 KPI</li>
+<li>用户满意度 KPI</li>
+<li>业务 KPI</li>
+</ul>
+<hr>
+<h3 id="slaservice-level-agreement" tabindex="-1">SLA（Service Level Agreement） <a class="heading-anchor" href="#slaservice-level-agreement" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：服务级别协议，定义服务提供商和客户之间的服务标准和责任。</p>
+<p><strong>内容</strong>：</p>
+<ul>
+<li>可用性</li>
+<li>性能</li>
+<li>响应时间</li>
+<li>故障恢复</li>
+</ul>
+<hr>
+<h3 id="gdprgeneral-data-protection-regulation" tabindex="-1">GDPR（General Data Protection Regulation） <a class="heading-anchor" href="#gdprgeneral-data-protection-regulation" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：欧盟的数据保护法规，保护个人数据的隐私和安全。</p>
+<p><strong>要求</strong>：</p>
+<ul>
+<li>数据保护</li>
+<li>隐私保护</li>
+<li>用户同意</li>
+<li>数据删除权</li>
+</ul>
+<hr>
+<h3 id="hipaahealth-insurance-portability-and-accountability-act" tabindex="-1">HIPAA（Health Insurance Portability and Accountability Act） <a class="heading-anchor" href="#hipaahealth-insurance-portability-and-accountability-act" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：美国的医疗数据保护法规，保护医疗信息的隐私和安全。</p>
+<p><strong>要求</strong>：</p>
+<ul>
+<li>数据保护</li>
+<li>隐私保护</li>
+<li>安全措施</li>
+</ul>
+<hr>
+<h3 id="soc2system-and-organization-controls-2" tabindex="-1">SOC2（System and Organization Controls 2） <a class="heading-anchor" href="#soc2system-and-organization-controls-2" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：美国的审计标准，评估服务提供商的安全、可用性、处理完整性、保密性和隐私。</p>
+<p><strong>类型</strong>：</p>
+<ul>
+<li>SOC2 Type I</li>
+<li>SOC2 Type II</li>
+</ul>
+<hr>
+<h2 id="结语" tabindex="-1">结语 <a class="heading-anchor" href="#结语" aria-hidden="true">#</a></h2>
+<p>本术语表涵盖了 AI Agent 开发的核心术语，包括 Agent 相关、架构相关、开发相关、评估相关、部署相关等方面的术语。</p>
+<p><strong>术语表版本</strong>：v1.0<br>
+<strong>最后更新</strong>：2026-03-19<br>
+<strong>研究基础</strong>：基于 2024-2025 年最新技术趋势和研究</p>
+</div> <nav class="pager"> <a class="pager__link" href="/ai-agent-development/appendix-references/"> <span>上一篇</span> <strong>附录 B：参考文献（References）</strong> </a> <span class="pager__link pager__link--empty">已经是最后一篇</span> </nav> </article> </section>  </main> <footer class="site-footer"> <div class="site-footer__inner"> <p>Vinci Knowledge Base</p> <p>Source directory: <code>/Users/superone77/Documents/知识库/projects</code></p> </div> </footer> </div> </body></html>

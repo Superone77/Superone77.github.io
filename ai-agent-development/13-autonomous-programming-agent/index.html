@@ -1,0 +1,757 @@
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>第十三章：自主编程 Agent（Autonomous Programming Agent） | Vinci Knowledge Base</title><meta name="description" content="第十三章：自主编程 Agent（Autonomous Programming Agent） 自主编程 Agent 是 AI Agent 的高级应用之一，通过自主理解代码、生成代码、执行代码和调试代码，实现软件开发的自动化。 13.1 自主编程 Agent 概述 13.1.1 自主编程 Agent 的定义 自主编程 Agent 是一种能够自主理解代码、生成代码"><meta name="generator" content="Vinci Knowledge Base"><link rel="stylesheet" href="/_astro/_doc_.CY2v1inF.css"></head> <body> <div class="page-shell"> <header class="site-header"> <div class="site-header__inner"> <a class="brand" href="/"> <span class="brand__eyebrow">GitHub Pages Knowledge Site</span> <span class="brand__name">Vinci Knowledge Base</span> </a> <nav class="site-nav"> <a href="/">Projects</a> </nav> </div> </header> <main class="page-main">  <section class="article-hero"> <div> <p class="eyebrow">Knowledge Article</p> <h1>第十三章：自主编程 Agent（Autonomous Programming Agent）</h1> <p class="article-hero__breadcrumbs"> <a href="/">Home</a> <span>/</span> <a href="/ai-agent-development/">AI Agent 智能体开发知识库</a> </p> </div> <div class="meta-card"> <p><strong>Project</strong> AI Agent 智能体开发知识库</p> <p><strong>Source</strong> <code>knowledge/13-autonomous-programming-agent.md</code></p> <p><strong>Sections</strong> 16</p> </div> </section> <section class="content-grid"> <aside class="toc-card"> <p class="toc-card__title">本页目录</p> <ul class="toc-card__list"> <li class="toc-depth-1"> <a href="#第十三章自主编程-agentautonomous-programming-agent">第十三章：自主编程 Agent（Autonomous Programming Agent）</a> </li><li class="toc-depth-2"> <a href="#131-自主编程-agent-概述">13.1 自主编程 Agent 概述</a> </li><li class="toc-depth-3"> <a href="#1311-自主编程-agent-的定义">13.1.1 自主编程 Agent 的定义</a> </li><li class="toc-depth-2"> <a href="#132-主流自主编程平台">13.2 主流自主编程平台</a> </li><li class="toc-depth-3"> <a href="#1321-devin">13.2.1 Devin</a> </li><li class="toc-depth-3"> <a href="#1322-cursor">13.2.2 Cursor</a> </li><li class="toc-depth-3"> <a href="#1323-其他自主编程平台">13.2.3 其他自主编程平台</a> </li><li class="toc-depth-2"> <a href="#133-自主编程技术">13.3 自主编程技术</a> </li><li class="toc-depth-3"> <a href="#1331-代码生成技术">13.3.1 代码生成技术</a> </li><li class="toc-depth-2"> <a href="#134-自主编程应用场景">13.4 自主编程应用场景</a> </li><li class="toc-depth-3"> <a href="#1341-web-开发">13.4.1 Web 开发</a> </li><li class="toc-depth-3"> <a href="#1342-数据处理">13.4.2 数据处理</a> </li><li class="toc-depth-2"> <a href="#135-自主编程代码示例">13.5 自主编程代码示例</a> </li><li class="toc-depth-1"> <a href="#配置日志">配置日志</a> </li><li class="toc-depth-1"> <a href="#使用示例">使用示例</a> </li><li class="toc-depth-2"> <a href="#小结第十三章全部完成">小结（第十三章全部完成）</a> </li> </ul> </aside> <article class="prose-card"> <div class="prose"><h1 id="第十三章自主编程-agentautonomous-programming-agent" tabindex="-1">第十三章：自主编程 Agent（Autonomous Programming Agent） <a class="heading-anchor" href="#第十三章自主编程-agentautonomous-programming-agent" aria-hidden="true">#</a></h1>
+<p>自主编程 Agent 是 AI Agent 的高级应用之一，通过自主理解代码、生成代码、执行代码和调试代码，实现软件开发的自动化。</p>
+<h2 id="131-自主编程-agent-概述" tabindex="-1">13.1 自主编程 Agent 概述 <a class="heading-anchor" href="#131-自主编程-agent-概述" aria-hidden="true">#</a></h2>
+<h3 id="1311-自主编程-agent-的定义" tabindex="-1">13.1.1 自主编程 Agent 的定义 <a class="heading-anchor" href="#1311-自主编程-agent-的定义" aria-hidden="true">#</a></h3>
+<p>自主编程 Agent 是一种能够自主理解代码、生成代码、执行代码和调试代码的 AI Agent，通过自然语言描述、代码理解、规划、执行和调试等技术，实现软件开发的自动化。</p>
+<h4>自主编程 Agent 的定义</h4>
+<p>自主编程 Agent 是一种能够自主理解代码、生成代码、执行代码和调试代码的 AI Agent，通过自然语言描述、代码理解、规划、执行和调试等技术，实现软件开发的自动化，包括需求理解、架构设计、代码生成、代码执行、测试、调试、重构和部署等全流程。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong>Trickle（2025）</strong>：Devin AI stands out as a fully autonomous AI software engineer that can independently handle complex coding tasks。</li>
+<li><strong>DeepFinder（2025）</strong>：2025: The Agent Era Begins. Claude Code, Devin, and Cursor’s agent mode launched within months of each other.</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，自主编程 Agent 包括：</p>
+<ol>
+<li><strong>需求理解</strong>：通过自然语言理解用户需求和任务描述</li>
+<li><strong>代码理解</strong>：理解现有代码库和代码结构</li>
+<li><strong>规划与设计</strong>：规划任务步骤和设计软件架构</li>
+<li><strong>代码生成</strong>：根据需求生成符合规范的代码</li>
+<li><strong>代码执行</strong>：执行代码并处理运行时错误</li>
+<li><strong>测试与调试</strong>：自动化测试和调试，修复 bug</li>
+<li><strong>重构与优化</strong>：重构和优化代码，提高代码质量</li>
+</ol>
+<h4>自主编程 Agent 的核心能力</h4>
+<p><strong>1. 需求理解</strong></p>
+<p>通过自然语言理解用户需求和任务描述，包括功能需求、性能需求、约束条件等。</p>
+<p><strong>2. 代码理解</strong></p>
+<p>理解现有代码库和代码结构，包括代码语义、依赖关系、设计模式等。</p>
+<p><strong>3. 规划与设计</strong></p>
+<p>规划任务步骤和设计软件架构，包括模块划分、接口设计、数据结构设计等。</p>
+<p><strong>4. 代码生成</strong></p>
+<p>根据需求生成符合规范的代码，包括选择合适的编程语言、框架、库等。</p>
+<p><strong>5. 代码执行</strong></p>
+<p>执行代码并处理运行时错误，包括环境配置、依赖安装、错误处理等。</p>
+<p><strong>6. 测试与调试</strong></p>
+<p>自动化测试和调试，修复 bug，包括单元测试、集成测试、端到端测试。</p>
+<p><strong>7. 重构与优化</strong></p>
+<p>重构和优化代码，提高代码质量，包括代码简化、性能优化、安全加固。</p>
+<h4>自主编程 Agent 的优势与劣势</h4>
+<table>
+<thead>
+<tr>
+<th>优势</th>
+<th>劣势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>自动化软件开发</td>
+<td>可能产生低质量代码</td>
+</tr>
+<tr>
+<td>提高开发效率</td>
+<td>可能难以维护</td>
+</tr>
+<tr>
+<td>支持全流程</td>
+<td>需要良好的代码理解能力</td>
+</tr>
+<tr>
+<td>24/7 可用</td>
+<td>可能引入安全风险</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="132-主流自主编程平台" tabindex="-1">13.2 主流自主编程平台 <a class="heading-anchor" href="#132-主流自主编程平台" aria-hidden="true">#</a></h2>
+<h3 id="1321-devin" tabindex="-1">13.2.1 Devin <a class="heading-anchor" href="#1321-devin" aria-hidden="true">#</a></h3>
+<p>Devin 是一种完全自主的 AI 软件工程师，通过深度理解代码、规划和执行任务，实现软件开发的自动化。</p>
+<h4>Devin 的定义</h4>
+<p>Devin 是一种完全自主的 AI 软件工程师，通过深度理解代码、规划和执行任务，实现软件开发的自动化，包括代码理解、代码生成、代码执行、测试和调试等全流程。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong>Trickle（2025）</strong>：Devin AI stands out as a fully autonomous AI software engineer that can independently handle complex coding tasks.</li>
+<li><strong>DeepFinder（2025）</strong>：Announced in 2024 and significantly improved through 2025-2026, Devin demonstrated capabilities that surprised even industry observers—completing complex software tasks that seemed far beyond AI’s reach just years earlier.</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，Devin 包括：</p>
+<ol>
+<li><strong>代码理解</strong>：深度理解代码库和代码结构</li>
+<li><strong>任务规划</strong>：规划复杂的软件开发任务</li>
+<li><strong>代码生成</strong>：生成高质量的代码</li>
+<li><strong>代码执行</strong>：在沙箱环境中执行代码</li>
+<li><strong>测试与调试</strong>：自动化测试和调试</li>
+<li><strong>迭代优化</strong>：基于反馈迭代优化代码</li>
+</ol>
+<h4>Devin 的核心能力</h4>
+<p><strong>1. 深度代码理解</strong></p>
+<p>深度理解代码库和代码结构，包括代码语义、依赖关系、设计模式、业务逻辑。</p>
+<p><strong>2. 复杂任务规划</strong></p>
+<p>规划复杂的软件开发任务，包括模块划分、依赖管理、里程碑设置。</p>
+<p><strong>3. 高质量代码生成</strong></p>
+<p>生成高质量的代码，包括代码规范、注释、文档。</p>
+<p><strong>4. 沙箱环境执行</strong></p>
+<p>在沙箱环境中执行代码，确保安全和可控。</p>
+<p><strong>5. 自动化测试与调试</strong></p>
+<p>自动化测试和调试，包括单元测试、集成测试、端到端测试、错误日志分析。</p>
+<p><strong>6. 基于反馈迭代</strong></p>
+<p>基于反馈迭代优化代码，包括错误修复、性能优化、安全加固。</p>
+<h4>Devin 的优势与劣势</h4>
+<table>
+<thead>
+<tr>
+<th>优势</th>
+<th>劣势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>完全自主</td>
+<td>成本高</td>
+</tr>
+<tr>
+<td>深度代码理解</td>
+<td>需要大量的计算资源</td>
+</tr>
+<tr>
+<td>复杂任务处理</td>
+<td>可能难以调试</td>
+</tr>
+<tr>
+<td>高质量代码生成</td>
+<td>可能不透明</td>
+</tr>
+</tbody>
+</table>
+<h3 id="1322-cursor" tabindex="-1">13.2.2 Cursor <a class="heading-anchor" href="#1322-cursor" aria-hidden="true">#</a></h3>
+<p>Cursor 是一种 AI 增强的 IDE 和自主编程平台，通过自主终端访问和网络搜索，实现编程的自动化。</p>
+<h4>Cursor 的定义</h4>
+<p>Cursor 是一种 AI 增强的 IDE 和自主编程平台，通过自主终端访问和网络搜索，实现编程的自动化，包括代码生成、代码重构、代码调试、代码搜索等功能。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong>DeepFinder（2025）</strong>：The Agent Era Begins. Claude Code, Devin, and Cursor’s agent mode launched within months of each other.</li>
+<li><strong>Sacra（2025）</strong>：Cursor is accelerating its shift from an AI-augmented IDE to a semi-autonomous agentic environment—positioning itself at the center of the convergence of AI and development tools.</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，Cursor 包括：</p>
+<ol>
+<li><strong>Agent 模式</strong>：提供自主 Agent 模式，实现编程自动化</li>
+<li><strong>自主终端访问</strong>：提供自主的终端访问，执行命令</li>
+<li><strong>网络搜索</strong>：集成网络搜索，查找代码解决方案</li>
+<li><strong>代码生成</strong>：AI 增强的代码生成和补全</li>
+<li><strong>代码重构</strong>：自动化代码重构和优化</li>
+<li><strong>代码调试</strong>：AI 辅助的调试和错误修复</li>
+</ol>
+<h4>Cursor 的核心能力</h4>
+<p><strong>1. Agent 模式</strong></p>
+<p>提供自主 Agent 模式，实现编程自动化，包括需求理解、代码生成、代码执行。</p>
+<p><strong>2. 自主终端访问</strong></p>
+<p>提供自主的终端访问，执行命令、安装依赖、运行脚本。</p>
+<p><strong>3. 网络搜索</strong></p>
+<p>集成网络搜索，查找代码解决方案、库文档、错误信息。</p>
+<p><strong>4. AI 增强的代码生成</strong></p>
+<p>AI 增强的代码生成和补全，包括上下文理解、代码建议、代码重构。</p>
+<p><strong>5. 自动化代码重构</strong></p>
+<p>自动化代码重构和优化，包括代码简化、性能优化、代码规范。</p>
+<p><strong>6. AI 辅助的调试</strong></p>
+<p>AI 辅助的调试和错误修复，包括错误诊断、错误建议、自动修复。</p>
+<h4>Cursor 的优势与劣势</h4>
+<table>
+<thead>
+<tr>
+<th>优势</th>
+<th>劣势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AI 增强的 IDE</td>
+<td>需要学习成本</td>
+</tr>
+<tr>
+<td>自主 Agent 模式</td>
+<td>可能过度依赖 AI</td>
+</tr>
+<tr>
+<td>终端访问</td>
+<td>安全风险高</td>
+</tr>
+<tr>
+<td>网络搜索集成</td>
+<td>可能不准确</td>
+</tr>
+</tbody>
+</table>
+<h3 id="1323-其他自主编程平台" tabindex="-1">13.2.3 其他自主编程平台 <a class="heading-anchor" href="#1323-其他自主编程平台" aria-hidden="true">#</a></h3>
+<p>除了 Devin 和 Cursor，还有其他自主编程平台，如 Claude Code、GitHub Copilot、Tabnine、AWS CodeWhisperer 等。</p>
+<h4>其他自主编程平台的定义</h4>
+<p>其他自主编程平台是指除了 Devin 和 Cursor 之外的其他 AI 编程助手和自主编程平台，如 Claude Code、GitHub Copilot、Tabnine、AWS CodeWhisperer 等，通过 AI 增强和自动化能力，提高编程效率。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong>DeepFinder（2025）</strong>：2025: The Agent Era Begins. Claude Code, Devin, and Cursor’s agent mode launched within months of each other.</li>
+<li><strong>Cursor（2025）</strong>：The best LLM applications have an autonomy slider: you control how much independence to give to AI.</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，其他自主编程平台包括：</p>
+<ol>
+<li><strong>代码补全</strong>：AI 增强的代码补全和建议</li>
+<li><strong>代码生成</strong>：基于上下文生成代码</li>
+<li><strong>代码重构</strong>：AI 辅助的代码重构和优化</li>
+<li><strong>代码搜索</strong>：搜索代码库和文档</li>
+<li><strong>错误诊断</strong>：AI 辅助的错误诊断和修复</li>
+<li><strong>性能优化</strong>：AI 辅助的性能优化建议</li>
+</ol>
+<h4>其他自主编程平台的核心能力</h4>
+<p><strong>1. 代码补全</strong></p>
+<p>AI 增强的代码补全和建议，包括变量建议、方法建议、库建议。</p>
+<p><strong>2. 代码生成</strong></p>
+<p>基于上下文生成代码，包括函数生成、类生成、模块生成。</p>
+<p><strong>3. 代码重构</strong></p>
+<p>AI 辅助的代码重构和优化，包括代码简化、性能优化、代码规范。</p>
+<p><strong>4. 代码搜索</strong></p>
+<p>搜索代码库和文档，查找最佳实践和解决方案。</p>
+<p><strong>5. 错误诊断</strong></p>
+<p>AI 辅助的错误诊断和修复，包括错误解释、错误建议、自动修复。</p>
+<p><strong>6. 性能优化</strong></p>
+<p>AI 辅助的性能优化建议，包括算法优化、数据结构优化、缓存策略。</p>
+<h4>其他自主编程平台的优势与劣势</h4>
+<table>
+<thead>
+<tr>
+<th>平台</th>
+<th>核心能力</th>
+<th>优势</th>
+<th>劣势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Claude Code</strong></td>
+<td>代码理解、代码生成</td>
+<td>强大的代码理解能力</td>
+<td>需要配置</td>
+</tr>
+<tr>
+<td><strong>GitHub Copilot</strong></td>
+<td>代码补全、代码生成</td>
+<td>与 GitHub 深度集成</td>
+<td>需要权限</td>
+</tr>
+<tr>
+<td><strong>Tabnine</strong></td>
+<td>代码补全、代码生成</td>
+<td>支持多种语言</td>
+<td>免费版功能有限</td>
+</tr>
+<tr>
+<td><strong>AWS CodeWhisperer</strong></td>
+<td>代码转录、代码生成</td>
+<td>准确的代码转录</td>
+<td>仅限代码转录</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="133-自主编程技术" tabindex="-1">13.3 自主编程技术 <a class="heading-anchor" href="#133-自主编程技术" aria-hidden="true">#</a></h2>
+<h3 id="1331-代码生成技术" tabindex="-1">13.3.1 代码生成技术 <a class="heading-anchor" href="#1331-代码生成技术" aria-hidden="true">#</a></h3>
+<p>代码生成技术是自主编程 Agent 的核心技术，包括 LLM 驱动的代码生成、代码补全、代码翻译等。</p>
+<h4>代码生成技术的定义</h4>
+<p>代码生成技术是自主编程 Agent 的核心技术，包括 LLM 驱动的代码生成、代码补全、代码翻译等，通过学习大规模代码库，生成高质量、符合规范的代码。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong>arXiv（2025）</strong>：LLM Agents 的评估和基准测试包括评估对象，如 agent 行为、能力、可靠性和安全性。</li>
+<li><strong>DeepFinder（2025）</strong>：2025: The Agent Era Begins. Claude Code, Devin, and Cursor’s agent mode launched within months of each other.</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，代码生成技术包括：</p>
+<ol>
+<li><strong>LLM 驱动的代码生成</strong>：使用 LLM 生成代码</li>
+<li><strong>代码补全</strong>：基于上下文补全代码</li>
+<li><strong>代码翻译</strong>：将代码从一种语言翻译到另一种</li>
+<li><strong>代码优化</strong>：优化代码性能和质量</li>
+<li><strong>代码格式化</strong>：自动格式化代码，符合规范</li>
+</ol>
+<h4>代码生成技术的核心机制</h4>
+<p><strong>1. LLM 驱动的代码生成</strong></p>
+<p>使用 LLM 生成代码，包括提示工程、上下文理解、代码生成。</p>
+<p><strong>2. 代码补全</strong></p>
+<p>基于上下文补全代码，包括变量补全、方法补全、语句补全。</p>
+<p><strong>3. 代码翻译</strong></p>
+<p>将代码从一种语言翻译到另一种，保持语义一致性。</p>
+<p><strong>4. 代码优化</strong></p>
+<p>优化代码性能和质量，包括算法优化、数据结构优化、内存管理。</p>
+<p><strong>5. 代码格式化</strong></p>
+<p>自动格式化代码，符合代码规范和最佳实践。</p>
+<h4>代码生成技术的优势与劣势</h4>
+<table>
+<thead>
+<tr>
+<th>技术</th>
+<th>核心特点</th>
+<th>优势</th>
+<th>劣势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LLM 驱动的代码生成</strong></td>
+<td>大规模代码生成</td>
+<td>生成速度快</td>
+<td>可能产生低质量代码</td>
+</tr>
+<tr>
+<td><strong>代码补全</strong></td>
+<td>上下文感知补全</td>
+<td>提高编码效率</td>
+<td>可能不准确</td>
+</tr>
+<tr>
+<td><strong>代码翻译</strong></td>
+<td>跨语言代码生成</td>
+<td>支持多语言</td>
+<td>可能丢失语义</td>
+</tr>
+<tr>
+<td><strong>代码优化</strong></td>
+<td>自动优化性能</td>
+<td>提高代码性能</td>
+<td>可能改变代码逻辑</td>
+</tr>
+<tr>
+<td><strong>代码格式化</strong></td>
+<td>自动格式化</td>
+<td>提高代码可读性</td>
+<td>可能不适用所有项目</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="134-自主编程应用场景" tabindex="-1">13.4 自主编程应用场景 <a class="heading-anchor" href="#134-自主编程应用场景" aria-hidden="true">#</a></h2>
+<h3 id="1341-web-开发" tabindex="-1">13.4.1 Web 开发 <a class="heading-anchor" href="#1341-web-开发" aria-hidden="true">#</a></h3>
+<p>Web 开发是自主编程 Agent 的主要应用场景之一，通过理解需求、生成代码、执行代码和调试代码，实现 Web 应用的自动化开发。</p>
+<h4>Web 开发的定义</h4>
+<p>Web 开发是自主编程 Agent 的主要应用场景之一，通过理解需求、生成代码、执行代码和调试代码，实现 Web 应用的自动化开发，包括前端开发、后端开发、数据库设计、API 开发等。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong>DeepFinder（2025）</strong>：2025: The Agent Era Begins. Claude Code, Devin, and Cursor’s agent mode launched within months of each other.</li>
+<li><strong>Trickle（2025）</strong>：Devin AI stands out as a fully autonomous AI software engineer that can independently handle complex coding tasks.</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，Web 开发包括：</p>
+<ol>
+<li><strong>前端开发</strong>：生成和优化前端代码（HTML、CSS、JavaScript、React、Vue 等）</li>
+<li><strong>后端开发</strong>：生成和优化后端代码（Python、Java、Node.js、Go 等）</li>
+<li><strong>数据库设计</strong>：设计数据库 schema、生成数据库操作代码</li>
+<li><strong>API 开发</strong>：设计和实现 REST API、GraphQL API</li>
+<li><strong>测试与调试</strong>：自动化测试和调试 Web 应用</li>
+<li><strong>部署与运维</strong>：自动化部署和运维</li>
+</ol>
+<h4>Web 开发的核心机制</h4>
+<p><strong>1. 前端开发</strong></p>
+<p>生成和优化前端代码，包括页面布局、组件开发、样式设计、交互逻辑。</p>
+<p><strong>2. 后端开发</strong></p>
+<p>生成和优化后端代码，包括业务逻辑、数据处理、API 实现、错误处理。</p>
+<p><strong>3. 数据库设计</strong></p>
+<p>设计数据库 schema、生成数据库操作代码，包括 CRUD 操作、查询优化、事务管理。</p>
+<p><strong>4. API 开发</strong></p>
+<p>设计和实现 REST API、GraphQL API，包括接口定义、参数验证、错误处理、文档生成。</p>
+<p><strong>5. 测试与调试</strong></p>
+<p>自动化测试和调试 Web 应用，包括单元测试、集成测试、端到端测试、性能测试。</p>
+<p><strong>6. 部署与运维</strong></p>
+<p>自动化部署和运维，包括环境配置、CI/CD、监控、日志记录。</p>
+<h4>Web 开发的优势与劣势</h4>
+<table>
+<thead>
+<tr>
+<th>优势</th>
+<th>劣势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>自动化开发</td>
+<td>可能产生不兼容的代码</td>
+</tr>
+<tr>
+<td>提高开发效率</td>
+<td>需要良好的需求理解能力</td>
+</tr>
+<tr>
+<td>支持全流程</td>
+<td>可能难以维护</td>
+</tr>
+<tr>
+<td>24/7 可用</td>
+<td>安全风险高</td>
+</tr>
+</tbody>
+</table>
+<h3 id="1342-数据处理" tabindex="-1">13.4.2 数据处理 <a class="heading-anchor" href="#1342-数据处理" aria-hidden="true">#</a></h3>
+<p>数据处理是自主编程 Agent 的另一个重要应用场景，通过理解数据、处理数据、分析数据和生成报告，实现数据处理的自动化。</p>
+<h4>数据处理的定义</h4>
+<p>数据处理是自主编程 Agent 的另一个重要应用场景，通过理解数据、处理数据、分析数据和生成报告，实现数据处理的自动化，包括数据清洗、数据转换、数据分析、数据可视化等。</p>
+<p><strong>学术定义</strong>（来源：最新研究）</p>
+<ul>
+<li><strong>DeepFinder（2025）</strong>：2025: The Agent Era Begins. Claude Code, Devin, and Cursor’s agent mode launched within months of each other.</li>
+<li><strong>Trickle（2025）</strong>：Devin AI stands out as a fully autonomous AI software engineer that can independently handle complex coding tasks.</li>
+</ul>
+<p><strong>工程定义</strong></p>
+<p>在实际工程中，数据处理包括：</p>
+<ol>
+<li><strong>数据清洗</strong>：自动清洗和修复数据质量问题</li>
+<li><strong>数据转换</strong>：转换数据格式和结构</li>
+<li><strong>数据分析</strong>：分析和挖掘数据中的模式和洞察</li>
+<li><strong>数据可视化</strong>：生成数据可视化图表和报告</li>
+<li><strong>数据导出</strong>：将处理后的数据导出为各种格式</li>
+<li><strong>数据安全</strong>：确保数据安全和隐私保护</li>
+</ol>
+<h4>数据处理的核心机制</h4>
+<p><strong>1. 数据清洗</strong></p>
+<p>自动清洗和修复数据质量问题，包括缺失值处理、异常值检测、格式统一。</p>
+<p><strong>2. 数据转换</strong></p>
+<p>转换数据格式和结构，包括数据类型转换、数据聚合、数据分组。</p>
+<p><strong>3. 数据分析</strong></p>
+<p>分析和挖掘数据中的模式和洞察，包括统计分析、趋势分析、关联分析。</p>
+<p><strong>4. 数据可视化</strong></p>
+<p>生成数据可视化图表和报告，包括柱状图、折线图、饼图、热力图、仪表板。</p>
+<p><strong>5. 数据导出</strong></p>
+<p>将处理后的数据导出为各种格式，包括 CSV、JSON、Excel、PDF。</p>
+<p><strong>6. 数据安全</strong></p>
+<p>确保数据安全和隐私保护，包括数据加密、访问控制、日志记录。</p>
+<h4>数据处理的优势与劣势</h4>
+<table>
+<thead>
+<tr>
+<th>优势</th>
+<th>劣势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>自动化数据处理</td>
+<td>可能不准确</td>
+</tr>
+<tr>
+<td>提高数据质量</td>
+<td>需要良好的数据理解能力</td>
+</tr>
+<tr>
+<td>支持大规模数据</td>
+<td>计算成本高</td>
+</tr>
+<tr>
+<td>多样化数据处理</td>
+<td>可能泄露隐私数据</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="135-自主编程代码示例" tabindex="-1">13.5 自主编程代码示例 <a class="heading-anchor" href="#135-自主编程代码示例" aria-hidden="true">#</a></h2>
+<p>以下代码示例展示如何实现一个简单的自主编程 Agent：</p>
+<pre class="hljs"><code><span class="hljs-string">&quot;&quot;&quot;
+自主编程 Agent 示例
+
+这个示例展示如何实现一个简单的自主编程 Agent，
+理解自然语言需求，生成代码，执行代码。
+&quot;&quot;&quot;</span>
+
+<span class="hljs-keyword">import</span> os
+<span class="hljs-keyword">import</span> logging
+<span class="hljs-keyword">from</span> typing <span class="hljs-keyword">import</span> <span class="hljs-type">Dict</span>, <span class="hljs-type">Any</span>, <span class="hljs-type">List</span>, <span class="hljs-type">Optional</span>
+<span class="hljs-keyword">from</span> dataclasses <span class="hljs-keyword">import</span> dataclass
+<span class="hljs-keyword">from</span> enum <span class="hljs-keyword">import</span> Enum
+<span class="hljs-keyword">import</span> subprocess
+<span class="hljs-keyword">import</span> json
+
+<span class="hljs-keyword">from</span> langchain_openai <span class="hljs-keyword">import</span> ChatOpenAI
+<span class="hljs-keyword">from</span> langchain.prompts <span class="hljs-keyword">import</span> ChatPromptTemplate
+
+<span class="hljs-comment"># 配置日志</span>
+logging.basicConfig(
+    level=logging.INFO,
+    <span class="hljs-built_in">format</span>=<span class="hljs-string">&#x27;%(asctime)s - %(name)s - %(levelname)s - %(message)s&#x27;</span>
+)
+logger = logging.getLogger(__name__)
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">TaskStatus</span>(<span class="hljs-title class_ inherited__">Enum</span>):
+    <span class="hljs-string">&quot;&quot;&quot;任务状态&quot;&quot;&quot;</span>
+    PENDING = <span class="hljs-string">&quot;pending&quot;</span>
+    IN_PROGRESS = <span class="hljs-string">&quot;in_progress&quot;</span>
+    COMPLETED = <span class="hljs-string">&quot;completed&quot;</span>
+    FAILED = <span class="hljs-string">&quot;failed&quot;</span>
+
+<span class="hljs-meta">@dataclass</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">CodeTask</span>:
+    <span class="hljs-string">&quot;&quot;&quot;代码任务&quot;&quot;&quot;</span>
+    description: <span class="hljs-built_in">str</span>
+    code: <span class="hljs-built_in">str</span>
+    status: TaskStatus
+    error: <span class="hljs-type">Optional</span>[<span class="hljs-built_in">str</span>] = <span class="hljs-literal">None</span>
+
+<span class="hljs-meta">@dataclass</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">ExecutionResult</span>:
+    <span class="hljs-string">&quot;&quot;&quot;执行结果&quot;&quot;&quot;</span>
+    success: <span class="hljs-built_in">bool</span>
+    output: <span class="hljs-built_in">str</span>
+    error: <span class="hljs-type">Optional</span>[<span class="hljs-built_in">str</span>] = <span class="hljs-literal">None</span>
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">AutonomousProgrammingAgent</span>:
+    <span class="hljs-string">&quot;&quot;&quot;自主编程 Agent&quot;&quot;&quot;</span>
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, name: <span class="hljs-built_in">str</span>, model: <span class="hljs-built_in">str</span> = <span class="hljs-string">&quot;gpt-4&quot;</span></span>):
+        <span class="hljs-string">&quot;&quot;&quot;
+        初始化自主编程 Agent
+
+        Args:
+            name: Agent 名称
+            model: LLM 模型名称
+        &quot;&quot;&quot;</span>
+        <span class="hljs-variable language_">self</span>.name = name
+
+        <span class="hljs-comment"># 初始化 LLM</span>
+        <span class="hljs-variable language_">self</span>.llm = ChatOpenAI(model=model, temperature=<span class="hljs-number">0.0</span>)
+
+        <span class="hljs-comment"># 初始化提示词模板</span>
+        <span class="hljs-variable language_">self</span>.code_prompt = ChatPromptTemplate.from_messages([
+            (<span class="hljs-string">&quot;system&quot;</span>, <span class="hljs-string">f&quot;你是一个自主编程专家，名为 <span class="hljs-subst">{self.name}</span>，能够理解需求、生成代码、执行代码和调试代码。&quot;</span>),
+            (<span class="hljs-string">&quot;user&quot;</span>, <span class="hljs-string">&quot;请根据以下需求生成代码：\n{task}&quot;</span>)
+        ])
+
+        <span class="hljs-variable language_">self</span>.execute_prompt = ChatPromptTemplate.from_messages([
+            (<span class="hljs-string">&quot;system&quot;</span>, <span class="hljs-string">f&quot;你是一个执行专家，名为 <span class="hljs-subst">{self.name}</span>，能够执行代码并返回结果。&quot;</span>),
+            (<span class="hljs-string">&quot;user&quot;</span>, <span class="hljs-string">&quot;请执行以下代码并返回结果：\n{code}&quot;</span>)
+        ])
+
+        <span class="hljs-comment"># 初始化任务历史</span>
+        <span class="hljs-variable language_">self</span>.tasks: <span class="hljs-type">List</span>[CodeTask] = []
+
+        logger.info(<span class="hljs-string">f&quot;自主编程 Agent &#x27;<span class="hljs-subst">{self.name}</span>&#x27; 初始化完成&quot;</span>)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">understand_task</span>(<span class="hljs-params">self, user_input: <span class="hljs-built_in">str</span></span>) -&gt; CodeTask:
+        <span class="hljs-string">&quot;&quot;&quot;
+        理解任务
+
+        Args:
+            user_input: 用户输入
+
+        Returns:
+            代码任务
+        &quot;&quot;&quot;</span>
+        logger.info(<span class="hljs-string">f&quot;理解任务：<span class="hljs-subst">{user_input}</span>&quot;</span>)
+
+        <span class="hljs-comment"># 生成代码</span>
+        response = <span class="hljs-variable language_">self</span>.llm.invoke(<span class="hljs-variable language_">self</span>.code_prompt.<span class="hljs-built_in">format</span>(task=user_input))
+        code = response.content
+
+        <span class="hljs-comment"># 提取代码块（简化实现）</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-string">&quot;```&quot;</span> <span class="hljs-keyword">in</span> code:
+            code_start = code.find(<span class="hljs-string">&quot;```&quot;</span>)
+            code_end = code.find(<span class="hljs-string">&quot;```&quot;</span>, code_start + <span class="hljs-number">3</span>)
+            code = code[code_start + <span class="hljs-number">3</span>:code_end].strip()
+            code = code.split(<span class="hljs-string">&quot;\n&quot;</span>)[<span class="hljs-number">0</span>]  <span class="hljs-comment"># 去掉语言标识</span>
+
+        <span class="hljs-comment"># 创建任务</span>
+        task = CodeTask(
+            description=user_input,
+            code=code,
+            status=TaskStatus.PENDING
+        )
+
+        <span class="hljs-variable language_">self</span>.tasks.append(task)
+
+        logger.info(<span class="hljs-string">f&quot;任务理解完成，生成代码：<span class="hljs-subst">{<span class="hljs-built_in">len</span>(code)}</span> 行&quot;</span>)
+
+        <span class="hljs-keyword">return</span> task
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">execute_task</span>(<span class="hljs-params">self, task: CodeTask</span>) -&gt; ExecutionResult:
+        <span class="hljs-string">&quot;&quot;&quot;
+        执行任务
+
+        Args:
+            task: 代码任务
+
+        Returns:
+            执行结果
+        &quot;&quot;&quot;</span>
+        logger.info(<span class="hljs-string">&quot;执行任务&quot;</span>)
+
+        <span class="hljs-comment"># 更新任务状态</span>
+        task.status = TaskStatus.IN_PROGRESS
+
+        <span class="hljs-keyword">try</span>:
+            <span class="hljs-comment"># 创建临时文件</span>
+            temp_file = <span class="hljs-string">&quot;/tmp/agent_code.py&quot;</span>
+
+            <span class="hljs-comment"># 写入代码</span>
+            <span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(temp_file, <span class="hljs-string">&#x27;w&#x27;</span>) <span class="hljs-keyword">as</span> f:
+                f.write(task.code)
+
+            <span class="hljs-comment"># 执行代码</span>
+            result = subprocess.run(
+                [<span class="hljs-string">&quot;python3&quot;</span>, temp_file],
+                capture_output=<span class="hljs-literal">True</span>,
+                text=<span class="hljs-literal">True</span>,
+                timeout=<span class="hljs-number">10</span>
+            )
+
+            <span class="hljs-keyword">if</span> result.returncode == <span class="hljs-number">0</span>:
+                <span class="hljs-comment"># 执行成功</span>
+                output = result.stdout
+                task.status = TaskStatus.COMPLETED
+                logger.info(<span class="hljs-string">f&quot;任务执行成功，输出：<span class="hljs-subst">{output[:<span class="hljs-number">100</span>]}</span>...&quot;</span>)
+            <span class="hljs-keyword">else</span>:
+                <span class="hljs-comment"># 执行失败</span>
+                error = result.stderr
+                output = <span class="hljs-string">f&quot;执行失败：<span class="hljs-subst">{error}</span>&quot;</span>
+                task.status = TaskStatus.FAILED
+                task.error = error
+                logger.warning(<span class="hljs-string">f&quot;任务执行失败：<span class="hljs-subst">{error}</span>&quot;</span>)
+
+            <span class="hljs-comment"># 清理临时文件</span>
+            os.remove(temp_file)
+
+            <span class="hljs-keyword">return</span> ExecutionResult(
+                success=task.status == TaskStatus.COMPLETED,
+                output=output <span class="hljs-keyword">if</span> task.status == TaskStatus.COMPLETED <span class="hljs-keyword">else</span> error,
+                error=task.error
+            )
+
+        <span class="hljs-keyword">except</span> subprocess.TimeoutExpired:
+            error = <span class="hljs-string">&quot;执行超时&quot;</span>
+            task.status = TaskStatus.FAILED
+            task.error = error
+            logger.error(error)
+            <span class="hljs-keyword">return</span> ExecutionResult(
+                success=<span class="hljs-literal">False</span>,
+                output=<span class="hljs-string">&quot;&quot;</span>,
+                error=error
+            )
+        <span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+            error = <span class="hljs-string">f&quot;执行错误：<span class="hljs-subst">{<span class="hljs-built_in">str</span>(e)}</span>&quot;</span>
+            task.status = TaskStatus.FAILED
+            task.error = error
+            logger.error(error)
+            <span class="hljs-keyword">return</span> ExecutionResult(
+                success=<span class="hljs-literal">False</span>,
+                output=<span class="hljs-string">&quot;&quot;</span>,
+                error=error
+            )
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">debug_task</span>(<span class="hljs-params">self, task: CodeTask</span>) -&gt; <span class="hljs-built_in">str</span>:
+        <span class="hljs-string">&quot;&quot;&quot;
+        调试任务
+
+        Args:
+            task: 代码任务
+
+        Returns:
+            调试建议
+        &quot;&quot;&quot;</span>
+        logger.info(<span class="hljs-string">&quot;调试任务&quot;</span>)
+
+        <span class="hljs-comment"># 生成调试建议</span>
+        prompt = <span class="hljs-string">f&quot;请调试以下代码，找出错误并提供修复建议：\n<span class="hljs-subst">{task.code}</span>\n\n任务描述：<span class="hljs-subst">{task.description}</span>\n\n错误信息：<span class="hljs-subst">{task.error}</span>&quot;</span>
+
+        response = <span class="hljs-variable language_">self</span>.llm.invoke(prompt)
+        debug_suggestion = response.content
+
+        logger.info(<span class="hljs-string">f&quot;调试建议：<span class="hljs-subst">{debug_suggestion[:<span class="hljs-number">100</span>]}</span>...&quot;</span>)
+
+        <span class="hljs-keyword">return</span> debug_suggestion
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">autonomous_development</span>(<span class="hljs-params">self, user_input: <span class="hljs-built_in">str</span></span>) -&gt; <span class="hljs-type">Dict</span>[<span class="hljs-built_in">str</span>, <span class="hljs-type">Any</span>]:
+        <span class="hljs-string">&quot;&quot;&quot;
+        自主开发流程
+
+        Args:
+            user_input: 用户输入
+
+        Returns:
+            开发结果
+        &quot;&quot;&quot;</span>
+        logger.info(<span class="hljs-string">f&quot;开始自主开发流程：<span class="hljs-subst">{user_input}</span>&quot;</span>)
+
+        <span class="hljs-comment"># 理解任务</span>
+        task = <span class="hljs-variable language_">self</span>.understand_task(user_input)
+
+        <span class="hljs-comment"># 执行任务</span>
+        execution_result = <span class="hljs-variable language_">self</span>.execute_task(task)
+
+        <span class="hljs-comment"># 如果执行失败，尝试调试</span>
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> execution_result.success:
+            debug_suggestion = <span class="hljs-variable language_">self</span>.debug_task(task)
+
+            <span class="hljs-comment"># 根据调试建议修复代码（简化实现）</span>
+            <span class="hljs-comment"># 在实际应用中，这里应该使用 LLM 自动修复代码</span>
+            logger.warning(<span class="hljs-string">&quot;代码执行失败，建议人工干预&quot;</span>)
+
+        <span class="hljs-keyword">return</span> {
+            <span class="hljs-string">&quot;task&quot;</span>: user_input,
+            <span class="hljs-string">&quot;code&quot;</span>: task.code,
+            <span class="hljs-string">&quot;status&quot;</span>: task.status.value,
+            <span class="hljs-string">&quot;output&quot;</span>: execution_result.output,
+            <span class="hljs-string">&quot;error&quot;</span>: execution_result.error
+        }
+
+<span class="hljs-comment"># 使用示例</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">main</span>():
+    <span class="hljs-string">&quot;&quot;&quot;主函数&quot;&quot;&quot;</span>
+    <span class="hljs-comment"># 创建自主编程 Agent</span>
+    agent = AutonomousProgrammingAgent(
+        name=<span class="hljs-string">&quot;AutonomousProgrammingAgent&quot;</span>,
+        model=<span class="hljs-string">&quot;gpt-4&quot;</span>
+    )
+
+    <span class="hljs-comment"># 自主开发任务</span>
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n&quot;</span> + <span class="hljs-string">&quot;=&quot;</span>*<span class="hljs-number">60</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;自主编程 Agent 演示&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;=&quot;</span>*<span class="hljs-number">60</span>)
+
+    <span class="hljs-comment"># 任务 1：简单的数学计算</span>
+    result1 = agent.autonomous_development(<span class="hljs-string">&quot;计算 1 到 100 的和&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n任务 1：<span class="hljs-subst">{result1[<span class="hljs-string">&#x27;task&#x27;</span>]}</span>&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;状态：<span class="hljs-subst">{result1[<span class="hljs-string">&#x27;status&#x27;</span>]}</span>&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;代码：<span class="hljs-subst">{result1[<span class="hljs-string">&#x27;code&#x27;</span>]}</span>&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;输出：<span class="hljs-subst">{result1[<span class="hljs-string">&#x27;output&#x27;</span>]}</span>&quot;</span>)
+    <span class="hljs-keyword">if</span> result1[<span class="hljs-string">&#x27;error&#x27;</span>]:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;错误：<span class="hljs-subst">{result1[<span class="hljs-string">&#x27;error&#x27;</span>]}</span>&quot;</span>)
+
+    <span class="hljs-comment"># 任务 2：生成 HTML 页面</span>
+    result2 = agent.autonomous_development(<span class="hljs-string">&quot;生成一个简单的 HTML 页面，包含标题和段落&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;\n任务 2：<span class="hljs-subst">{result2[<span class="hljs-string">&#x27;task&#x27;</span>]}</span>&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;状态：<span class="hljs-subst">{result2[<span class="hljs-string">&#x27;status&#x27;</span>]}</span>&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;代码：<span class="hljs-subst">{result2[<span class="hljs-string">&#x27;code&#x27;</span>][:<span class="hljs-number">200</span>]}</span>...&quot;</span>)
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;输出：<span class="hljs-subst">{result2[<span class="hljs-string">&#x27;output&#x27;</span>]}</span>&quot;</span>)
+    <span class="hljs-keyword">if</span> result2[<span class="hljs-string">&#x27;error&#x27;</span>]:
+        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;错误：<span class="hljs-subst">{result2[<span class="hljs-string">&#x27;error&#x27;</span>]}</span>&quot;</span>)
+
+<span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:
+    main()
+</code></pre>
+<hr>
+<h2 id="小结第十三章全部完成" tabindex="-1">小结（第十三章全部完成） <a class="heading-anchor" href="#小结第十三章全部完成" aria-hidden="true">#</a></h2>
+<p>本章详细介绍了自主编程 Agent 的核心概念和实践，包括自主编程 Agent 概述、主流自主编程平台、自主编程技术、自主编程应用场景等内容，帮助开发者构建强大的自主编程能力。</p>
+<p><strong>自主编程 Agent 概述</strong></p>
+<ul>
+<li><strong>自主编程 Agent 的定义</strong>：定义、核心能力、优势与劣势</li>
+</ul>
+<p><strong>主流自主编程平台</strong></p>
+<ul>
+<li><strong>Devin</strong>：定义、核心能力、优势与劣势</li>
+<li><strong>Cursor</strong>：定义、核心能力、优势与劣势</li>
+<li><strong>其他自主编程平台</strong>：定义、核心能力、优势与劣势</li>
+</ul>
+<p><strong>自主编程技术</strong></p>
+<ul>
+<li><strong>代码生成技术</strong>：定义、核心机制、优势与劣势</li>
+</ul>
+<p><strong>自主编程应用场景</strong></p>
+<ul>
+<li><strong>Web 开发</strong>：定义、核心机制、优势与劣势</li>
+<li><strong>数据处理</strong>：定义、核心机制、优势与劣势</li>
+</ul>
+<hr>
+<p><em>文档版本：v1.0</em>
+<em>最后更新：2026-03-18</em></p>
+</div> <nav class="pager"> <a class="pager__link" href="/ai-agent-development/12-agent-safety-and-alignment/"> <span>上一篇</span> <strong>第十二章：Agent 安全与对齐（Agent Safety and Alignment）</strong> </a> <a class="pager__link" href="/ai-agent-development/14-agent-deployment-and-operations/"> <span>下一篇</span> <strong>第十四章：Agent 部署与运维（Agent Deployment and Operations）</strong> </a> </nav> </article> </section>  </main> <footer class="site-footer"> <div class="site-footer__inner"> <p>Vinci Knowledge Base</p> <p>Source directory: <code>/Users/superone77/Documents/知识库/projects</code></p> </div> </footer> </div> </body></html>

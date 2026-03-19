@@ -1,0 +1,584 @@
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>第五章：条件扩散模型（Conditional Diffusion Models） | Vinci Knowledge Base</title><meta name="description" content="第五章：条件扩散模型（Conditional Diffusion Models） 探索如何引导扩散模型生成特定条件下的样本 5.1 条件扩散模型概述 5.1.1 什么是条件扩散模型？ 条件扩散模型（Conditional Diffusion Models） 是一种能够根据特定条件（如类别、文本、图像等）生成样本的扩散模型。 核心思想 ： 条件信息 ：将类别、"><meta name="generator" content="Vinci Knowledge Base"><link rel="stylesheet" href="/_astro/_doc_.CY2v1inF.css"></head> <body> <div class="page-shell"> <header class="site-header"> <div class="site-header__inner"> <a class="brand" href="/"> <span class="brand__eyebrow">GitHub Pages Knowledge Site</span> <span class="brand__name">Vinci Knowledge Base</span> </a> <nav class="site-nav"> <a href="/">Projects</a> </nav> </div> </header> <main class="page-main">  <section class="article-hero"> <div> <p class="eyebrow">Knowledge Article</p> <h1>第五章：条件扩散模型（Conditional Diffusion Models）</h1> <p class="article-hero__breadcrumbs"> <a href="/">Home</a> <span>/</span> <a href="/diffusion-models-knowledge-base/">扩散模型知识库（Diffusion Model Knowledge Base）</a> </p> </div> <div class="meta-card"> <p><strong>Project</strong> 扩散模型知识库（Diffusion Model Knowledge Base）</p> <p><strong>Source</strong> <code>knowledge/05-conditional-diffusion-models.md</code></p> <p><strong>Sections</strong> 25</p> </div> </section> <section class="content-grid"> <aside class="toc-card"> <p class="toc-card__title">本页目录</p> <ul class="toc-card__list"> <li class="toc-depth-1"> <a href="#第五章条件扩散模型conditional-diffusion-models">第五章：条件扩散模型（Conditional Diffusion Models）</a> </li><li class="toc-depth-2"> <a href="#51-条件扩散模型概述">5.1 条件扩散模型概述</a> </li><li class="toc-depth-3"> <a href="#511-什么是条件扩散模型">5.1.1 什么是条件扩散模型？</a> </li><li class="toc-depth-3"> <a href="#512-条件扩散模型的类型">5.1.2 条件扩散模型的类型</a> </li><li class="toc-depth-3"> <a href="#513-条件扩散模型的应用">5.1.3 条件扩散模型的应用</a> </li><li class="toc-depth-2"> <a href="#52-classifier-guidance">5.2 Classifier Guidance</a> </li><li class="toc-depth-3"> <a href="#521-classifier-guidance-的核心思想">5.2.1 Classifier Guidance 的核心思想</a> </li><li class="toc-depth-3"> <a href="#522-classifier-guidance-的实现">5.2.2 Classifier Guidance 的实现</a> </li><li class="toc-depth-3"> <a href="#523-classifier-guidance-的优缺点">5.2.3 Classifier Guidance 的优缺点</a> </li><li class="toc-depth-2"> <a href="#53-classifier-free-guidance-cfg">5.3 Classifier-Free Guidance (CFG)</a> </li><li class="toc-depth-3"> <a href="#531-cfg-的核心思想">5.3.1 CFG 的核心思想</a> </li><li class="toc-depth-3"> <a href="#532-cfg-的实现">5.3.2 CFG 的实现</a> </li><li class="toc-depth-3"> <a href="#533-cfg-的优缺点">5.3.3 CFG 的优缺点</a> </li><li class="toc-depth-2"> <a href="#54-文本条件扩散模型">5.4 文本条件扩散模型</a> </li><li class="toc-depth-3"> <a href="#541-文本条件扩散模型的核心思想">5.4.1 文本条件扩散模型的核心思想</a> </li><li class="toc-depth-3"> <a href="#542-stable-diffusion-的文本条件">5.4.2 Stable Diffusion 的文本条件</a> </li><li class="toc-depth-3"> <a href="#543-文本条件扩散模型的应用">5.4.3 文本条件扩散模型的应用</a> </li><li class="toc-depth-2"> <a href="#55-图像条件扩散模型">5.5 图像条件扩散模型</a> </li><li class="toc-depth-3"> <a href="#551-图像条件扩散模型的核心思想">5.5.1 图像条件扩散模型的核心思想</a> </li><li class="toc-depth-3"> <a href="#552-图像条件扩散模型的实现">5.5.2 图像条件扩散模型的实现</a> </li><li class="toc-depth-3"> <a href="#553-图像条件扩散模型的应用">5.5.3 图像条件扩散模型的应用</a> </li><li class="toc-depth-2"> <a href="#56-条件扩散模型对比">5.6 条件扩散模型对比</a> </li><li class="toc-depth-3"> <a href="#561-性能对比">5.6.1 性能对比</a> </li><li class="toc-depth-3"> <a href="#562-适用场景对比">5.6.2 适用场景对比</a> </li><li class="toc-depth-2"> <a href="#结语">结语</a> </li> </ul> </aside> <article class="prose-card"> <div class="prose"><h1 id="第五章条件扩散模型conditional-diffusion-models" tabindex="-1">第五章：条件扩散模型（Conditional Diffusion Models） <a class="heading-anchor" href="#第五章条件扩散模型conditional-diffusion-models" aria-hidden="true">#</a></h1>
+<blockquote>
+<p>探索如何引导扩散模型生成特定条件下的样本</p>
+</blockquote>
+<hr>
+<h2 id="51-条件扩散模型概述" tabindex="-1">5.1 条件扩散模型概述 <a class="heading-anchor" href="#51-条件扩散模型概述" aria-hidden="true">#</a></h2>
+<h3 id="511-什么是条件扩散模型" tabindex="-1">5.1.1 什么是条件扩散模型？ <a class="heading-anchor" href="#511-什么是条件扩散模型" aria-hidden="true">#</a></h3>
+<p>**条件扩散模型（Conditional Diffusion Models）**是一种能够根据特定条件（如类别、文本、图像等）生成样本的扩散模型。</p>
+<p><strong>核心思想</strong>：</p>
+<ul>
+<li><strong>条件信息</strong>：将类别、文本、图像等条件信息融入扩散过程</li>
+<li><strong>条件生成</strong>：生成符合给定条件的样本</li>
+<li><strong>可控生成</strong>：通过控制条件来控制生成结果</li>
+</ul>
+<p><strong>数学表达</strong>：
+[ p_\theta(\mathbf{x} \mid c) ]
+其中 ( c ) 是条件信息（类别、文本、图像等）。</p>
+<p><strong>来源</strong>：Dhariwal &amp; Nichol, 2021; Ho &amp; Salimans, 2022</p>
+<blockquote>
+<p>“Classifier guidance is a recently introduced method to trade off mode coverage and sample fidelity in conditional diffusion models.”</p>
+</blockquote>
+<h3 id="512-条件扩散模型的类型" tabindex="-1">5.1.2 条件扩散模型的类型 <a class="heading-anchor" href="#512-条件扩散模型的类型" aria-hidden="true">#</a></h3>
+<p><strong>按条件类型分类</strong>：</p>
+<ol>
+<li><strong>类别条件（Class-Conditioned）</strong>：根据类别标签生成样本</li>
+<li><strong>文本条件（Text-Conditioned）</strong>：根据文本描述生成图像</li>
+<li><strong>图像条件（Image-Conditioned）</strong>：根据输入图像生成新图像（图像修复、编辑）</li>
+<li><strong>多模态条件（Multimodal-Conditioned）</strong>：根据多种模态的条件生成样本</li>
+</ol>
+<p><strong>按引导方式分类</strong>：</p>
+<ol>
+<li><strong>分类器引导（Classifier Guidance）</strong>：使用外部分类器引导生成</li>
+<li><strong>无分类器引导（Classifier-Free Guidance, CFG）</strong>：使用条件和无条件模型的混合引导生成</li>
+</ol>
+<p><strong>来源</strong>：Ho &amp; Salimans, 2022 - Classifier-Free Diffusion Guidance</p>
+<h3 id="513-条件扩散模型的应用" tabindex="-1">5.1.3 条件扩散模型的应用 <a class="heading-anchor" href="#513-条件扩散模型的应用" aria-hidden="true">#</a></h3>
+<p><strong>应用场景</strong>：</p>
+<ul>
+<li><strong>文本到图像生成</strong>：Stable Diffusion、DALL-E、Midjourney</li>
+<li><strong>图像到图像生成</strong>：图像修复、图像编辑、风格迁移</li>
+<li><strong>类别条件生成</strong>：根据类别标签生成特定类别的图像</li>
+<li><strong>多模态生成</strong>：视频生成、音频生成、3D 生成</li>
+</ul>
+<hr>
+<h2 id="52-classifier-guidance" tabindex="-1">5.2 Classifier Guidance <a class="heading-anchor" href="#52-classifier-guidance" aria-hidden="true">#</a></h2>
+<h3 id="521-classifier-guidance-的核心思想" tabindex="-1">5.2.1 Classifier Guidance 的核心思想 <a class="heading-anchor" href="#521-classifier-guidance-的核心思想" aria-hidden="true">#</a></h3>
+<p>**Classifier Guidance（分类器引导）**是一种使用外部分类器引导扩散模型生成的方法，由 Dhariwal &amp; Nichol 于 2021 年提出。</p>
+<p><strong>核心思想</strong>：</p>
+<ol>
+<li><strong>训练分类器</strong>：训练一个图像分类器，用于估计样本属于特定类别的概率</li>
+<li><strong>引导采样</strong>：在采样过程中，使用分类器的梯度引导扩散模型</li>
+<li><strong>方向引导</strong>：将采样过程推向目标类别的方向</li>
+</ol>
+<p><strong>数学表达</strong>：
+[ \nabla_{\mathbf{x}_t} \log p(\mathbf{x}<em>t \mid c) = \nabla</em>{\mathbf{x}_t} \log p(\mathbf{x}<em>t) + s \nabla</em>{\mathbf{x}_t} \log p(c \mid \mathbf{x}_t) ]
+其中 ( s ) 是引导强度参数。</p>
+<p><strong>来源</strong>：Dhariwal &amp; Nichol, 2021</p>
+<blockquote>
+<p>“Classifier guidance modifies the diffusion score to include the gradient of a classifier’s log-probability.”</p>
+</blockquote>
+<h3 id="522-classifier-guidance-的实现" tabindex="-1">5.2.2 Classifier Guidance 的实现 <a class="heading-anchor" href="#522-classifier-guidance-的实现" aria-hidden="true">#</a></h3>
+<p><strong>Classifier Guidance 实现</strong>：</p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> torch
+<span class="hljs-keyword">import</span> torch.nn <span class="hljs-keyword">as</span> nn
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">ClassifierGuidance</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, diffusion_model: nn.Module, classifier: nn.Module, guidance_scale: <span class="hljs-built_in">float</span> = <span class="hljs-number">1.0</span></span>):
+        <span class="hljs-variable language_">self</span>.diffusion_model = diffusion_model
+        <span class="hljs-variable language_">self</span>.classifier = classifier
+        <span class="hljs-variable language_">self</span>.classifier.<span class="hljs-built_in">eval</span>()
+        <span class="hljs-variable language_">self</span>.guidance_scale = guidance_scale
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">guided_sample</span>(<span class="hljs-params">self, shape: <span class="hljs-built_in">tuple</span>, class_label: <span class="hljs-built_in">int</span>, device: torch.Tensor, num_inference_steps: <span class="hljs-built_in">int</span> = <span class="hljs-number">50</span></span>) -&gt; torch.Tensor:
+        <span class="hljs-string">&quot;&quot;&quot;
+        分类器引导采样
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 初始化噪声</span>
+        x = torch.randn(shape, device=device)
+
+        <span class="hljs-comment"># 逐步去噪</span>
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">reversed</span>(<span class="hljs-built_in">range</span>(<span class="hljs-number">0</span>, <span class="hljs-number">1000</span>)):
+            t = torch.full((shape[<span class="hljs-number">0</span>],), i, device=device).long()
+
+            <span class="hljs-comment"># 扩散模型预测噪声</span>
+            noise_pred = <span class="hljs-variable language_">self</span>.diffusion_model(x, t)
+
+            <span class="hljs-comment"># 分类器预测类别</span>
+            class_logit = <span class="hljs-variable language_">self</span>.classifier(x)
+            class_prob = torch.softmax(class_logit, dim=-<span class="hljs-number">1</span>)
+
+            <span class="hljs-comment"># 计算分类器梯度</span>
+            target_class = torch.full((shape[<span class="hljs-number">0</span>],), class_label, device=device).long()
+            classifier_grad = torch.autograd.grad(
+                outputs=class_prob[torch.arange(shape[<span class="hljs-number">0</span>]), target_class].<span class="hljs-built_in">sum</span>(),
+                inputs=x,
+                create_graph=<span class="hljs-literal">True</span>
+            )[<span class="hljs-number">0</span>]
+
+            <span class="hljs-comment"># 引导预测噪声</span>
+            guided_noise_pred = noise_pred - <span class="hljs-variable language_">self</span>.guidance_scale * classifier_grad
+
+            <span class="hljs-comment"># 去噪</span>
+            x = <span class="hljs-variable language_">self</span>._denoise_step(x, guided_noise_pred, t)
+
+        <span class="hljs-keyword">return</span> x
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_denoise_step</span>(<span class="hljs-params">self, x: torch.Tensor, noise_pred: torch.Tensor, t: torch.Tensor</span>) -&gt; torch.Tensor:
+        <span class="hljs-string">&quot;&quot;&quot;
+        去噪步骤
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 简化的去噪步骤</span>
+        <span class="hljs-comment"># 实际实现应该使用 DDPM 或 DDIM 的去噪步骤</span>
+        <span class="hljs-keyword">return</span> x - (t / <span class="hljs-number">1000</span>) * noise_pred
+</code></pre>
+<p><strong>来源</strong>：Dhariwal &amp; Nichol, 2021</p>
+<h3 id="523-classifier-guidance-的优缺点" tabindex="-1">5.2.3 Classifier Guidance 的优缺点 <a class="heading-anchor" href="#523-classifier-guidance-的优缺点" aria-hidden="true">#</a></h3>
+<p><strong>优点</strong>：</p>
+<ol>
+<li><strong>灵活性高</strong>：可以使用任何预训练的分类器</li>
+<li><strong>引导可控</strong>：通过引导强度参数控制引导程度</li>
+</ol>
+<p><strong>缺点</strong>：</p>
+<ol>
+<li><strong>需要额外训练</strong>：需要训练分类器，增加训练成本</li>
+<li><strong>兼容性问题</strong>：分类器可能与扩散模型不兼容</li>
+<li><strong>梯度不稳定</strong>：分类器的梯度可能不稳定</li>
+</ol>
+<hr>
+<h2 id="53-classifier-free-guidance-cfg" tabindex="-1">5.3 Classifier-Free Guidance (CFG) <a class="heading-anchor" href="#53-classifier-free-guidance-cfg" aria-hidden="true">#</a></h2>
+<h3 id="531-cfg-的核心思想" tabindex="-1">5.3.1 CFG 的核心思想 <a class="heading-anchor" href="#531-cfg-的核心思想" aria-hidden="true">#</a></h3>
+<p>**Classifier-Free Guidance（无分类器引导，CFG）**是一种不需要外部分类器的引导方法，由 Ho &amp; Salimans 于 2022 年提出。</p>
+<p><strong>核心思想</strong>：</p>
+<ol>
+<li><strong>联合训练</strong>：同时训练条件模型和无条件模型</li>
+<li><strong>混合预测</strong>：在采样时混合条件模型和无条件模型的预测</li>
+<li><strong>无额外模型</strong>：不需要额外的分类器，简化流程</li>
+</ol>
+<p><strong>数学表达</strong>：
+[ \epsilon_{\text{guided}} = \epsilon_{\text{cond}} + w \cdot (\epsilon_{\text{cond}} - \epsilon_{\text{uncond}}) ]
+其中 ( w ) 是引导强度参数。</p>
+<p><strong>来源</strong>：Ho &amp; Salimans, 2022 - Classifier-Free Diffusion Guidance</p>
+<blockquote>
+<p>“We jointly train a conditional and an unconditional diffusion model, and combine the resulting score estimates.”</p>
+</blockquote>
+<h3 id="532-cfg-的实现" tabindex="-1">5.3.2 CFG 的实现 <a class="heading-anchor" href="#532-cfg-的实现" aria-hidden="true">#</a></h3>
+<p><strong>CFG 实现</strong>：</p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> torch
+<span class="hljs-keyword">import</span> torch.nn <span class="hljs-keyword">as</span> nn
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">ClassifierFreeGuidance</span>:
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, model: nn.Module, guidance_scale: <span class="hljs-built_in">float</span> = <span class="hljs-number">7.5</span></span>):
+        <span class="hljs-variable language_">self</span>.model = model
+        <span class="hljs-variable language_">self</span>.model.<span class="hljs-built_in">eval</span>()
+        <span class="hljs-variable language_">self</span>.guidance_scale = guidance_scale
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">cfg_sample</span>(<span class="hljs-params">self, shape: <span class="hljs-built_in">tuple</span>, condition: torch.Tensor, device: torch.Tensor, num_inference_steps: <span class="hljs-built_in">int</span> = <span class="hljs-number">50</span></span>) -&gt; torch.Tensor:
+        <span class="hljs-string">&quot;&quot;&quot;
+        无分类器引导采样
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 初始化噪声</span>
+        x = torch.randn(shape, device=device)
+
+        <span class="hljs-comment"># 逐步去噪</span>
+        <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">reversed</span>(<span class="hljs-built_in">range</span>(<span class="hljs-number">0</span>, <span class="hljs-number">1000</span>)):
+            t = torch.full((shape[<span class="hljs-number">0</span>],), i, device=device).long()
+
+            <span class="hljs-comment"># 条件预测（有条件）</span>
+            noise_cond = <span class="hljs-variable language_">self</span>.model(x, t, condition)
+
+            <span class="hljs-comment"># 无条件预测（条件为空）</span>
+            null_condition = torch.zeros_like(condition)
+            noise_uncond = <span class="hljs-variable language_">self</span>.model(x, t, null_condition)
+
+            <span class="hljs-comment"># CFG 混合</span>
+            noise_guided = noise_uncond + <span class="hljs-variable language_">self</span>.guidance_scale * (noise_cond - noise_uncond)
+
+            <span class="hljs-comment"># 去噪</span>
+            x = <span class="hljs-variable language_">self</span>._denoise_step(x, noise_guided, t)
+
+        <span class="hljs-keyword">return</span> x
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_denoise_step</span>(<span class="hljs-params">self, x: torch.Tensor, noise_pred: torch.Tensor, t: torch.Tensor</span>) -&gt; torch.Tensor:
+        <span class="hljs-string">&quot;&quot;&quot;
+        去噪步骤
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 简化的去噪步骤</span>
+        <span class="hljs-comment"># 实际实现应该使用 DDPM 或 DDIM 的去噪步骤</span>
+        <span class="hljs-keyword">return</span> x - (t / <span class="hljs-number">1000</span>) * noise_pred
+
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">ConditionalUNet</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, in_channels: <span class="hljs-built_in">int</span> = <span class="hljs-number">4</span>, condition_dim: <span class="hljs-built_in">int</span> = <span class="hljs-number">768</span>, hidden_dim: <span class="hljs-built_in">int</span> = <span class="hljs-number">320</span></span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        <span class="hljs-variable language_">self</span>.condition_dim = condition_dim
+
+        <span class="hljs-comment"># 时间嵌入</span>
+        <span class="hljs-variable language_">self</span>.time_emb_dim = hidden_dim
+        <span class="hljs-variable language_">self</span>.time_mlp = nn.Sequential(
+            SinusoidalPosEmb(hidden_dim),
+            nn.Linear(hidden_dim, hidden_dim * <span class="hljs-number">4</span>),
+            nn.Mish(),
+            nn.Linear(hidden_dim * <span class="hljs-number">4</span>, hidden_dim)
+        )
+
+        <span class="hljs-comment"># 条件嵌入</span>
+        <span class="hljs-variable language_">self</span>.condition_mlp = nn.Sequential(
+            nn.Linear(condition_dim, hidden_dim),
+            nn.Mish(),
+            nn.Linear(hidden_dim, hidden_dim)
+        )
+
+        <span class="hljs-comment"># UNet</span>
+        <span class="hljs-variable language_">self</span>.unet = UNet(in_channels=in_channels, hidden_dim=hidden_dim)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x: torch.Tensor, t: torch.Tensor, condition: torch.Tensor</span>) -&gt; torch.Tensor:
+        <span class="hljs-string">&quot;&quot;&quot;
+        前向传播
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 时间嵌入</span>
+        time_emb = <span class="hljs-variable language_">self</span>.time_mlp(t)
+        time_emb = time_emb.unsqueeze(-<span class="hljs-number">1</span>).unsqueeze(-<span class="hljs-number">1</span>)
+
+        <span class="hljs-comment"># 条件嵌入</span>
+        cond_emb = <span class="hljs-variable language_">self</span>.condition_mlp(condition)
+        cond_emb = cond_emb.unsqueeze(-<span class="hljs-number">1</span>).unsqueeze(-<span class="hljs-number">1</span>)
+
+        <span class="hljs-comment"># 融合时间嵌入和条件嵌入</span>
+        emb = time_emb + cond_emb
+
+        <span class="hljs-comment"># UNet 前向传播</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.unet(x, t, emb)
+
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">SinusoidalPosEmb</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, dim: <span class="hljs-built_in">int</span></span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        <span class="hljs-variable language_">self</span>.dim = dim
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x: torch.Tensor</span>) -&gt; torch.Tensor:
+        device = x.device
+        half_dim = <span class="hljs-variable language_">self</span>.dim // <span class="hljs-number">2</span>
+        emb = torch.log(torch.tensor(<span class="hljs-number">10000</span>, device=device)) / (half_dim - <span class="hljs-number">1</span>)
+        emb = torch.exp(torch.arange(half_dim, device=device) * -emb)
+        emb = x[:, <span class="hljs-literal">None</span>] * emb[<span class="hljs-literal">None</span>, :]
+        emb = torch.cat((emb.sin(), emb.cos()), dim=-<span class="hljs-number">1</span>)
+        <span class="hljs-keyword">return</span> emb
+</code></pre>
+<p><strong>来源</strong>：Ho &amp; Salimans, 2022 - Classifier-Free Diffusion Guidance; APE-XML - CFG Tutorial</p>
+<h3 id="533-cfg-的优缺点" tabindex="-1">5.3.3 CFG 的优缺点 <a class="heading-anchor" href="#533-cfg-的优缺点" aria-hidden="true">#</a></h3>
+<p><strong>优点</strong>：</p>
+<ol>
+<li><strong>无需额外模型</strong>：不需要训练额外的分类器</li>
+<li><strong>实现简单</strong>：只需修改采样循环</li>
+<li><strong>兼容性好</strong>：与扩散模型天然兼容</li>
+</ol>
+<p><strong>缺点</strong>：</p>
+<ol>
+<li><strong>计算成本高</strong>：需要前向传播两次（条件 + 无条件）</li>
+<li><strong>内存占用大</strong>：需要存储中间结果</li>
+</ol>
+<p><strong>来源</strong>：The AI Summer - CFG Overview (2024)</p>
+<hr>
+<h2 id="54-文本条件扩散模型" tabindex="-1">5.4 文本条件扩散模型 <a class="heading-anchor" href="#54-文本条件扩散模型" aria-hidden="true">#</a></h2>
+<h3 id="541-文本条件扩散模型的核心思想" tabindex="-1">5.4.1 文本条件扩散模型的核心思想 <a class="heading-anchor" href="#541-文本条件扩散模型的核心思想" aria-hidden="true">#</a></h3>
+<p>**文本条件扩散模型（Text-Conditioned Diffusion Models）**是一种根据文本描述生成图像的扩散模型。</p>
+<p><strong>核心思想</strong>：</p>
+<ol>
+<li><strong>文本编码</strong>：使用文本编码器（如 CLIP）将文本编码为向量</li>
+<li><strong>条件融合</strong>：将文本编码向量融入扩散过程</li>
+<li><strong>文本引导</strong>：通过文本信息引导生成过程</li>
+</ol>
+<p><strong>来源</strong>：Stable Diffusion Documentation (2024); Milvus - Text-to-Image Diffusion (2024)</p>
+<blockquote>
+<p>“In Stable Diffusion, the text prompt is first encoded into a latent vector via a CLIP text encoder.”</p>
+</blockquote>
+<h3 id="542-stable-diffusion-的文本条件" tabindex="-1">5.4.2 Stable Diffusion 的文本条件 <a class="heading-anchor" href="#542-stable-diffusion-的文本条件" aria-hidden="true">#</a></h3>
+<p><strong>Stable Diffusion 的文本条件</strong>：</p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> torch
+<span class="hljs-keyword">import</span> torch.nn <span class="hljs-keyword">as</span> nn
+<span class="hljs-keyword">from</span> transformers <span class="hljs-keyword">import</span> CLIPTextModel, CLIPTokenizer
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">TextConditionedDiffusion</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, in_channels: <span class="hljs-built_in">int</span> = <span class="hljs-number">4</span>, hidden_dim: <span class="hljs-built_in">int</span> = <span class="hljs-number">320</span>, text_dim: <span class="hljs-built_in">int</span> = <span class="hljs-number">768</span></span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        <span class="hljs-variable language_">self</span>.text_dim = text_dim
+
+        <span class="hljs-comment"># CLIP 文本编码器</span>
+        <span class="hljs-variable language_">self</span>.clip_text_model = CLIPTextModel.from_pretrained(<span class="hljs-string">&quot;openai/clip-vit-base-patch32&quot;</span>)
+        <span class="hljs-variable language_">self</span>.clip_tokenizer = CLIPTokenizer.from_pretrained(<span class="hljs-string">&quot;openai/clip-vit-base-patch32&quot;</span>)
+
+        <span class="hljs-comment"># 文本嵌入投影</span>
+        <span class="hljs-variable language_">self</span>.text_mlp = nn.Sequential(
+            nn.Linear(text_dim, hidden_dim),
+            nn.Mish(),
+            nn.Linear(hidden_dim, hidden_dim)
+        )
+
+        <span class="hljs-comment"># 扩散模型 UNet</span>
+        <span class="hljs-variable language_">self</span>.unet = UNet(in_channels=in_channels, hidden_dim=hidden_dim)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">encode_text</span>(<span class="hljs-params">self, text: <span class="hljs-built_in">str</span></span>) -&gt; torch.Tensor:
+        <span class="hljs-string">&quot;&quot;&quot;
+        编码文本
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># Tokenize 文本</span>
+        tokens = <span class="hljs-variable language_">self</span>.clip_tokenizer(
+            text,
+            padding=<span class="hljs-string">&quot;max_length&quot;</span>,
+            truncation=<span class="hljs-literal">True</span>,
+            max_length=<span class="hljs-number">77</span>,
+            return_tensors=<span class="hljs-string">&quot;pt&quot;</span>
+        )
+
+        <span class="hljs-comment"># 编码文本</span>
+        text_features = <span class="hljs-variable language_">self</span>.clip_text_model(**tokens).last_hidden_state
+
+        <span class="hljs-comment"># 投影到模型维度</span>
+        text_emb = <span class="hljs-variable language_">self</span>.text_mlp(text_features)
+
+        <span class="hljs-keyword">return</span> text_emb
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x: torch.Tensor, t: torch.Tensor, text: <span class="hljs-built_in">str</span></span>) -&gt; torch.Tensor:
+        <span class="hljs-string">&quot;&quot;&quot;
+        前向传播
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 编码文本</span>
+        text_emb = <span class="hljs-variable language_">self</span>.encode_text(text)
+
+        <span class="hljs-comment"># 时间嵌入</span>
+        time_emb = <span class="hljs-variable language_">self</span>.time_mlp(t)
+        time_emb = time_emb.unsqueeze(-<span class="hljs-number">1</span>).unsqueeze(-<span class="hljs-number">1</span>)
+
+        <span class="hljs-comment"># 融合时间嵌入和文本嵌入</span>
+        emb = time_emb + text_emb.unsqueeze(-<span class="hljs-number">1</span>).unsqueeze(-<span class="hljs-number">1</span>)
+
+        <span class="hljs-comment"># UNet 前向传播</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.unet(x, t, emb)
+
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">SinusoidalPosEmb</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, dim: <span class="hljs-built_in">int</span></span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        <span class="hljs-variable language_">self</span>.dim = dim
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x: torch.Tensor</span>) -&gt; torch.Tensor:
+        device = x.device
+        half_dim = <span class="hljs-variable language_">self</span>.dim // <span class="hljs-number">2</span>
+        emb = torch.log(torch.tensor(<span class="hljs-number">10000</span>, device=device)) / (half_dim - <span class="hljs-number">1</span>)
+        emb = torch.exp(torch.arange(half_dim, device=device) * -emb)
+        emb = x[:, <span class="hljs-literal">None</span>] * emb[<span class="hljs-literal">None</span>, :]
+        emb = torch.cat((emb.sin(), emb.cos()), dim=-<span class="hljs-number">1</span>)
+        <span class="hljs-keyword">return</span> emb
+</code></pre>
+<p><strong>来源</strong>：Milvus - Text-to-Image Diffusion (2024); Stable Diffusion Documentation (2024)</p>
+<h3 id="543-文本条件扩散模型的应用" tabindex="-1">5.4.3 文本条件扩散模型的应用 <a class="heading-anchor" href="#543-文本条件扩散模型的应用" aria-hidden="true">#</a></h3>
+<p><strong>应用场景</strong>：</p>
+<ul>
+<li><strong>文本到图像生成</strong>：Stable Diffusion、DALL-E、Midjourney</li>
+<li><strong>图像编辑</strong>：通过文本描述编辑图像</li>
+<li><strong>风格迁移</strong>：通过文本描述指定风格</li>
+</ul>
+<hr>
+<h2 id="55-图像条件扩散模型" tabindex="-1">5.5 图像条件扩散模型 <a class="heading-anchor" href="#55-图像条件扩散模型" aria-hidden="true">#</a></h2>
+<h3 id="551-图像条件扩散模型的核心思想" tabindex="-1">5.5.1 图像条件扩散模型的核心思想 <a class="heading-anchor" href="#551-图像条件扩散模型的核心思想" aria-hidden="true">#</a></h3>
+<p>**图像条件扩散模型（Image-Conditioned Diffusion Models）**是一种根据输入图像生成新图像的扩散模型。</p>
+<p><strong>核心思想</strong>：</p>
+<ol>
+<li><strong>图像编码</strong>：将输入图像编码为特征向量</li>
+<li><strong>条件融合</strong>：将图像特征融入扩散过程</li>
+<li><strong>图像引导</strong>：通过图像信息引导生成过程</li>
+</ol>
+<p><strong>应用场景</strong>：</p>
+<ul>
+<li><strong>图像修复（Inpainting）</strong>：修复图像的缺失部分</li>
+<li><strong>图像编辑（Image Editing）</strong>：编辑图像的特定区域</li>
+<li><strong>风格迁移（Style Transfer）</strong>：将一张图像的风格应用到另一张图像</li>
+</ul>
+<p><strong>来源</strong>：Zhang et al., 2023 - Adding Conditional Control to Text-to-Image Diffusion Models</p>
+<h3 id="552-图像条件扩散模型的实现" tabindex="-1">5.5.2 图像条件扩散模型的实现 <a class="heading-anchor" href="#552-图像条件扩散模型的实现" aria-hidden="true">#</a></h3>
+<p><strong>图像条件扩散模型</strong>：</p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> torch
+<span class="hljs-keyword">import</span> torch.nn <span class="hljs-keyword">as</span> nn
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">ImageConditionedDiffusion</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, in_channels: <span class="hljs-built_in">int</span> = <span class="hljs-number">4</span>, condition_channels: <span class="hljs-built_in">int</span> = <span class="hljs-number">3</span>, hidden_dim: <span class="hljs-built_in">int</span> = <span class="hljs-number">320</span></span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        <span class="hljs-variable language_">self</span>.condition_channels = condition_channels
+
+        <span class="hljs-comment"># 图像编码器</span>
+        <span class="hljs-variable language_">self</span>.image_encoder = nn.Sequential(
+            nn.Conv2d(condition_channels, <span class="hljs-number">64</span>, kernel_size=<span class="hljs-number">4</span>, stride=<span class="hljs-number">2</span>, padding=<span class="hljs-number">1</span>),
+            nn.Mish(),
+            nn.Conv2d(<span class="hljs-number">64</span>, <span class="hljs-number">128</span>, kernel_size=<span class="hljs-number">4</span>, stride=<span class="hljs-number">2</span>, padding=<span class="hljs-number">1</span>),
+            nn.Mish(),
+            nn.Conv2d(<span class="hljs-number">128</span>, <span class="hljs-number">256</span>, kernel_size=<span class="hljs-number">4</span>, stride=<span class="hljs-number">2</span>, padding=<span class="hljs-number">1</span>),
+            nn.Mish(),
+            nn.AdaptiveAvgPool2d((<span class="hljs-number">1</span>, <span class="hljs-number">1</span>))
+        )
+
+        <span class="hljs-comment"># 图像嵌入投影</span>
+        <span class="hljs-variable language_">self</span>.image_mlp = nn.Sequential(
+            nn.Linear(<span class="hljs-number">256</span>, hidden_dim),
+            nn.Mish(),
+            nn.Linear(hidden_dim, hidden_dim)
+        )
+
+        <span class="hljs-comment"># 时间嵌入</span>
+        <span class="hljs-variable language_">self</span>.time_emb_dim = hidden_dim
+        <span class="hljs-variable language_">self</span>.time_mlp = nn.Sequential(
+            SinusoidalPosEmb(hidden_dim),
+            nn.Linear(hidden_dim, hidden_dim * <span class="hljs-number">4</span>),
+            nn.Mish(),
+            nn.Linear(hidden_dim * <span class="hljs-number">4</span>, hidden_dim)
+        )
+
+        <span class="hljs-comment"># UNet</span>
+        <span class="hljs-variable language_">self</span>.unet = UNet(in_channels=in_channels, hidden_dim=hidden_dim)
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">encode_image</span>(<span class="hljs-params">self, image: torch.Tensor</span>) -&gt; torch.Tensor:
+        <span class="hljs-string">&quot;&quot;&quot;
+        编码图像
+        &quot;&quot;&quot;</span>
+        image_features = <span class="hljs-variable language_">self</span>.image_encoder(image)
+        image_emb = <span class="hljs-variable language_">self</span>.image_mlp(image_features.squeeze(-<span class="hljs-number">1</span>).squeeze(-<span class="hljs-number">1</span>))
+        <span class="hljs-keyword">return</span> image_emb
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x: torch.Tensor, t: torch.Tensor, condition_image: torch.Tensor</span>) -&gt; torch.Tensor:
+        <span class="hljs-string">&quot;&quot;&quot;
+        前向传播
+        &quot;&quot;&quot;</span>
+        <span class="hljs-comment"># 编码条件图像</span>
+        image_emb = <span class="hljs-variable language_">self</span>.encode_image(condition_image)
+
+        <span class="hljs-comment"># 时间嵌入</span>
+        time_emb = <span class="hljs-variable language_">self</span>.time_mlp(t)
+        time_emb = time_emb.unsqueeze(-<span class="hljs-number">1</span>).unsqueeze(-<span class="hljs-number">1</span>)
+
+        <span class="hljs-comment"># 融合时间嵌入和图像嵌入</span>
+        emb = time_emb + image_emb.unsqueeze(-<span class="hljs-number">1</span>).unsqueeze(-<span class="hljs-number">1</span>)
+
+        <span class="hljs-comment"># UNet 前向传播</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.unet(x, t, emb)
+
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">SinusoidalPosEmb</span>(nn.Module):
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, dim: <span class="hljs-built_in">int</span></span>):
+        <span class="hljs-built_in">super</span>().__init__()
+        <span class="hljs-variable language_">self</span>.dim = dim
+
+    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x: torch.Tensor</span>) -&gt; torch.Tensor:
+        device = x.device
+        half_dim = <span class="hljs-variable language_">self</span>.dim // <span class="hljs-number">2</span>
+        emb = torch.log(torch.tensor(<span class="hljs-number">10000</span>, device=device)) / (half_dim - <span class="hljs-number">1</span>)
+        emb = torch.exp(torch.arange(half_dim, device=device) * -emb)
+        emb = x[:, <span class="hljs-literal">None</span>] * emb[<span class="hljs-literal">None</span>, :]
+        emb = torch.cat((emb.sin(), emb.cos()), dim=-<span class="hljs-number">1</span>)
+        <span class="hljs-keyword">return</span> emb
+</code></pre>
+<p><strong>来源</strong>：Zhang et al., 2023 - Adding Conditional Control to Text-to-Image Diffusion Models</p>
+<h3 id="553-图像条件扩散模型的应用" tabindex="-1">5.5.3 图像条件扩散模型的应用 <a class="heading-anchor" href="#553-图像条件扩散模型的应用" aria-hidden="true">#</a></h3>
+<p><strong>应用场景</strong>：</p>
+<ul>
+<li><strong>图像修复</strong>：修复照片的缺失部分</li>
+<li><strong>图像编辑</strong>：编辑照片的特定区域</li>
+<li><strong>图像超分辨率</strong>：提高图像分辨率</li>
+</ul>
+<hr>
+<h2 id="56-条件扩散模型对比" tabindex="-1">5.6 条件扩散模型对比 <a class="heading-anchor" href="#56-条件扩散模型对比" aria-hidden="true">#</a></h2>
+<h3 id="561-性能对比" tabindex="-1">5.6.1 性能对比 <a class="heading-anchor" href="#561-性能对比" aria-hidden="true">#</a></h3>
+<p><strong>对比表</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>额外模型</th>
+<th>计算成本</th>
+<th>实现难度</th>
+<th>引导强度可控</th>
+<th>应用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Classifier Guidance</strong></td>
+<td>需要</td>
+<td>高</td>
+<td>高</td>
+<td>是</td>
+<td>类别条件生成</td>
+</tr>
+<tr>
+<td><strong>Classifier-Free Guidance</strong></td>
+<td>不需要</td>
+<td>中等</td>
+<td>低</td>
+<td>是</td>
+<td>多条件生成</td>
+</tr>
+<tr>
+<td><strong>文本条件扩散模型</strong></td>
+<td>需要（CLIP）</td>
+<td>中等</td>
+<td>中等</td>
+<td>是</td>
+<td>文本到图像生成</td>
+</tr>
+<tr>
+<td><strong>图像条件扩散模型</strong></td>
+<td>不需要</td>
+<td>中等</td>
+<td>中等</td>
+<td>是</td>
+<td>图像修复、编辑</td>
+</tr>
+</tbody>
+</table>
+<p><strong>来源</strong>：Ho &amp; Salimans, 2022; The AI Summer - CFG Overview (2024)</p>
+<h3 id="562-适用场景对比" tabindex="-1">5.6.2 适用场景对比 <a class="heading-anchor" href="#562-适用场景对比" aria-hidden="true">#</a></h3>
+<p><strong>按条件类型分类</strong>：</p>
+<ol>
+<li><strong>类别条件</strong>：Classifier Guidance、CFG</li>
+<li><strong>文本条件</strong>：Stable Diffusion、DALL-E</li>
+<li><strong>图像条件</strong>：图像修复、图像编辑</li>
+</ol>
+<p><strong>按应用场景分类</strong>：</p>
+<ol>
+<li><strong>文本到图像生成</strong>：文本条件扩散模型</li>
+<li><strong>图像到图像生成</strong>：图像条件扩散模型</li>
+<li><strong>类别条件生成</strong>：Classifier Guidance、CFG</li>
+</ol>
+<hr>
+<h2 id="结语" tabindex="-1">结语 <a class="heading-anchor" href="#结语" aria-hidden="true">#</a></h2>
+<p>本章介绍了条件扩散模型，包括 Classifier Guidance、Classifier-Free Guidance（CFG）、文本条件扩散模型和图像条件扩散模型。条件扩散模型通过融入条件信息（类别、文本、图像）实现了可控的生成。</p>
+<p>我们详细介绍了各种条件扩散模型的核心思想、实现和应用场景，并对它们的性能和适用场景进行了对比。读者可以根据应用场景选择合适的条件扩散模型。</p>
+<hr>
+<p><strong>参考文献</strong>：</p>
+<ol>
+<li>
+<p>Ho &amp; Salimans - Classifier-Free Diffusion Guidance (2022)</p>
+<ul>
+<li>论文链接：<a href="https://arxiv.org/abs/2207.12598">https://arxiv.org/abs/2207.12598</a></li>
+<li>重要性：CFG 的开山之作，实现了无需分类器的引导</li>
+</ul>
+</li>
+<li>
+<p>Dhariwal &amp; Nichol - Improved Denoising Diffusion Probabilistic Models (2021)</p>
+<ul>
+<li>论文链接：<a href="https://arxiv.org/abs/2102.09672">https://arxiv.org/abs/2102.09672</a></li>
+<li>重要性：Classifier Guidance 的提出</li>
+</ul>
+</li>
+<li>
+<p>Zhang et al. - Adding Conditional Control to Text-to-Image Diffusion Models (2023)</p>
+<ul>
+<li>论文链接：<a href="https://openaccess.thecvf.com/content/ICCV2023/papers/Zhang_Adding_Conditional_Control_to_Text-to-Image_Diffusion_Models_ICCV_2023_paper.pdf">https://openaccess.thecvf.com/content/ICCV2023/papers/Zhang_Adding_Conditional_Control_to_Text-to-Image_Diffusion_Models_ICCV_2023_paper.pdf</a></li>
+<li>重要性：图像条件扩散模型的详细实现</li>
+</ul>
+</li>
+<li>
+<p>The AI Summer - Classifier-Free Guidance Overview (2024)</p>
+<ul>
+<li>链接：<a href="https://theaisummer.com/classifier-free-guidance/">https://theaisummer.com/classifier-free-guidance/</a></li>
+<li>重要性：CFG 的详细教程</li>
+</ul>
+</li>
+<li>
+<p>Milvus - Text-to-Image Diffusion (2024)</p>
+<ul>
+<li>链接：<a href="https://milvus.io/ai-quick-reference/how-do-you-condition-diffusion-models-for-texttoimage-generation">https://milvus.io/ai-quick-reference/how-do-you-condition-diffusion-models-for-texttoimage-generation</a></li>
+<li>重要性：文本条件扩散模型的详细解释</li>
+</ul>
+</li>
+<li>
+<p>Stable Diffusion Documentation (2024)</p>
+<ul>
+<li>链接：<a href="https://stability.ai/docs">https://stability.ai/docs</a></li>
+<li>重要性：Stable Diffusion 的官方文档</li>
+</ul>
+</li>
+</ol>
+<hr>
+<p><strong>章节版本</strong>：v1.0
+<strong>最后更新</strong>：2026-03-19</p>
+</div> <nav class="pager"> <a class="pager__link" href="/diffusion-models-knowledge-base/04-diffusion-model-optimization/"> <span>上一篇</span> <strong>第四章：扩散模型的优化算法（Diffusion Model Optimization）</strong> </a> <a class="pager__link" href="/diffusion-models-knowledge-base/06-diffusion-model-training-techniques/"> <span>下一篇</span> <strong>第六章：扩散模型的训练技巧（Diffusion Model Training Techniques）</strong> </a> </nav> </article> </section>  </main> <footer class="site-footer"> <div class="site-footer__inner"> <p>Vinci Knowledge Base</p> <p>Source directory: <code>/Users/superone77/Documents/知识库/projects</code></p> </div> </footer> </div> </body></html>

@@ -1,0 +1,704 @@
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>第九章：图像扩散模型（Image Diffusion Models） | Vinci Knowledge Base</title><meta name="description" content="第九章：图像扩散模型（Image Diffusion Models） 深入了解主流图像扩散模型：DALL E、Imagen、FLUX 等 9.1 图像扩散模型概述 9.1.1 图像扩散模型的定义 图像扩散模型 是一类用于图像生成的扩散模型，通过逐步去噪从随机噪声中生成高质量图像。 核心思想 ： 1. 前向扩散 ：逐步给图像添加高斯噪声，直到变成纯噪声 2. "><meta name="generator" content="Vinci Knowledge Base"><link rel="stylesheet" href="/_astro/_doc_.CY2v1inF.css"></head> <body> <div class="page-shell"> <header class="site-header"> <div class="site-header__inner"> <a class="brand" href="/"> <span class="brand__eyebrow">GitHub Pages Knowledge Site</span> <span class="brand__name">Vinci Knowledge Base</span> </a> <nav class="site-nav"> <a href="/">Projects</a> </nav> </div> </header> <main class="page-main">  <section class="article-hero"> <div> <p class="eyebrow">Knowledge Article</p> <h1>第九章：图像扩散模型（Image Diffusion Models）</h1> <p class="article-hero__breadcrumbs"> <a href="/">Home</a> <span>/</span> <a href="/diffusion-models-knowledge-base/">扩散模型知识库（Diffusion Model Knowledge Base）</a> </p> </div> <div class="meta-card"> <p><strong>Project</strong> 扩散模型知识库（Diffusion Model Knowledge Base）</p> <p><strong>Source</strong> <code>knowledge/09-image-diffusion-models.md</code></p> <p><strong>Sections</strong> 65</p> </div> </section> <section class="content-grid"> <aside class="toc-card"> <p class="toc-card__title">本页目录</p> <ul class="toc-card__list"> <li class="toc-depth-1"> <a href="#第九章图像扩散模型image-diffusion-models">第九章：图像扩散模型（Image Diffusion Models）</a> </li><li class="toc-depth-2"> <a href="#91-图像扩散模型概述">9.1 图像扩散模型概述</a> </li><li class="toc-depth-3"> <a href="#911-图像扩散模型的定义">9.1.1 图像扩散模型的定义</a> </li><li class="toc-depth-3"> <a href="#912-图像扩散模型的应用">9.1.2 图像扩散模型的应用</a> </li><li class="toc-depth-3"> <a href="#913-图像扩散模型的类型">9.1.3 图像扩散模型的类型</a> </li><li class="toc-depth-3"> <a href="#914-图像扩散模型的发展">9.1.4 图像扩散模型的发展</a> </li><li class="toc-depth-2"> <a href="#92-dall-e">9.2 DALL-E</a> </li><li class="toc-depth-3"> <a href="#921-dall-e-1">9.2.1 DALL-E 1</a> </li><li class="toc-depth-3"> <a href="#922-dall-e-2">9.2.2 DALL-E 2</a> </li><li class="toc-depth-3"> <a href="#923-dall-e-3">9.2.3 DALL-E 3</a> </li><li class="toc-depth-3"> <a href="#924-dall-e-的代码示例">9.2.4 DALL-E 的代码示例</a> </li><li class="toc-depth-1"> <a href="#加载-dall-e-2-模型使用-hugging-face-兼容版本">加载 DALL-E 2 模型（使用 Hugging Face 兼容版本）</a> </li><li class="toc-depth-1"> <a href="#创建管道">创建管道</a> </li><li class="toc-depth-1"> <a href="#设置文本提示">设置文本提示</a> </li><li class="toc-depth-1"> <a href="#生成图像">生成图像</a> </li><li class="toc-depth-1"> <a href="#保存图像">保存图像</a> </li><li class="toc-depth-2"> <a href="#93-imagen">9.3 Imagen</a> </li><li class="toc-depth-3"> <a href="#931-imagen-概述">9.3.1 Imagen 概述</a> </li><li class="toc-depth-3"> <a href="#932-imagen-的架构">9.3.2 Imagen 的架构</a> </li><li class="toc-depth-3"> <a href="#933-imagen-的特点">9.3.3 Imagen 的特点</a> </li><li class="toc-depth-2"> <a href="#94-parti">9.4 Parti</a> </li><li class="toc-depth-3"> <a href="#941-parti-概述">9.4.1 Parti 概述</a> </li><li class="toc-depth-3"> <a href="#942-parti-的架构">9.4.2 Parti 的架构</a> </li><li class="toc-depth-3"> <a href="#943-parti-的特点">9.4.3 Parti 的特点</a> </li><li class="toc-depth-2"> <a href="#95-flux">9.5 FLUX</a> </li><li class="toc-depth-3"> <a href="#951-flux-概述">9.5.1 FLUX 概述</a> </li><li class="toc-depth-3"> <a href="#952-flux-的版本">9.5.2 FLUX 的版本</a> </li><li class="toc-depth-3"> <a href="#953-flux-的代码示例">9.5.3 FLUX 的代码示例</a> </li><li class="toc-depth-1"> <a href="#加载-flux1-schnell-模型">加载 FLUX.1-schnell 模型</a> </li><li class="toc-depth-1"> <a href="#创建管道-1">创建管道</a> </li><li class="toc-depth-1"> <a href="#设置文本提示-1">设置文本提示</a> </li><li class="toc-depth-1"> <a href="#生成图像快速采样">生成图像（快速采样）</a> </li><li class="toc-depth-1"> <a href="#保存图像-1">保存图像</a> </li><li class="toc-depth-2"> <a href="#96-stable-diffusion-2030xl">9.6 Stable Diffusion 2.0/3.0/XL</a> </li><li class="toc-depth-3"> <a href="#961-stable-diffusion-20">9.6.1 Stable Diffusion 2.0</a> </li><li class="toc-depth-3"> <a href="#962-stable-diffusion-xl-sdxl">9.6.2 Stable Diffusion XL (SDXL)</a> </li><li class="toc-depth-3"> <a href="#963-stable-diffusion-30">9.6.3 Stable Diffusion 3.0</a> </li><li class="toc-depth-2"> <a href="#97-midjourney">9.7 Midjourney</a> </li><li class="toc-depth-3"> <a href="#971-midjourney-概述">9.7.1 Midjourney 概述</a> </li><li class="toc-depth-3"> <a href="#972-midjourney-的特点">9.7.2 Midjourney 的特点</a> </li><li class="toc-depth-2"> <a href="#98-图像扩散模型对比">9.8 图像扩散模型对比</a> </li><li class="toc-depth-3"> <a href="#981-性能对比">9.8.1 性能对比</a> </li><li class="toc-depth-3"> <a href="#982-选型建议">9.8.2 选型建议</a> </li><li class="toc-depth-2"> <a href="#99-图像扩散模型的应用案例">9.9 图像扩散模型的应用案例</a> </li><li class="toc-depth-3"> <a href="#991-文本到图像生成">9.9.1 文本到图像生成</a> </li><li class="toc-depth-1"> <a href="#加载-stable-diffusion-xl-模型">加载 Stable Diffusion XL 模型</a> </li><li class="toc-depth-1"> <a href="#创建管道-2">创建管道</a> </li><li class="toc-depth-1"> <a href="#设置文本提示-2">设置文本提示</a> </li><li class="toc-depth-1"> <a href="#生成图像-1">生成图像</a> </li><li class="toc-depth-1"> <a href="#保存图像-2">保存图像</a> </li><li class="toc-depth-3"> <a href="#992-图像到图像生成">9.9.2 图像到图像生成</a> </li><li class="toc-depth-1"> <a href="#加载-stable-diffusion-图像到图像模型">加载 Stable Diffusion 图像到图像模型</a> </li><li class="toc-depth-1"> <a href="#创建管道-3">创建管道</a> </li><li class="toc-depth-1"> <a href="#加载原始图像">加载原始图像</a> </li><li class="toc-depth-1"> <a href="#设置文本提示-3">设置文本提示</a> </li><li class="toc-depth-1"> <a href="#生成图像-2">生成图像</a> </li><li class="toc-depth-1"> <a href="#保存图像-3">保存图像</a> </li><li class="toc-depth-3"> <a href="#993-图像修复">9.9.3 图像修复</a> </li><li class="toc-depth-1"> <a href="#加载-stable-diffusion-修复模型">加载 Stable Diffusion 修复模型</a> </li><li class="toc-depth-1"> <a href="#创建管道-4">创建管道</a> </li><li class="toc-depth-1"> <a href="#加载原始图像和遮罩">加载原始图像和遮罩</a> </li><li class="toc-depth-1"> <a href="#设置文本提示-4">设置文本提示</a> </li><li class="toc-depth-1"> <a href="#生成图像-3">生成图像</a> </li><li class="toc-depth-1"> <a href="#保存图像-4">保存图像</a> </li><li class="toc-depth-2"> <a href="#结语">结语</a> </li> </ul> </aside> <article class="prose-card"> <div class="prose"><h1 id="第九章图像扩散模型image-diffusion-models" tabindex="-1">第九章：图像扩散模型（Image Diffusion Models） <a class="heading-anchor" href="#第九章图像扩散模型image-diffusion-models" aria-hidden="true">#</a></h1>
+<blockquote>
+<p>深入了解主流图像扩散模型：DALL-E、Imagen、FLUX 等</p>
+</blockquote>
+<hr>
+<h2 id="91-图像扩散模型概述" tabindex="-1">9.1 图像扩散模型概述 <a class="heading-anchor" href="#91-图像扩散模型概述" aria-hidden="true">#</a></h2>
+<h3 id="911-图像扩散模型的定义" tabindex="-1">9.1.1 图像扩散模型的定义 <a class="heading-anchor" href="#911-图像扩散模型的定义" aria-hidden="true">#</a></h3>
+<p><strong>图像扩散模型</strong>是一类用于图像生成的扩散模型，通过逐步去噪从随机噪声中生成高质量图像。</p>
+<p><strong>核心思想</strong>：</p>
+<ol>
+<li><strong>前向扩散</strong>：逐步给图像添加高斯噪声，直到变成纯噪声</li>
+<li><strong>反向去噪</strong>：训练神经网络逐步去噪，恢复原始图像</li>
+<li><strong>文本条件</strong>：使用文本作为条件，实现文本到图像生成</li>
+<li><strong>高质量生成</strong>：生成高分辨率、高质量的图像</li>
+</ol>
+<p><strong>来源</strong>：Ho et al., 2020 - DDPM; Rombach et al., 2021 - LDM</p>
+<h3 id="912-图像扩散模型的应用" tabindex="-1">9.1.2 图像扩散模型的应用 <a class="heading-anchor" href="#912-图像扩散模型的应用" aria-hidden="true">#</a></h3>
+<p><strong>图像扩散模型的应用场景</strong>：</p>
+<ul>
+<li><strong>文本到图像生成</strong>：从文本描述生成图像</li>
+<li><strong>图像编辑</strong>：编辑现有图像（Inpainting、Outpainting）</li>
+<li><strong>图像修复</strong>：修复损坏的图像</li>
+<li><strong>风格迁移</strong>：将图像从一种风格转换为另一种风格</li>
+<li><strong>超分辨率</strong>：提升图像分辨率</li>
+<li><strong>创意设计</strong>：辅助设计师进行创意设计</li>
+</ul>
+<p><strong>来源</strong>：Stability AI (2022-2024); OpenAI (2022-2024)</p>
+<h3 id="913-图像扩散模型的类型" tabindex="-1">9.1.3 图像扩散模型的类型 <a class="heading-anchor" href="#913-图像扩散模型的类型" aria-hidden="true">#</a></h3>
+<p><strong>主流图像扩散模型</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>公司/组织</th>
+<th>发布时间</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DALL-E 2</strong></td>
+<td>OpenAI</td>
+<td>2022-04</td>
+<td>CLIP 文本编码 + 扩散模型</td>
+</tr>
+<tr>
+<td><strong>DALL-E 3</strong></td>
+<td>OpenAI</td>
+<td>2023-10</td>
+<td>更好的文本对齐</td>
+</tr>
+<tr>
+<td><strong>Imagen</strong></td>
+<td>Google</td>
+<td>2022-05</td>
+<td>级联扩散模型 + T5 文本编码器</td>
+</tr>
+<tr>
+<td><strong>Parti</strong></td>
+<td>Google</td>
+<td>2022-06</td>
+<td>自回归文本到图像模型</td>
+</tr>
+<tr>
+<td><strong>Stable Diffusion</strong></td>
+<td>Stability AI</td>
+<td>2022-08</td>
+<td>开源、可商用</td>
+</tr>
+<tr>
+<td><strong>FLUX</strong></td>
+<td>Black Forest Labs</td>
+<td>2024-08</td>
+<td>快速采样、高质量</td>
+</tr>
+</tbody>
+</table>
+<p><strong>来源</strong>：OpenAI (2022-2024); Google Research (2022); Black Forest Labs (2024)</p>
+<h3 id="914-图像扩散模型的发展" tabindex="-1">9.1.4 图像扩散模型的发展 <a class="heading-anchor" href="#914-图像扩散模型的发展" aria-hidden="true">#</a></h3>
+<p><strong>发展历程</strong>：</p>
+<ol>
+<li><strong>2020 年</strong>：DDPM 提出扩散模型</li>
+<li><strong>2021 年</strong>：LDM 提出潜空间扩散模型</li>
+<li><strong>2022 年</strong>：DALL-E 2、Imagen、Stable Diffusion 发布</li>
+<li><strong>2023 年</strong>：DALL-E 3、Stable Diffusion XL 发布</li>
+<li><strong>2024 年</strong>：FLUX、Stable Diffusion 3.0 发布</li>
+<li><strong>2025 年</strong>：更高效、更高质量的模型</li>
+</ol>
+<p><strong>来源</strong>：Ho et al. (2020); Rombach et al. (2021); OpenAI (2022-2024); Google Research (2022-2024); Stability AI (2022-2024); Black Forest Labs (2024)</p>
+<hr>
+<h2 id="92-dall-e" tabindex="-1">9.2 DALL-E <a class="heading-anchor" href="#92-dall-e" aria-hidden="true">#</a></h2>
+<h3 id="921-dall-e-1" tabindex="-1">9.2.1 DALL-E 1 <a class="heading-anchor" href="#921-dall-e-1" aria-hidden="true">#</a></h3>
+<p><strong>DALL-E 1</strong> 是 OpenAI 于 2021 年 1 月发布的文本到图像生成模型，基于 VQGAN + Transformer 架构。</p>
+<p><strong>核心思想</strong>：</p>
+<ol>
+<li><strong>VQGAN 编码器</strong>：将图像编码为离散 Token</li>
+<li><strong>Transformer</strong>：使用 Transformer 生成 Token 序列</li>
+<li><strong>文本条件</strong>：使用 GPT-3 文本编码器编码文本</li>
+<li><strong>VQGAN 解码器</strong>：将 Token 序列解码为图像</li>
+</ol>
+<p><strong>架构</strong>：
+[ \text{Text} \xrightarrow{\text{GPT-3}} \text{Text Emb} ]
+[ \text{Text Emb} + \text{Tokens} \xrightarrow{\text{Transformer}} \text{Generated Tokens} ]
+[ \text{Generated Tokens} \xrightarrow{\text{VQGAN Decoder}} \text{Image} ]</p>
+<p><strong>来源</strong>：Ramesh et al., 2021 - Zero-Shot Text-to-Image Generation</p>
+<h3 id="922-dall-e-2" tabindex="-1">9.2.2 DALL-E 2 <a class="heading-anchor" href="#922-dall-e-2" aria-hidden="true">#</a></h3>
+<p><strong>DALL-E 2</strong> 是 OpenAI 于 2022 年 4 月发布的文本到图像生成模型，基于 CLIP + 扩散模型架构。</p>
+<p><strong>核心思想</strong>：</p>
+<ol>
+<li><strong>CLIP 编码器</strong>：编码文本和图像到潜空间</li>
+<li><strong>前向扩散</strong>：逐步添加高斯噪声</li>
+<li><strong>反向去噪</strong>：训练神经网络逐步去噪</li>
+<li><strong>CLIP 文本编码</strong>：使用 CLIP 文本编码器作为条件</li>
+</ol>
+<p><strong>架构</strong>：
+[ \text{Text} \xrightarrow{\text{CLIP Text Encoder}} \text{Text Emb} ]
+[ \text{Random Noise} \xrightarrow{\text{Diffusion Model} + \text{Text Emb}} \text{Denoised Image} ]</p>
+<p><strong>特点</strong>：</p>
+<ul>
+<li><strong>高分辨率</strong>：支持 1024×1024 分辨率</li>
+<li><strong>高质量</strong>：生成高质量的图像</li>
+<li><strong>文本对齐</strong>：文本与图像对齐良好</li>
+<li><strong>多样性</strong>：生成多样化的图像</li>
+</ul>
+<p><strong>来源</strong>：Ramesh et al., 2022 - Hierarchical Text-Conditional Image Generation with CLIP Latents</p>
+<h3 id="923-dall-e-3" tabindex="-1">9.2.3 DALL-E 3 <a class="heading-anchor" href="#923-dall-e-3" aria-hidden="true">#</a></h3>
+<p><strong>DALL-E 3</strong> 是 OpenAI 于 2023 年 10 月发布的文本到图像生成模型，基于改进的 CLIP + 扩散模型架构。</p>
+<p><strong>改进点</strong>：</p>
+<ol>
+<li><strong>更好的文本对齐</strong>：文本与图像对齐更好</li>
+<li><strong>更高的质量</strong>：图像质量更高</li>
+<li><strong>更多细节</strong>：图像细节更丰富</li>
+<li><strong>水印</strong>：添加 C2PA 水印</li>
+</ol>
+<p><strong>特点</strong>：</p>
+<ul>
+<li><strong>更精准的文本理解</strong>：更好地理解复杂的文本描述</li>
+<li><strong>更丰富的细节</strong>：图像细节更丰富</li>
+<li><strong>更高的质量</strong>：图像质量更高</li>
+<li><strong>水印支持</strong>：支持 C2PA 水印</li>
+</ul>
+<p><strong>来源</strong>：DALL-E 3 System Card (2023); OpenAI (2024)</p>
+<h3 id="924-dall-e-的代码示例" tabindex="-1">9.2.4 DALL-E 的代码示例 <a class="heading-anchor" href="#924-dall-e-的代码示例" aria-hidden="true">#</a></h3>
+<p><strong>使用 Hugging Face Diffusers 调用 DALL-E 2/3</strong>：</p>
+<pre class="hljs"><code><span class="hljs-keyword">from</span> diffusers <span class="hljs-keyword">import</span> DDPMPipeline, DDPMScheduler
+<span class="hljs-keyword">import</span> torch
+
+<span class="hljs-comment"># 加载 DALL-E 2 模型（使用 Hugging Face 兼容版本）</span>
+model_id = <span class="hljs-string">&quot;runwayml/stable-diffusion-v1-5&quot;</span>  <span class="hljs-comment"># 使用 Stable Diffusion 作为示例</span>
+
+<span class="hljs-comment"># 创建管道</span>
+pipe = DDPMPipeline.from_pretrained(model_id, torch_dtype=torch.float16)
+pipe = pipe.to(<span class="hljs-string">&quot;cuda&quot;</span>)
+
+<span class="hljs-comment"># 设置文本提示</span>
+prompt = <span class="hljs-string">&quot;A photo of a cat sitting on a windowsill&quot;</span>
+
+<span class="hljs-comment"># 生成图像</span>
+images = pipe(prompt, num_inference_steps=<span class="hljs-number">50</span>, guidance_scale=<span class="hljs-number">7.5</span>).images
+
+<span class="hljs-comment"># 保存图像</span>
+images[<span class="hljs-number">0</span>].save(<span class="hljs-string">&quot;dalle2_cat.png&quot;</span>)
+</code></pre>
+<p><strong>来源</strong>：Hugging Face Diffusers (2024); OpenAI API (2024)</p>
+<hr>
+<h2 id="93-imagen" tabindex="-1">9.3 Imagen <a class="heading-anchor" href="#93-imagen" aria-hidden="true">#</a></h2>
+<h3 id="931-imagen-概述" tabindex="-1">9.3.1 Imagen 概述 <a class="heading-anchor" href="#931-imagen-概述" aria-hidden="true">#</a></h3>
+<p><strong>Imagen</strong> 是 Google 于 2022 年 5 月发布的文本到图像生成模型，基于级联扩散模型架构。</p>
+<p><strong>核心思想</strong>：</p>
+<ol>
+<li><strong>级联扩散模型</strong>：使用多个扩散模型逐步提升分辨率</li>
+<li><strong>T5 文本编码器</strong>：使用 T5 文本编码器编码文本</li>
+<li><strong>动态分辨率</strong>：支持多种分辨率</li>
+<li><strong>高质量生成</strong>：生成高质量图像</li>
+</ol>
+<p><strong>架构</strong>：
+[ \text{Text} \xrightarrow{\text{T5 Encoder}} \text{Text Emb} ]
+[ \text{Base Diffusion Model} \xrightarrow{\text{Text Emb}} \text{Low-Res Image} ]
+[ \text{Upsampler 1} \xrightarrow{\text{Low-Res Image} + \text{Text Emb}} \text{Mid-Res Image} ]
+[ \text{Upsampler 2} \xrightarrow{\text{Mid-Res Image} + \text{Text Emb}} \text{High-Res Image} ]</p>
+<p><strong>来源</strong>：Saharia et al., 2022 - Photorealistic Text-to-Image Diffusion Models with Deep Language Understanding</p>
+<h3 id="932-imagen-的架构" tabindex="-1">9.3.2 Imagen 的架构 <a class="heading-anchor" href="#932-imagen-的架构" aria-hidden="true">#</a></h3>
+<p><strong>级联扩散模型</strong>：</p>
+<ul>
+<li><strong>Base Diffusion Model</strong>：生成 64×64 基础图像</li>
+<li><strong>Upsampler 1</strong>：将 64×64 提升到 256×256</li>
+<li><strong>Upsampler 2</strong>：将 256×256 提升到 1024×1024</li>
+</ul>
+<p><strong>文本编码器</strong>：</p>
+<ul>
+<li><strong>T5-XXL</strong>：大型 T5 模型，编码文本为嵌入向量</li>
+<li><strong>文本嵌入</strong>：768 维文本嵌入向量</li>
+</ul>
+<p><strong>采样方法</strong>：</p>
+<ul>
+<li><strong>DDPM</strong>：基础扩散模型使用 DDPM 采样</li>
+<li><strong>DDIM</strong>：Upsampler 使用 DDIM 采样</li>
+<li><strong>Classifier-Free Guidance</strong>：使用 CFG 提高文本对齐</li>
+</ul>
+<p><strong>来源</strong>：Saharia et al., 2022 - Imagen</p>
+<h3 id="933-imagen-的特点" tabindex="-1">9.3.3 Imagen 的特点 <a class="heading-anchor" href="#933-imagen-的特点" aria-hidden="true">#</a></h3>
+<p><strong>优点</strong>：</p>
+<ul>
+<li><strong>高分辨率</strong>：支持 1024×1024 分辨率</li>
+<li><strong>高质量</strong>：生成高质量图像</li>
+<li><strong>文本对齐</strong>：文本与图像对齐良好</li>
+<li><strong>多样性</strong>：生成多样化图像</li>
+</ul>
+<p><strong>缺点</strong>：</p>
+<ul>
+<li><strong>模型规模大</strong>：模型规模大，需要大量计算资源</li>
+<li><strong>推理速度慢</strong>：推理速度较慢</li>
+<li><strong>不开源</strong>：模型不开源，无法商用</li>
+</ul>
+<p><strong>来源</strong>：Google Research (2022)</p>
+<hr>
+<h2 id="94-parti" tabindex="-1">9.4 Parti <a class="heading-anchor" href="#94-parti" aria-hidden="true">#</a></h2>
+<h3 id="941-parti-概述" tabindex="-1">9.4.1 Parti 概述 <a class="heading-anchor" href="#941-parti-概述" aria-hidden="true">#</a></h3>
+<p><strong>Parti</strong>（Pathways Autoregressive Text-to-Image）是 Google 于 2022 年 6 月发布的自回归文本到图像生成模型。</p>
+<p><strong>核心思想</strong>：</p>
+<ol>
+<li><strong>自回归生成</strong>：使用 Transformer 自回归生成 Token 序列</li>
+<li><strong>VQGAN</strong>：使用 VQGAN 将图像编码为 Token 序列</li>
+<li><strong>路径扩展</strong>：使用 Google 的 Pathways 架构</li>
+<li><strong>高质量生成</strong>：生成高质量、多样化的图像</li>
+</ol>
+<p><strong>架构</strong>：
+[ \text{Text} \xrightarrow{\text{T5 Encoder}} \text{Text Emb} ]
+[ \text{Text Emb} \xrightarrow{\text{Transformer}} \text{Generated Tokens} ]
+[ \text{Generated Tokens} \xrightarrow{\text{VQGAN Decoder}} \text{Image} ]</p>
+<p><strong>来源</strong>：Yu et al., 2022 - Scaling Autoregressive Models for Content-Rich Text-to-Image Generation</p>
+<h3 id="942-parti-的架构" tabindex="-1">9.4.2 Parti 的架构 <a class="heading-anchor" href="#942-parti-的架构" aria-hidden="true">#</a></h3>
+<p><strong>自回归 Transformer</strong>：</p>
+<ul>
+<li><strong>编码器</strong>：编码文本为嵌入向量</li>
+<li><strong>解码器</strong>：自回归生成 Token 序列</li>
+<li><strong>注意力机制</strong>：使用多头注意力机制</li>
+</ul>
+<p><strong>VQGAN</strong>：</p>
+<ul>
+<li><strong>编码器</strong>：将图像编码为 Token 序列</li>
+<li><strong>代码本</strong>：离散 Token 空间</li>
+<li><strong>解码器</strong>：将 Token 序列解码为图像</li>
+</ul>
+<p><strong>路径扩展</strong>：</p>
+<ul>
+<li><strong>分布式训练</strong>：使用 Google 的 Pathways 架构</li>
+<li><strong>模型扩展</strong>：支持大规模模型训练</li>
+</ul>
+<p><strong>来源</strong>：Yu et al., 2022 - Parti</p>
+<h3 id="943-parti-的特点" tabindex="-1">9.4.3 Parti 的特点 <a class="heading-anchor" href="#943-parti-的特点" aria-hidden="true">#</a></h3>
+<p><strong>优点</strong>：</p>
+<ul>
+<li><strong>高分辨率</strong>：支持高分辨率图像</li>
+<li><strong>高质量</strong>：生成高质量图像</li>
+<li><strong>文本对齐</strong>：文本与图像对齐良好</li>
+<li><strong>多样性</strong>：生成多样化图像</li>
+</ul>
+<p><strong>缺点</strong>：</p>
+<ul>
+<li><strong>模型规模大</strong>：模型规模大，需要大量计算资源</li>
+<li><strong>推理速度慢</strong>：自回归生成速度慢</li>
+<li><strong>不开源</strong>：模型不开源，无法商用</li>
+</ul>
+<p><strong>来源</strong>：Google Research (2022)</p>
+<hr>
+<h2 id="95-flux" tabindex="-1">9.5 FLUX <a class="heading-anchor" href="#95-flux" aria-hidden="true">#</a></h2>
+<h3 id="951-flux-概述" tabindex="-1">9.5.1 FLUX 概述 <a class="heading-anchor" href="#951-flux-概述" aria-hidden="true">#</a></h3>
+<p><strong>FLUX</strong> 是 Black Forest Labs 于 2024 年 8 月发布的文本到图像生成模型，基于改进的扩散模型架构。</p>
+<p><strong>核心思想</strong>：</p>
+<ol>
+<li><strong>快速采样</strong>：支持快速采样（4-10 步）</li>
+<li><strong>高质量生成</strong>：生成高质量图像</li>
+<li><strong>开源</strong>：模型开源，可商用</li>
+<li><strong>多版本</strong>：支持多个版本（Schnell、Dev、Pro）</li>
+</ol>
+<p><strong>架构</strong>：</p>
+<ul>
+<li><strong>扩散模型</strong>：基于改进的扩散模型架构</li>
+<li><strong>文本编码器</strong>：使用 T5 文本编码器</li>
+<li><strong>快速采样</strong>：支持快速采样（4-10 步）</li>
+</ul>
+<p><strong>来源</strong>：Black Forest Labs (2024); Wikipedia - Flux (text-to-image model) (2025)</p>
+<h3 id="952-flux-的版本" tabindex="-1">9.5.2 FLUX 的版本 <a class="heading-anchor" href="#952-flux-的版本" aria-hidden="true">#</a></h3>
+<p><strong>主要版本</strong>：</p>
+<ul>
+<li><strong>FLUX.1-schnell</strong>：快速版本，支持 4 步采样</li>
+<li><strong>FLUX.1-dev</strong>：开发版本，支持 10 步采样</li>
+<li><strong>FLUX.1-pro</strong>：专业版本，支持 20 步采样</li>
+</ul>
+<p><strong>特点</strong>：</p>
+<ul>
+<li><strong>快速采样</strong>：支持 4-10 步快速采样</li>
+<li><strong>高质量</strong>：生成高质量图像</li>
+<li><strong>开源</strong>：模型开源，可商用</li>
+<li><strong>多样化</strong>：生成多样化图像</li>
+</ul>
+<p><strong>来源</strong>：Black Forest Labs (2024); Hugging Face (2024)</p>
+<h3 id="953-flux-的代码示例" tabindex="-1">9.5.3 FLUX 的代码示例 <a class="heading-anchor" href="#953-flux-的代码示例" aria-hidden="true">#</a></h3>
+<p><strong>使用 Hugging Face Diffusers 调用 FLUX</strong>：</p>
+<pre class="hljs"><code><span class="hljs-keyword">from</span> diffusers <span class="hljs-keyword">import</span> FluxPipeline
+<span class="hljs-keyword">import</span> torch
+
+<span class="hljs-comment"># 加载 FLUX.1-schnell 模型</span>
+model_id = <span class="hljs-string">&quot;black-forest-labs/FLUX.1-schnell&quot;</span>
+
+<span class="hljs-comment"># 创建管道</span>
+pipe = FluxPipeline.from_pretrained(model_id, torch_dtype=torch.bfloat16)
+pipe.enable_model_cpu_offload()  <span class="hljs-comment"># 节省显存</span>
+
+<span class="hljs-comment"># 设置文本提示</span>
+prompt = <span class="hljs-string">&quot;A photo of a cat holding a sign that says hello world&quot;</span>
+
+<span class="hljs-comment"># 生成图像（快速采样）</span>
+image = pipe(
+    prompt,
+    guidance_scale=<span class="hljs-number">0.0</span>,
+    num_inference_steps=<span class="hljs-number">4</span>,
+    max_sequence_length=<span class="hljs-number">256</span>,
+    generator=torch.Generator(<span class="hljs-string">&quot;cpu&quot;</span>).manual_seed(<span class="hljs-number">0</span>)
+).images[<span class="hljs-number">0</span>]
+
+<span class="hljs-comment"># 保存图像</span>
+image.save(<span class="hljs-string">&quot;flux_cat.png&quot;</span>)
+</code></pre>
+<p><strong>来源</strong>：Hugging Face (2024); Black Forest Labs (2024)</p>
+<hr>
+<h2 id="96-stable-diffusion-2030xl" tabindex="-1">9.6 Stable Diffusion 2.0/3.0/XL <a class="heading-anchor" href="#96-stable-diffusion-2030xl" aria-hidden="true">#</a></h2>
+<h3 id="961-stable-diffusion-20" tabindex="-1">9.6.1 Stable Diffusion 2.0 <a class="heading-anchor" href="#961-stable-diffusion-20" aria-hidden="true">#</a></h3>
+<p><strong>Stable Diffusion 2.0</strong> 是 Stability AI 于 2022 年 11 月发布的改进版本。</p>
+<p><strong>改进点</strong>：</p>
+<ul>
+<li><strong>更高分辨率</strong>：从 512×512 提升到 768×768</li>
+<li><strong>更好的质量</strong>：图像质量提升</li>
+<li><strong>更多的模型</strong>：提供多个版本（768、512、depth）</li>
+</ul>
+<p><strong>来源</strong>：Stability AI (2022)</p>
+<h3 id="962-stable-diffusion-xl-sdxl" tabindex="-1">9.6.2 Stable Diffusion XL (SDXL) <a class="heading-anchor" href="#962-stable-diffusion-xl-sdxl" aria-hidden="true">#</a></h3>
+<p><strong>Stable Diffusion XL</strong> 是 Stability AI 于 2023 年 7 月发布的大型扩散模型。</p>
+<p><strong>改进点</strong>：</p>
+<ul>
+<li><strong>更大的模型</strong>：从 860M 参数提升到 6.6B 参数</li>
+<li><strong>更高分辨率</strong>：从 768×768 提升到 1024×1024</li>
+<li><strong>Refiner</strong>：额外的精炼模型</li>
+<li><strong>更好的质量</strong>：图像质量大幅提升</li>
+</ul>
+<p><strong>架构</strong>：</p>
+<ul>
+<li><strong>Base Model</strong>：6.6B 参数的基础模型</li>
+<li><strong>Refiner</strong>：6.6B 参数的精炼模型</li>
+<li><strong>文本编码器</strong>：OpenCLIP 和 CLIP 双文本编码器</li>
+</ul>
+<p><strong>来源</strong>：Stability AI (2023)</p>
+<h3 id="963-stable-diffusion-30" tabindex="-1">9.6.3 Stable Diffusion 3.0 <a class="heading-anchor" href="#963-stable-diffusion-30" aria-hidden="true">#</a></h3>
+<p><strong>Stable Diffusion 3.0</strong> 是 Stability AI 于 2024 年 4 月发布的最新版本。</p>
+<p><strong>改进点</strong>：</p>
+<ul>
+<li><strong>更好的质量</strong>：图像质量大幅提升</li>
+<li><strong>更快的采样</strong>：采样步数减少</li>
+<li><strong>更好的文本对齐</strong>：文本与图像对齐更好</li>
+<li><strong>更多模型</strong>：提供多个版本（8B、4B、2B）</li>
+</ul>
+<p><strong>特点</strong>：</p>
+<ul>
+<li><strong>MMDiT 架构</strong>：使用 MMDiT（Multimodal Diffusion Transformer）</li>
+<li><strong>更好的文本对齐</strong>：文本与图像对齐更好</li>
+<li><strong>更高的质量</strong>：图像质量更高</li>
+<li><strong>开源</strong>：模型开源，可商用</li>
+</ul>
+<p><strong>来源</strong>：Stability AI (2024)</p>
+<hr>
+<h2 id="97-midjourney" tabindex="-1">9.7 Midjourney <a class="heading-anchor" href="#97-midjourney" aria-hidden="true">#</a></h2>
+<h3 id="971-midjourney-概述" tabindex="-1">9.7.1 Midjourney 概述 <a class="heading-anchor" href="#971-midjourney-概述" aria-hidden="true">#</a></h3>
+<p><strong>Midjourney</strong> 是 Midjourney 公司于 2022 年发布的商业化文本到图像生成服务。</p>
+<p><strong>特点</strong>：</p>
+<ul>
+<li><strong>高质量</strong>：生成高质量图像</li>
+<li><strong>艺术风格</strong>：支持多种艺术风格</li>
+<li><strong>快速迭代</strong>：快速迭代版本</li>
+<li><strong>Discord 集成</strong>：通过 Discord 使用</li>
+</ul>
+<p><strong>架构</strong>：</p>
+<ul>
+<li><strong>模型</strong>：基于扩散模型架构</li>
+<li><strong>文本编码器</strong>：使用 CLIP 文本编码器</li>
+<li><strong>采样方法</strong>：使用 DDIM 采样</li>
+</ul>
+<p><strong>来源</strong>：Midjourney (2022-2024)</p>
+<h3 id="972-midjourney-的特点" tabindex="-1">9.7.2 Midjourney 的特点 <a class="heading-anchor" href="#972-midjourney-的特点" aria-hidden="true">#</a></h3>
+<p><strong>优点</strong>：</p>
+<ul>
+<li><strong>高质量</strong>：生成高质量图像</li>
+<li><strong>艺术风格</strong>：支持多种艺术风格</li>
+<li><strong>快速迭代</strong>：快速迭代版本</li>
+<li><strong>易用性</strong>：通过 Discord 使用，易用性好</li>
+</ul>
+<p><strong>缺点</strong>：</p>
+<ul>
+<li><strong>闭源</strong>：模型闭源，无法商用</li>
+<li><strong>收费</strong>：付费服务</li>
+<li><strong>限制</strong>：有使用限制</li>
+</ul>
+<p><strong>来源</strong>：Midjourney (2022-2024)</p>
+<hr>
+<h2 id="98-图像扩散模型对比" tabindex="-1">9.8 图像扩散模型对比 <a class="heading-anchor" href="#98-图像扩散模型对比" aria-hidden="true">#</a></h2>
+<h3 id="981-性能对比" tabindex="-1">9.8.1 性能对比 <a class="heading-anchor" href="#981-性能对比" aria-hidden="true">#</a></h3>
+<p><strong>对比表</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>参数</th>
+<th>分辨率</th>
+<th>采样步数</th>
+<th>开源</th>
+<th>商用</th>
+<th>质量</th>
+<th>速度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DALL-E 2</strong></td>
+<td>未知</td>
+<td>1024×1024</td>
+<td>50</td>
+<td>否</td>
+<td>否</td>
+<td>高</td>
+<td>中等</td>
+</tr>
+<tr>
+<td><strong>DALL-E 3</strong></td>
+<td>未知</td>
+<td>1024×1024</td>
+<td>50</td>
+<td>否</td>
+<td>否</td>
+<td>极高</td>
+<td>中等</td>
+</tr>
+<tr>
+<td><strong>Imagen</strong></td>
+<td>4.6B</td>
+<td>1024×1024</td>
+<td>100</td>
+<td>否</td>
+<td>否</td>
+<td>极高</td>
+<td>慢</td>
+</tr>
+<tr>
+<td><strong>Parti</strong></td>
+<td>20B</td>
+<td>1024×1024</td>
+<td>100</td>
+<td>否</td>
+<td>否</td>
+<td>极高</td>
+<td>慢</td>
+</tr>
+<tr>
+<td><strong>Stable Diffusion 1.5</strong></td>
+<td>860M</td>
+<td>512×512</td>
+<td>50</td>
+<td>是</td>
+<td>是</td>
+<td>高</td>
+<td>中等</td>
+</tr>
+<tr>
+<td><strong>Stable Diffusion 2.0</strong></td>
+<td>860M</td>
+<td>768×768</td>
+<td>50</td>
+<td>是</td>
+<td>是</td>
+<td>高</td>
+<td>中等</td>
+</tr>
+<tr>
+<td><strong>Stable Diffusion XL</strong></td>
+<td>6.6B</td>
+<td>1024×1024</td>
+<td>50</td>
+<td>是</td>
+<td>是</td>
+<td>极高</td>
+<td>中等</td>
+</tr>
+<tr>
+<td><strong>Stable Diffusion 3.0</strong></td>
+<td>8B</td>
+<td>1024×1024</td>
+<td>50</td>
+<td>是</td>
+<td>是</td>
+<td>极高</td>
+<td>中等</td>
+</tr>
+<tr>
+<td><strong>FLUX.1-schnell</strong></td>
+<td>12B</td>
+<td>1024×1024</td>
+<td>4</td>
+<td>是</td>
+<td>是</td>
+<td>高</td>
+<td>极快</td>
+</tr>
+<tr>
+<td><strong>FLUX.1-dev</strong></td>
+<td>12B</td>
+<td>1024×1024</td>
+<td>10</td>
+<td>是</td>
+<td>是</td>
+<td>极高</td>
+<td>快</td>
+</tr>
+<tr>
+<td><strong>Midjourney</strong></td>
+<td>未知</td>
+<td>1024×1024</td>
+<td>50</td>
+<td>否</td>
+<td>否</td>
+<td>极高</td>
+<td>快</td>
+</tr>
+</tbody>
+</table>
+<p><strong>来源</strong>：OpenAI (2022-2024); Google Research (2022); Stability AI (2022-2024); Black Forest Labs (2024); Midjourney (2022-2024)</p>
+<h3 id="982-选型建议" tabindex="-1">9.8.2 选型建议 <a class="heading-anchor" href="#982-选型建议" aria-hidden="true">#</a></h3>
+<p><strong>选型建议</strong>：</p>
+<ul>
+<li><strong>商用</strong>：Stable Diffusion XL/3.0、FLUX</li>
+<li><strong>研究</strong>：Imagen、Parti</li>
+<li><strong>快速生成</strong>：FLUX.1-schnell</li>
+<li><strong>高质量</strong>：DALL-E 3、Imagen、Stable Diffusion XL</li>
+<li><strong>开源</strong>：Stable Diffusion、FLUX</li>
+<li><strong>易用性</strong>：Midjourney（通过 Discord）</li>
+</ul>
+<p><strong>来源</strong>：综合多个来源的选型建议</p>
+<hr>
+<h2 id="99-图像扩散模型的应用案例" tabindex="-1">9.9 图像扩散模型的应用案例 <a class="heading-anchor" href="#99-图像扩散模型的应用案例" aria-hidden="true">#</a></h2>
+<h3 id="991-文本到图像生成" tabindex="-1">9.9.1 文本到图像生成 <a class="heading-anchor" href="#991-文本到图像生成" aria-hidden="true">#</a></h3>
+<p><strong>代码示例（Stable Diffusion）</strong>：</p>
+<pre class="hljs"><code><span class="hljs-keyword">from</span> diffusers <span class="hljs-keyword">import</span> StableDiffusionPipeline
+<span class="hljs-keyword">import</span> torch
+
+<span class="hljs-comment"># 加载 Stable Diffusion XL 模型</span>
+model_id = <span class="hljs-string">&quot;stabilityai/stable-diffusion-xl-base-1.0&quot;</span>
+
+<span class="hljs-comment"># 创建管道</span>
+pipe = StableDiffusionPipeline.from_pretrained(model_id, torch_dtype=torch.float16)
+pipe = pipe.to(<span class="hljs-string">&quot;cuda&quot;</span>)
+
+<span class="hljs-comment"># 设置文本提示</span>
+prompt = <span class="hljs-string">&quot;A photo of a cat sitting on a windowsill&quot;</span>
+
+<span class="hljs-comment"># 生成图像</span>
+images = pipe(prompt, num_inference_steps=<span class="hljs-number">50</span>, guidance_scale=<span class="hljs-number">7.5</span>).images
+
+<span class="hljs-comment"># 保存图像</span>
+images[<span class="hljs-number">0</span>].save(<span class="hljs-string">&quot;text_to_image_cat.png&quot;</span>)
+</code></pre>
+<p><strong>来源</strong>：Hugging Face Diffusers (2024)</p>
+<h3 id="992-图像到图像生成" tabindex="-1">9.9.2 图像到图像生成 <a class="heading-anchor" href="#992-图像到图像生成" aria-hidden="true">#</a></h3>
+<p><strong>代码示例（Stable Diffusion）</strong>：</p>
+<pre class="hljs"><code><span class="hljs-keyword">from</span> diffusers <span class="hljs-keyword">import</span> StableDiffusionImg2ImgPipeline
+<span class="hljs-keyword">from</span> PIL <span class="hljs-keyword">import</span> Image
+<span class="hljs-keyword">import</span> torch
+
+<span class="hljs-comment"># 加载 Stable Diffusion 图像到图像模型</span>
+model_id = <span class="hljs-string">&quot;stabilityai/stable-diffusion-xl-refiner-1.0&quot;</span>
+
+<span class="hljs-comment"># 创建管道</span>
+pipe = StableDiffusionImg2ImgPipeline.from_pretrained(model_id, torch_dtype=torch.float16)
+pipe = pipe.to(<span class="hljs-string">&quot;cuda&quot;</span>)
+
+<span class="hljs-comment"># 加载原始图像</span>
+image = Image.<span class="hljs-built_in">open</span>(<span class="hljs-string">&quot;input.png&quot;</span>).convert(<span class="hljs-string">&quot;RGB&quot;</span>)
+
+<span class="hljs-comment"># 设置文本提示</span>
+prompt = <span class="hljs-string">&quot;A photo of a cat sitting on a windowsill&quot;</span>
+
+<span class="hljs-comment"># 生成图像</span>
+images = pipe(prompt, image=image, strength=<span class="hljs-number">0.75</span>, guidance_scale=<span class="hljs-number">7.5</span>).images
+
+<span class="hljs-comment"># 保存图像</span>
+images[<span class="hljs-number">0</span>].save(<span class="hljs-string">&quot;img_to_img_cat.png&quot;</span>)
+</code></pre>
+<p><strong>来源</strong>：Hugging Face Diffusers (2024)</p>
+<h3 id="993-图像修复" tabindex="-1">9.9.3 图像修复 <a class="heading-anchor" href="#993-图像修复" aria-hidden="true">#</a></h3>
+<p><strong>代码示例（Stable Diffusion）</strong>：</p>
+<pre class="hljs"><code><span class="hljs-keyword">from</span> diffusers <span class="hljs-keyword">import</span> StableDiffusionInpaintPipeline
+<span class="hljs-keyword">from</span> PIL <span class="hljs-keyword">import</span> Image
+<span class="hljs-keyword">import</span> torch
+
+<span class="hljs-comment"># 加载 Stable Diffusion 修复模型</span>
+model_id = <span class="hljs-string">&quot;stabilityai/stable-diffusion-xl-base-1.0&quot;</span>
+
+<span class="hljs-comment"># 创建管道</span>
+pipe = StableDiffusionInpaintPipeline.from_pretrained(model_id, torch_dtype=torch.float16)
+pipe = pipe.to(<span class="hljs-string">&quot;cuda&quot;</span>)
+
+<span class="hljs-comment"># 加载原始图像和遮罩</span>
+image = Image.<span class="hljs-built_in">open</span>(<span class="hljs-string">&quot;input.png&quot;</span>).convert(<span class="hljs-string">&quot;RGB&quot;</span>)
+mask = Image.<span class="hljs-built_in">open</span>(<span class="hljs-string">&quot;mask.png&quot;</span>).convert(<span class="hljs-string">&quot;RGB&quot;</span>)
+
+<span class="hljs-comment"># 设置文本提示</span>
+prompt = <span class="hljs-string">&quot;A photo of a cat sitting on a windowsill&quot;</span>
+
+<span class="hljs-comment"># 生成图像</span>
+images = pipe(prompt, image=image, mask_image=mask, guidance_scale=<span class="hljs-number">7.5</span>).images
+
+<span class="hljs-comment"># 保存图像</span>
+images[<span class="hljs-number">0</span>].save(<span class="hljs-string">&quot;inpaint_cat.png&quot;</span>)
+</code></pre>
+<p><strong>来源</strong>：Hugging Face Diffusers (2024)</p>
+<hr>
+<h2 id="结语" tabindex="-1">结语 <a class="heading-anchor" href="#结语" aria-hidden="true">#</a></h2>
+<p>本章介绍了图像扩散模型的主流模型和应用案例，包括 DALL-E、Imagen、Parti、Stable Diffusion、FLUX、Midjourney 等。读者可以基于这些内容选择合适的模型进行图像生成、图像编辑、图像修复等应用。</p>
+<p>我们详细介绍了每个模型的架构、特点、优点、缺点和应用场景，并提供了完整的代码示例和应用案例。读者可以基于这些内容实现自己的图像扩散模型或应用现有模型进行图像生成。</p>
+<hr>
+<p><strong>参考文献</strong>：</p>
+<ol>
+<li>
+<p>Ramesh et al. - Zero-Shot Text-to-Image Generation (2021)</p>
+<ul>
+<li>论文链接：<a href="https://arxiv.org/abs/2102.12092">https://arxiv.org/abs/2102.12092</a></li>
+<li>重要性：DALL-E 1 的开山之作</li>
+</ul>
+</li>
+<li>
+<p>Ramesh et al. - Hierarchical Text-Conditional Image Generation with CLIP Latents (2022)</p>
+<ul>
+<li>论文链接：<a href="https://arxiv.org/abs/2204.06125">https://arxiv.org/abs/2204.06125</a></li>
+<li>重要性：DALL-E 2 的开山之作</li>
+</ul>
+</li>
+<li>
+<p>Saharia et al. - Photorealistic Text-to-Image Diffusion Models with Deep Language Understanding (2022)</p>
+<ul>
+<li>论文链接：<a href="https://arxiv.org/abs/2205.11487">https://arxiv.org/abs/2205.11487</a></li>
+<li>重要性：Imagen 的开山之作</li>
+</ul>
+</li>
+<li>
+<p>Yu et al. - Scaling Autoregressive Models for Content-Rich Text-to-Image Generation (2022)</p>
+<ul>
+<li>论文链接：<a href="https://arxiv.org/abs/2206.10789">https://arxiv.org/abs/2206.10789</a></li>
+<li>重要性：Parti 的开山之作</li>
+</ul>
+</li>
+<li>
+<p>Rombach et al. - High-Resolution Image Synthesis with Latent Diffusion Models (2021)</p>
+<ul>
+<li>论文链接：<a href="https://arxiv.org/abs/2112.10752">https://arxiv.org/abs/2112.10752</a></li>
+<li>重要性：LDM 的开山之作，Stable Diffusion 的基础</li>
+</ul>
+</li>
+<li>
+<p>Stability AI - Stable Diffusion (2022-2024)</p>
+<ul>
+<li>链接：<a href="https://stability.ai/">https://stability.ai/</a></li>
+<li>重要性：Stable Diffusion 的官方文档和代码</li>
+</ul>
+</li>
+<li>
+<p>Black Forest Labs - FLUX (2024)</p>
+<ul>
+<li>链接：<a href="https://black-forest-labs.ai/">https://black-forest-labs.ai/</a></li>
+<li>重要性：FLUX 的官方文档和代码</li>
+</ul>
+</li>
+<li>
+<p>Hugging Face Diffusers (2024)</p>
+<ul>
+<li>链接：<a href="https://huggingface.co/docs/diffusers">https://huggingface.co/docs/diffusers</a></li>
+<li>重要性：扩散模型的官方库</li>
+</ul>
+</li>
+<li>
+<p>Wikipedia - DALL-E (2025)</p>
+<ul>
+<li>链接：<a href="https://en.wikipedia.org/wiki/DALL-E">https://en.wikipedia.org/wiki/DALL-E</a></li>
+<li>重要性：DALL-E 的概述和总结</li>
+</ul>
+</li>
+<li>
+<p>Wikipedia - Flux (text-to-image model) (2025)</p>
+<ul>
+<li>链接：<a href="https://en.wikipedia.org/wiki/Flux_(text-to-image_model)">https://en.wikipedia.org/wiki/Flux_(text-to-image_model)</a></li>
+<li>重要性：FLUX 的概述和总结</li>
+</ul>
+</li>
+</ol>
+<hr>
+<p><strong>章节版本</strong>：v1.0
+<strong>最后更新</strong>：2026-03-19</p>
+</div> <nav class="pager"> <a class="pager__link" href="/diffusion-models-knowledge-base/08-stable-diffusion/"> <span>上一篇</span> <strong>第八章：Stable Diffusion（核心算法）</strong> </a> <span class="pager__link pager__link--empty">已经是最后一篇</span> </nav> </article> </section>  </main> <footer class="site-footer"> <div class="site-footer__inner"> <p>Vinci Knowledge Base</p> <p>Source directory: <code>/Users/superone77/Documents/知识库/projects</code></p> </div> </footer> </div> </body></html>

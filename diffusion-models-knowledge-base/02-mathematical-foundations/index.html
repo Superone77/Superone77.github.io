@@ -1,0 +1,410 @@
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>第二章：扩散模型的数学基础（Mathematical Foundations） | Vinci Knowledge Base</title><meta name="description" content="第二章：扩散模型的数学基础（Mathematical Foundations） 从随机过程到 Fokker Planck 方程，建立扩散模型的数学基础 2.1 随机过程基础 2.1.1 随机过程的定义 随机过程（Stochastic Process） 是一个随时间演化的随机变量，通常表示为 \( X t \)，其中 \( t \) 是时间索引。 形式化定义 "><meta name="generator" content="Vinci Knowledge Base"><link rel="stylesheet" href="/_astro/_doc_.CY2v1inF.css"></head> <body> <div class="page-shell"> <header class="site-header"> <div class="site-header__inner"> <a class="brand" href="/"> <span class="brand__eyebrow">GitHub Pages Knowledge Site</span> <span class="brand__name">Vinci Knowledge Base</span> </a> <nav class="site-nav"> <a href="/">Projects</a> </nav> </div> </header> <main class="page-main">  <section class="article-hero"> <div> <p class="eyebrow">Knowledge Article</p> <h1>第二章：扩散模型的数学基础（Mathematical Foundations）</h1> <p class="article-hero__breadcrumbs"> <a href="/">Home</a> <span>/</span> <a href="/diffusion-models-knowledge-base/">扩散模型知识库（Diffusion Model Knowledge Base）</a> </p> </div> <div class="meta-card"> <p><strong>Project</strong> 扩散模型知识库（Diffusion Model Knowledge Base）</p> <p><strong>Source</strong> <code>knowledge/02-mathematical-foundations.md</code></p> <p><strong>Sections</strong> 32</p> </div> </section> <section class="content-grid"> <aside class="toc-card"> <p class="toc-card__title">本页目录</p> <ul class="toc-card__list"> <li class="toc-depth-1"> <a href="#第二章扩散模型的数学基础mathematical-foundations">第二章：扩散模型的数学基础（Mathematical Foundations）</a> </li><li class="toc-depth-2"> <a href="#21-随机过程基础">2.1 随机过程基础</a> </li><li class="toc-depth-3"> <a href="#211-随机过程的定义">2.1.1 随机过程的定义</a> </li><li class="toc-depth-3"> <a href="#212-马尔可夫过程">2.1.2 马尔可夫过程</a> </li><li class="toc-depth-3"> <a href="#213-离散时间马尔可夫链">2.1.3 离散时间马尔可夫链</a> </li><li class="toc-depth-3"> <a href="#214-连续时间马尔可夫过程">2.1.4 连续时间马尔可夫过程</a> </li><li class="toc-depth-2"> <a href="#22-布朗运动与维纳过程">2.2 布朗运动与维纳过程</a> </li><li class="toc-depth-3"> <a href="#221-布朗运动的定义">2.2.1 布朗运动的定义</a> </li><li class="toc-depth-3"> <a href="#222-维纳过程的性质">2.2.2 维纳过程的性质</a> </li><li class="toc-depth-3"> <a href="#223-布朗运动的数学描述">2.2.3 布朗运动的数学描述</a> </li><li class="toc-depth-3"> <a href="#224-布朗运动在扩散模型中的应用">2.2.4 布朗运动在扩散模型中的应用</a> </li><li class="toc-depth-2"> <a href="#23-fokker-planck-方程">2.3 Fokker-Planck 方程</a> </li><li class="toc-depth-3"> <a href="#231-fokker-planck-方程的推导">2.3.1 Fokker-Planck 方程的推导</a> </li><li class="toc-depth-3"> <a href="#232-fokker-planck-方程的解">2.3.2 Fokker-Planck 方程的解</a> </li><li class="toc-depth-3"> <a href="#233-扩散过程的-fokker-planck-方程">2.3.3 扩散过程的 Fokker-Planck 方程</a> </li><li class="toc-depth-3"> <a href="#234-反向扩散过程">2.3.4 反向扩散过程</a> </li><li class="toc-depth-2"> <a href="#24-随机微分方程">2.4 随机微分方程</a> </li><li class="toc-depth-3"> <a href="#241-随机微分方程的定义">2.4.1 随机微分方程的定义</a> </li><li class="toc-depth-3"> <a href="#242-随机微分方程的数值解法">2.4.2 随机微分方程的数值解法</a> </li><li class="toc-depth-3"> <a href="#243-随机微分方程在扩散模型中的应用">2.4.3 随机微分方程在扩散模型中的应用</a> </li><li class="toc-depth-3"> <a href="#244-反向-sdescore-based-generative-models">2.4.4 反向 SDE（Score-Based Generative Models）</a> </li><li class="toc-depth-2"> <a href="#25-概率密度函数">2.5 概率密度函数</a> </li><li class="toc-depth-3"> <a href="#251-pdf-的定义和性质">2.5.1 PDF 的定义和性质</a> </li><li class="toc-depth-3"> <a href="#252-高斯分布">2.5.2 高斯分布</a> </li><li class="toc-depth-3"> <a href="#253-混合高斯分布">2.5.3 混合高斯分布</a> </li><li class="toc-depth-3"> <a href="#254-数据分布与噪声分布">2.5.4 数据分布与噪声分布</a> </li><li class="toc-depth-2"> <a href="#26-扩散过程的数学描述">2.6 扩散过程的数学描述</a> </li><li class="toc-depth-3"> <a href="#261-正向扩散过程">2.6.1 正向扩散过程</a> </li><li class="toc-depth-3"> <a href="#262-反向扩散过程">2.6.2 反向扩散过程</a> </li><li class="toc-depth-3"> <a href="#263-变分界variational-bound">2.6.3 变分界（Variational Bound）</a> </li><li class="toc-depth-3"> <a href="#264-扩散过程的优化">2.6.4 扩散过程的优化</a> </li><li class="toc-depth-2"> <a href="#结语">结语</a> </li> </ul> </aside> <article class="prose-card"> <div class="prose"><h1 id="第二章扩散模型的数学基础mathematical-foundations" tabindex="-1">第二章：扩散模型的数学基础（Mathematical Foundations） <a class="heading-anchor" href="#第二章扩散模型的数学基础mathematical-foundations" aria-hidden="true">#</a></h1>
+<blockquote>
+<p>从随机过程到 Fokker-Planck 方程，建立扩散模型的数学基础</p>
+</blockquote>
+<hr>
+<h2 id="21-随机过程基础" tabindex="-1">2.1 随机过程基础 <a class="heading-anchor" href="#21-随机过程基础" aria-hidden="true">#</a></h2>
+<h3 id="211-随机过程的定义" tabindex="-1">2.1.1 随机过程的定义 <a class="heading-anchor" href="#211-随机过程的定义" aria-hidden="true">#</a></h3>
+<p>**随机过程（Stochastic Process）**是一个随时间演化的随机变量，通常表示为 ( X_t )，其中 ( t ) 是时间索引。</p>
+<p><strong>形式化定义</strong>：</p>
+<ul>
+<li><strong>状态空间（State Space）</strong>：( \mathcal{X} )，随机变量 ( X_t ) 的取值空间</li>
+<li><strong>时间集（Time Set）</strong>：( \mathcal{T} )，时间索引的集合（离散或连续）</li>
+<li><strong>概率分布（Probability Distribution）</strong>：每个时间 ( t ) 对应的概率分布 ( P(X_t) )</li>
+</ul>
+<p><strong>类型</strong>：</p>
+<ul>
+<li><strong>离散时间离散状态</strong>：( t \in {0, 1, 2, \dots} ), ( X_t \in \mathcal{X} )</li>
+<li><strong>离散时间连续状态</strong>：( t \in {0, 1, 2, \dots} ), ( X_t \in \mathbb{R}^d )</li>
+<li><strong>连续时间离散状态</strong>：( t \in \mathbb{R}^+ ), ( X_t \in \mathcal{X} )</li>
+<li><strong>连续时间连续状态</strong>：( t \in \mathbb{R}^+ ), ( X_t \in \mathbb{R}^d )</li>
+</ul>
+<p><strong>来源</strong>：Wikipedia - Stochastic Process (2025)</p>
+<h3 id="212-马尔可夫过程" tabindex="-1">2.1.2 马尔可夫过程 <a class="heading-anchor" href="#212-马尔可夫过程" aria-hidden="true">#</a></h3>
+<p>**马尔可夫过程（Markov Process）**是一种特殊的随机过程，具有&quot;马尔可夫性质&quot;（Markov Property），即未来的状态只依赖于当前状态，而与过去的历史无关。</p>
+<p><strong>马尔可夫性质（Markov Property）</strong>：
+[ P(X_{t+1} \mid X_t, X_{t-1}, \dots, X_0) = P(X_{t+1} \mid X_t) ]</p>
+<p><strong>转移概率（Transition Probability）</strong>：</p>
+<ul>
+<li><strong>一步转移概率</strong>：( p(x_{t+1} \mid x_t) = P(X_{t+1} = x_{t+1} \mid X_t = x_t) )</li>
+<li><strong>k 步转移概率</strong>：( p^k(x_{t+k} \mid x_t) )</li>
+</ul>
+<p><strong>转移矩阵（Transition Matrix）</strong>（离散状态）：
+[ \mathbf{P} = \begin{bmatrix}
+p(1 \to 1) &amp; p(1 \to 2) &amp; \cdots &amp; p(1 \to n) \
+p(2 \to 1) &amp; p(2 \to 2) &amp; \cdots &amp; p(2 \to n) \
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots \
+p(n \to 1) &amp; p(n \to 2) &amp; \cdots &amp; p(n \to n)
+\end{bmatrix} ]</p>
+<p>** Chapman-Kolmogorov 方程**（C-K 方程）：</p>
+<ul>
+<li><strong>连续时间马尔可夫过程</strong>：( \frac{\partial p(x, t)}{\partial t} = \int p(y, t) p(x, t+\Delta t \mid y, t) dy - p(x, t) )</li>
+<li><strong>离散时间马尔可夫链</strong>：( \mathbf{p}_{t+1} = \mathbf{P}^\top \mathbf{p}_t )</li>
+</ul>
+<p><strong>来源</strong>：Wikipedia - Markov Chain (2025)</p>
+<blockquote>
+<p>“In probability theory and statistics, a Markov chain or Markov process is a stochastic process describing a sequence of possible events in which the probability of each event depends only on the state attained in the previous event.”</p>
+</blockquote>
+<h3 id="213-离散时间马尔可夫链" tabindex="-1">2.1.3 离散时间马尔可夫链 <a class="heading-anchor" href="#213-离散时间马尔可夫链" aria-hidden="true">#</a></h3>
+<p>**离散时间马尔可夫链（Discrete-Time Markov Chain, DTMC）**是时间离散、状态离散（或连续）的马尔可夫过程。</p>
+<p><strong>性质</strong>：</p>
+<ul>
+<li><strong>齐次性（Homogeneity）</strong>：转移矩阵 ( \mathbf{P} ) 不随时间变化</li>
+<li><strong>可约性（Reducibility）</strong>：状态之间可以互相到达</li>
+<li><strong>周期性（Periodicity）</strong>：状态返回的步数</li>
+<li><strong>平稳分布（Stationary Distribution）</strong>：满足 ( \pi = \pi \mathbf{P} ) 的分布</li>
+</ul>
+<p><strong>平稳分布的计算</strong>：
+[ \pi = \lim_{n \to \infty} \pi_0 \mathbf{P}^n ]
+[ \pi = \pi \mathbf{P} ]</p>
+<p><strong>吸收态（Absorbing State）</strong>：</p>
+<ul>
+<li>一旦进入，永不离开的状态</li>
+<li>转移概率：( p(i \to i) = 1 )</li>
+</ul>
+<h3 id="214-连续时间马尔可夫过程" tabindex="-1">2.1.4 连续时间马尔可夫过程 <a class="heading-anchor" href="#214-连续时间马尔可夫过程" aria-hidden="true">#</a></h3>
+<p>**连续时间马尔可夫链（Continuous-Time Markov Chain, CTMC）**是时间连续、状态离散（或连续）的马尔可夫过程。</p>
+<p><strong>转移速率矩阵（Transition Rate Matrix）</strong>：
+[ \mathbf{Q} = \begin{bmatrix}
+q_{11} &amp; q_{12} &amp; \cdots &amp; q_{1n} \
+q_{21} &amp; q_{22} &amp; \cdots &amp; q_{2n} \
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots \
+q_{n1} &amp; q_{n2} &amp; \cdots &amp; q_{nn}
+\end{bmatrix} ]
+其中 ( q_{ij} = \lim_{\Delta t \to 0} \frac{p(i \to j, \Delta t)}{\Delta t} )，且 ( q_{ii} = -\sum_{j \neq i} q_{ij} )</p>
+<p><strong>Kolmogorov 前向方程</strong>：
+[ \frac{\partial \mathbf{p}(t)}{\partial t} = \mathbf{p}(t) \mathbf{Q}^\top ]</p>
+<p><strong>平稳分布</strong>：
+[ \pi \mathbf{Q}^\top = 0 ]</p>
+<hr>
+<h2 id="22-布朗运动与维纳过程" tabindex="-1">2.2 布朗运动与维纳过程 <a class="heading-anchor" href="#22-布朗运动与维纳过程" aria-hidden="true">#</a></h2>
+<h3 id="221-布朗运动的定义" tabindex="-1">2.2.1 布朗运动的定义 <a class="heading-anchor" href="#221-布朗运动的定义" aria-hidden="true">#</a></h3>
+<p>**布朗运动（Brownian Motion）**是一种连续时间的随机过程，描述悬浮在流体中的微粒子的随机运动。</p>
+<p><strong>历史</strong>：</p>
+<ul>
+<li>1827 年：Robert Brown 观察到花粉在水中的随机运动</li>
+<li>1905 年：Albert Einstein 从理论上解释了布朗运动</li>
+<li>1908 年：Paul Langevin 提出了描述布朗运动的微分方程</li>
+</ul>
+<p><strong>数学描述</strong>：
+[ X_t = X_0 + \int_0^t \mu(s) ds + \int_0^t \sigma(s) dW_s ]
+其中 ( W_t ) 是维纳过程（标准布朗运动）</p>
+<p><strong>来源</strong>：Wikipedia - Brownian Motion (2025)</p>
+<blockquote>
+<p>“Brownian motion is a stochastic process describing the random motion of particles suspended in a fluid.”</p>
+</blockquote>
+<h3 id="222-维纳过程的性质" tabindex="-1">2.2.2 维纳过程的性质 <a class="heading-anchor" href="#222-维纳过程的性质" aria-hidden="true">#</a></h3>
+<p><strong>维纳过程（Wiener Process）</strong> ( W_t ) 是标准布朗运动，满足以下性质：</p>
+<ol>
+<li><strong>初始条件</strong>：( W_0 = 0 )</li>
+<li><strong>独立增量</strong>：( W_t - W_s ) 独立于 ( W_s )（对于 ( 0 \leq s &lt; t )）</li>
+<li><strong>高斯增量</strong>：( W_t - W_s \sim \mathcal{N}(0, t - s) )</li>
+<li><strong>连续路径</strong>：( W_t ) 的路径几乎必然是连续的</li>
+</ol>
+<p><strong>性质</strong>：</p>
+<ul>
+<li><strong>期望</strong>：( \mathbb{E}[W_t] = 0 )</li>
+<li><strong>方差</strong>：( \text{Var}(W_t) = t )</li>
+<li><strong>自相关</strong>：( \mathbb{E}[W_t W_s] = \min(t, s) )</li>
+<li><strong>马尔可夫性质</strong>：( W_t ) 是马尔可夫过程</li>
+</ul>
+<p><strong>来源</strong>：Wikipedia - Wiener Process (2025)</p>
+<h3 id="223-布朗运动的数学描述" tabindex="-1">2.2.3 布朗运动的数学描述 <a class="heading-anchor" href="#223-布朗运动的数学描述" aria-hidden="true">#</a></h3>
+<p><strong>朗之万方程（Langevin Equation）</strong>：
+[ m \frac{dX_t}{dt} = -\gamma X_t dt + \sigma dW_t ]
+其中：</p>
+<ul>
+<li>( m )：质量</li>
+<li>( \gamma )：摩擦系数</li>
+<li>( \sigma )：噪声强度</li>
+<li>( W_t )：维纳过程</li>
+</ul>
+<p><strong>解</strong>：
+[ X_t = X_0 e^{-\gamma t} + \frac{\sigma}{\sqrt{2\gamma}} \int_0^t e^{-\gamma (t-s)} dW_s ]</p>
+<p><strong>平稳分布</strong>：</p>
+<ul>
+<li>均值：( \mathbb{E}[X_t] = X_0 e^{-\gamma t} )</li>
+<li>方差：( \text{Var}(X_t) = \frac{\sigma^2}{2\gamma} (1 - e^{-2\gamma t}) )</li>
+</ul>
+<p><strong>来源</strong>：Brownian Motion in 2D and Fokker-Planck Equation (2024)</p>
+<blockquote>
+<p>“Brownian motion is described by the Langevin equation: ( m \frac{dX_t}{dt} = -\gamma X_t dt + \sigma dW_t ).”</p>
+</blockquote>
+<h3 id="224-布朗运动在扩散模型中的应用" tabindex="-1">2.2.4 布朗运动在扩散模型中的应用 <a class="heading-anchor" href="#224-布朗运动在扩散模型中的应用" aria-hidden="true">#</a></h3>
+<p><strong>正向扩散过程（Forward Diffusion Process）</strong>：
+[ q(x_t \mid x_{t-1}) = \mathcal{N}(x_t; \sqrt{1 - \beta_t} x_{t-1}, \beta_t \mathbf{I}) ]
+其中：</p>
+<ul>
+<li>( \beta_t )：噪声调度（( \beta_t \in (0, 1] )，( \beta_1 ) 接近 1）</li>
+<li>( x_{t-1} )：前一步的样本</li>
+<li>( x_t )：当前步的样本（加噪后）</li>
+</ul>
+<p><strong>含义</strong>：</p>
+<ul>
+<li>正向扩散过程类似于布朗运动：逐步向数据添加高斯噪声</li>
+<li>噪声调度 ( \beta_t ) 控制噪声的强度（从 0 到 1）</li>
+</ul>
+<p><strong>来源</strong>：Ho et al., 2020</p>
+<blockquote>
+<p>“We define the forward diffusion process ( q(x_t \mid x_{t-1}) = \mathcal{N}(x_t; \sqrt{1 - \beta_t} x_{t-1}, \beta_t \mathbf{I}) ).”</p>
+</blockquote>
+<hr>
+<h2 id="23-fokker-planck-方程" tabindex="-1">2.3 Fokker-Planck 方程 <a class="heading-anchor" href="#23-fokker-planck-方程" aria-hidden="true">#</a></h2>
+<h3 id="231-fokker-planck-方程的推导" tabindex="-1">2.3.1 Fokker-Planck 方程的推导 <a class="heading-anchor" href="#231-fokker-planck-方程的推导" aria-hidden="true">#</a></h3>
+<p>**Fokker-Planck 方程（Fokker-Planck Equation）**是描述随机过程（如布朗运动）的概率密度函数随时间演化的偏微分方程。</p>
+<p><strong>一般形式</strong>：
+[ \frac{\partial p(x, t)}{\partial t} = -\nabla \cdot [\mu(x, t) p(x, t)] + \frac{1}{2} \nabla^2 \cdot [D(x, t) p(x, t)] ]
+其中：</p>
+<ul>
+<li>( p(x, t) )：概率密度函数</li>
+<li>( \mu(x, t) )：漂移系数（Drift Coefficient）</li>
+<li>( D(x, t) )：扩散系数（Diffusion Coefficient）</li>
+</ul>
+<p><strong>常系数情况</strong>：
+[ \frac{\partial p(x, t)}{\partial t} = -\mu \frac{\partial p(x, t)}{\partial x} + \frac{D}{2} \frac{\partial^2 p(x, t)}{\partial x^2} ]</p>
+<p><strong>来源</strong>：Wikipedia - Fokker-Planck Equation (2025)</p>
+<blockquote>
+<p>“The Fokker-Planck equation is a partial differential equation that describes the time evolution of the probability density function of the velocity of a particle.”</p>
+</blockquote>
+<h3 id="232-fokker-planck-方程的解" tabindex="-1">2.3.2 Fokker-Planck 方程的解 <a class="heading-anchor" href="#232-fokker-planck-方程的解" aria-hidden="true">#</a></h3>
+<p><strong>一维常系数情况</strong>：
+[ \frac{\partial p(x, t)}{\partial t} = D \frac{\partial^2 p(x, t)}{\partial x^2} ]</p>
+<p><strong>初始条件</strong>：( p(x, 0) = \delta(x - x_0) )（点质量）</p>
+<p><strong>解</strong>：
+[ p(x, t) = \frac{1}{\sqrt{4 \pi D t}} \exp\left(-\frac{(x - x_0)^2}{4 D t}\right) ]
+这是一个高斯分布，均值 ( \mu = x_0 )，方差 ( \sigma^2 = 2 D t )。</p>
+<p><strong>平稳分布</strong>（( \frac{\partial p}{\partial t} = 0 )）：
+[ p_{\text{stationary}}(x) \propto \exp\left(-\frac{U(x)}{D}\right) ]
+其中 ( U(x) ) 是势能函数。</p>
+<p><strong>来源</strong>：Wikipedia - Fokker-Planck Equation (2025)</p>
+<h3 id="233-扩散过程的-fokker-planck-方程" tabindex="-1">2.3.3 扩散过程的 Fokker-Planck 方程 <a class="heading-anchor" href="#233-扩散过程的-fokker-planck-方程" aria-hidden="true">#</a></h3>
+<p><strong>正向扩散过程（Forward Diffusion Process）</strong>：
+[ dX_t = -\frac{1}{2} \beta_t X_t dt + \sqrt{\beta_t} dW_t ]</p>
+<p><strong>对应的 Fokker-Planck 方程</strong>：
+[ \frac{\partial p(x, t)}{\partial t} = \frac{\beta_t}{2} \nabla \cdot \left[\beta_t x p(x, t) + \nabla p(x, t)\right] ]</p>
+<p><strong>稳态分布（Stationary Distribution）</strong>：
+当 ( \beta_t = 1 ) 时，扩散过程达到稳态，概率密度函数 ( p(x, t) ) 收敛到标准高斯分布 ( \mathcal{N}(0, \mathbf{I}) )。</p>
+<p><strong>来源</strong>：Ho et al., 2020</p>
+<blockquote>
+<p>“We show that the marginal distribution ( q(x_t) ) converges to a unit Gaussian ( \mathcal{N}(0, \mathbf{I}) ) as ( t \to T ).”</p>
+</blockquote>
+<h3 id="234-反向扩散过程" tabindex="-1">2.3.4 反向扩散过程 <a class="heading-anchor" href="#234-反向扩散过程" aria-hidden="true">#</a></h3>
+<p><strong>反向扩散过程（Reverse Diffusion Process）</strong>：
+[ dX_t = -\frac{1}{2} \beta_t X_t dt + \sqrt{\beta_t} dW_t ]</p>
+<p><strong>对应的 Fokker-Planck 方程</strong>：
+[ \frac{\partial p(x, t)}{\partial t} = -\frac{\beta_t}{2} \nabla \cdot \left[\beta_t x p(x, t) + \nabla \log \frac{p(x_0)}{p(x_t)} p(x, t)\right] ]</p>
+<p><strong>含义</strong>：</p>
+<ul>
+<li>反向扩散过程是从噪声中重建数据的过程</li>
+<li>需要学习得分函数 ( s_\theta(x, t) = \nabla \log \frac{p(x_0)}{p(x_t)} )</li>
+</ul>
+<p><strong>来源</strong>：Song et al., 2021</p>
+<blockquote>
+<p>“We define the reverse diffusion process with the same functional form as the forward process but requiring the score function ( \nabla \log p(x_t \mid x_0) ).”</p>
+</blockquote>
+<hr>
+<h2 id="24-随机微分方程" tabindex="-1">2.4 随机微分方程 <a class="heading-anchor" href="#24-随机微分方程" aria-hidden="true">#</a></h2>
+<h3 id="241-随机微分方程的定义" tabindex="-1">2.4.1 随机微分方程的定义 <a class="heading-anchor" href="#241-随机微分方程的定义" aria-hidden="true">#</a></h3>
+<p>**随机微分方程（Stochastic Differential Equation, SDE）**是一个包含随机项（如布朗运动）的微分方程。</p>
+<p><strong>一般形式</strong>：
+[ dX_t = \mu(X_t, t) dt + \sigma(X_t, t) dW_t ]
+其中：</p>
+<ul>
+<li>( X_t )：状态变量</li>
+<li>( \mu(X_t, t) )：漂移项（Drift Term）</li>
+<li>( \sigma(X_t, t) )：扩散项（Diffusion Term）</li>
+<li>( W_t )：维纳过程（标准布朗运动）</li>
+</ul>
+<p><strong>伊藤引理（Itô’s Lemma）</strong>：
+对于函数 ( f(X_t) )，其微分为：
+[ df(X_t) = \left(\frac{\partial f}{\partial t} + \mu(X_t, t) \frac{\partial f}{\partial x} + \frac{1}{2} \sigma^2(X_t, t) \frac{\partial^2 f}{\partial x^2}\right) dt + \sigma(X_t, t) \frac{\partial f}{\partial x} dW_t ]</p>
+<p><strong>来源</strong>：Wikipedia - Stochastic Differential Equation (2025)</p>
+<h3 id="242-随机微分方程的数值解法" tabindex="-1">2.4.2 随机微分方程的数值解法 <a class="heading-anchor" href="#242-随机微分方程的数值解法" aria-hidden="true">#</a></h3>
+<p><strong>欧拉-丸山方法（Euler-Maruyama Method）</strong>：
+[ X_{t+\Delta t} = X_t + \mu(X_t, t) \Delta t + \sigma(X_t, t) \sqrt{\Delta t} , Z ]
+其中 ( Z \sim \mathcal{N}(0, 1) )。</p>
+<p><strong>米尔斯坦方法（Milstein Method）</strong>：
+[ X_{t+\Delta t} = X_t + \mu \Delta t + \sigma \sqrt{\Delta t} , Z + \frac{1}{2} \sigma \frac{\partial \sigma}{\partial x} (Z^2 - 1) \Delta t ]</p>
+<p><strong>高阶方法</strong>：</p>
+<ul>
+<li>Runge-Kutta 方法</li>
+<li>随机 Runge-Kutta 方法</li>
+</ul>
+<p><strong>来源</strong>：Wikipedia - Stochastic Differential Equation (2025)</p>
+<h3 id="243-随机微分方程在扩散模型中的应用" tabindex="-1">2.4.3 随机微分方程在扩散模型中的应用 <a class="heading-anchor" href="#243-随机微分方程在扩散模型中的应用" aria-hidden="true">#</a></h3>
+<p><strong>正向扩散过程（SDE 形式）</strong>：
+[ d\mathbf{x} = \sqrt{\beta_t} d\mathbf{w} ]
+其中 ( \mathbf{w} \sim \mathcal{N}(0, \mathbf{I}) )。</p>
+<p><strong>反向扩散过程（SDE 形式）</strong>：
+[ d\mathbf{x} = \left[\sqrt{\beta_t} d\mathbf{w} - \beta_t \nabla \log p(\mathbf{x}_0) d t\right] ]</p>
+<p><strong>数值求解</strong>：
+使用欧拉-丸山方法离散化：
+[ \mathbf{x}<em>t = \mathbf{x}</em>{t-1} + \sqrt{\beta_t} \epsilon \mathbf{z} ]
+其中 ( \epsilon ) 是步长，( \mathbf{z} \sim \mathcal{N}(0, \mathbf{I}) )。</p>
+<p><strong>来源</strong>：Song et al., 2021</p>
+<blockquote>
+<p>“We can discretize the SDE using the Euler-Maruyama method: ( \mathbf{x}<em>t = \mathbf{x}</em>{t-1} + \sqrt{\beta_t} \epsilon \mathbf{z} ).”</p>
+</blockquote>
+<h3 id="244-反向-sdescore-based-generative-models" tabindex="-1">2.4.4 反向 SDE（Score-Based Generative Models） <a class="heading-anchor" href="#244-反向-sdescore-based-generative-models" aria-hidden="true">#</a></h3>
+<p><strong>得分匹配（Score Matching）</strong>：
+[ \mathcal{L}<em>{\text{match}} = \mathbb{E}</em>{t \sim \mathcal{U}[0, T], \mathbf{x}<em>t \sim p_t} \left| \nabla</em>{\mathbf{x}_t} \log p_t(\mathbf{x}<em>t) - s</em>\theta(\mathbf{x}_t, t) \right|^2 ]</p>
+<p><strong>得分模型（Score Model）</strong>：
+[ s_\theta(\mathbf{x}, t) = \nabla_{\mathbf{x}} \log p_t(\mathbf{x}) ]</p>
+<p><strong>得分函数（Score Function）</strong>：
+[ s(\mathbf{x}, t) = \nabla_{\mathbf{x}} \log \frac{p_t(\mathbf{x})}{p_{\text{data}}(\mathbf{x})} ]</p>
+<p><strong>来源</strong>：Song et al., 2021; Song &amp; Ermon, 2019</p>
+<blockquote>
+<p>“We propose to train a neural network to approximate the score function ( s_\theta(\mathbf{x}, t) = \nabla_{\mathbf{x}} \log p_t(\mathbf{x}) ).”</p>
+</blockquote>
+<hr>
+<h2 id="25-概率密度函数" tabindex="-1">2.5 概率密度函数 <a class="heading-anchor" href="#25-概率密度函数" aria-hidden="true">#</a></h2>
+<h3 id="251-pdf-的定义和性质" tabindex="-1">2.5.1 PDF 的定义和性质 <a class="heading-anchor" href="#251-pdf-的定义和性质" aria-hidden="true">#</a></h3>
+<p><strong>概率密度函数（Probability Density Function, PDF）</strong> ( p(x) ) 是一个非负函数，其积分等于 1：
+[ \int_{-\infty}^\infty p(x) dx = 1 ]</p>
+<p><strong>性质</strong>：</p>
+<ol>
+<li><strong>非负性</strong>：( p(x) \geq 0 ) 对所有 ( x \in \mathcal{X} )</li>
+<li><strong>归一化</strong>：( \int_{\mathcal{X}} p(x) dx = 1 )</li>
+<li><strong>期望</strong>：( \mathbb{E}[X] = \int_{-\infty}^\infty x p(x) dx )</li>
+<li><strong>方差</strong>：( \text{Var}(X) = \int_{-\infty}^\infty (x - \mathbb{E}[X])^2 p(x) dx )</li>
+</ol>
+<p><strong>累积分布函数（Cumulative Distribution Function, CDF）</strong>：
+[ F(x) = P(X \leq x) = \int_{-\infty}^x p(y) dy ]</p>
+<p><strong>来源</strong>：Wikipedia - Probability Density Function (2025)</p>
+<h3 id="252-高斯分布" tabindex="-1">2.5.2 高斯分布 <a class="heading-anchor" href="#252-高斯分布" aria-hidden="true">#</a></h3>
+<p><strong>一维高斯分布</strong>：
+[ \mathcal{N}(x; \mu, \sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(x - \mu)^2}{2\sigma^2}\right) ]
+其中：</p>
+<ul>
+<li>( \mu )：均值</li>
+<li>( \sigma^2 )：方差</li>
+</ul>
+<p><strong>多维高斯分布</strong>：
+[ \mathcal{N}(\mathbf{x}; \boldsymbol{\mu}, \boldsymbol{\Sigma}) = \frac{1}{\sqrt{(2\pi)^d |\boldsymbol{\Sigma}|}} \exp\left(-\frac{1}{2} (\mathbf{x} - \boldsymbol{\mu})^\top \boldsymbol{\Sigma}^{-1} (\mathbf{x} - \boldsymbol{\mu})\right) ]
+其中：</p>
+<ul>
+<li>( \boldsymbol{\mu} )：均值向量</li>
+<li>( \boldsymbol{\Sigma} )：协方差矩阵</li>
+</ul>
+<p><strong>来源</strong>：Wikipedia - Normal Distribution (2025)</p>
+<h3 id="253-混合高斯分布" tabindex="-1">2.5.3 混合高斯分布 <a class="heading-anchor" href="#253-混合高斯分布" aria-hidden="true">#</a></h3>
+<p><strong>高斯混合模型（Gaussian Mixture Model, GMM）</strong>：
+[ p(x) = \sum_{k=1}^K \pi_k \mathcal{N}(x; \mu_k, \Sigma_k) ]
+其中：</p>
+<ul>
+<li>( \pi_k )：混合系数（( \sum_{k=1}^K \pi_k = 1 )）</li>
+<li>( \mathcal{N}(x; \mu_k, \Sigma_k) )：第 ( k ) 个高斯分布</li>
+</ul>
+<p><strong>期望值</strong>：
+[ \mathbb{E}[X] = \sum_{k=1}^K \pi_k \mu_k ]</p>
+<p><strong>方差</strong>：
+[ \text{Var}(X) = \sum_{k=1}^K \pi_k (\Sigma_k + \mu_k \mu_k^\top) - \mathbb{E}[X] \mathbb{E}[X]^\top ]</p>
+<p><strong>来源</strong>：Wikipedia - Mixture Model (2025)</p>
+<h3 id="254-数据分布与噪声分布" tabindex="-1">2.5.4 数据分布与噪声分布 <a class="heading-anchor" href="#254-数据分布与噪声分布" aria-hidden="true">#</a></h3>
+<p><strong>数据分布（Data Distribution）</strong>：( p_{\text{data}}(\mathbf{x}) )</p>
+<ul>
+<li>真实数据的分布</li>
+<li>扩散模型的训练目标</li>
+</ul>
+<p><strong>噪声分布（Noise Distribution）</strong>：( p_{\text{noise}}(\mathbf{x}) = \mathcal{N}(\mathbf{x}; \mathbf{0}, \mathbf{I}) )</p>
+<ul>
+<li>标准高斯分布</li>
+<li>扩散过程的稳态分布</li>
+</ul>
+<p><strong>扩散过程的目标</strong>：
+从数据分布 ( p_{\text{data}}(\mathbf{x}) ) 扩散到噪声分布 ( p_{\text{noise}}(\mathbf{x}) )，然后学习反向过程从噪声分布恢复到数据分布。</p>
+<p><strong>来源</strong>：Ho et al., 2020</p>
+<blockquote>
+<p>“We learn to reverse the diffusion process and recover data from noise distribution.”</p>
+</blockquote>
+<hr>
+<h2 id="26-扩散过程的数学描述" tabindex="-1">2.6 扩散过程的数学描述 <a class="heading-anchor" href="#26-扩散过程的数学描述" aria-hidden="true">#</a></h2>
+<h3 id="261-正向扩散过程" tabindex="-1">2.6.1 正向扩散过程 <a class="heading-anchor" href="#261-正向扩散过程" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：
+正向扩散过程 ( q(\mathbf{x}<em>t \mid \mathbf{x}</em>{t-1}) ) 是一个马尔可夫链，逐步向数据添加高斯噪声。</p>
+<p><strong>数学描述</strong>：
+[ q(\mathbf{x}<em>t \mid \mathbf{x}</em>{t-1}) = \mathcal{N}(\mathbf{x}<em>t; \sqrt{1 - \beta_t} \mathbf{x}</em>{t-1}, \beta_t \mathbf{I}) ]
+[ q(\mathbf{x}_t \mid \mathbf{x}_0) = \mathcal{N}(\mathbf{x}_t; \sqrt{\bar{\alpha}_t} \mathbf{x}_0, (1 - \bar{\alpha}_t) \mathbf{I}) ]
+其中 ( \bar{\alpha}<em>t = \prod</em>{s=1}^t (1 - \beta_s) )。</p>
+<p><strong>噪声调度（Noise Schedule）</strong>：
+[ \beta_t \in (0, 1] ]
+[ \alpha_t = 1 - \beta_t ]
+[ \bar{\alpha}<em>t = \prod</em>{s=1}^t \alpha_s ]</p>
+<p><strong>步数</strong>：通常 ( T = 1000 )（从 ( t = 0 ) 到 ( t = T )）</p>
+<p><strong>来源</strong>：Ho et al., 2020</p>
+<blockquote>
+<p>“We define the forward diffusion process ( q(\mathbf{x}<em>t \mid \mathbf{x}</em>{t-1}) ) as a Markov chain that gradually adds Gaussian noise to data.”</p>
+</blockquote>
+<h3 id="262-反向扩散过程" tabindex="-1">2.6.2 反向扩散过程 <a class="heading-anchor" href="#262-反向扩散过程" aria-hidden="true">#</a></h3>
+<p><strong>定义</strong>：
+反向扩散过程 ( p_\theta(\mathbf{x}_{t-1} \mid \mathbf{x}_t) ) 是一个马尔可夫链，逐步从噪声中去除噪声，重建原始数据。</p>
+<p><strong>数学描述</strong>：
+[ p_\theta(\mathbf{x}<em>{t-1} \mid \mathbf{x}<em>t) = \mathcal{N}(\mathbf{x}</em>{t-1}; \boldsymbol{\mu}</em>\theta(\mathbf{x}<em>t, t), \boldsymbol{\Sigma}</em>\theta(\mathbf{x}<em>t, t)) ]
+其中：
+[ \boldsymbol{\mu}</em>\theta(\mathbf{x}_t, t) = \frac{1}{\sqrt{\alpha_t}} \left( \mathbf{x}_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}<em>t}} \boldsymbol{\epsilon}</em>\theta(\mathbf{x}<em>t, t) \right) ]
+[ \boldsymbol{\Sigma}</em>\theta(\mathbf{x}_t, t) = \frac{1 - \alpha_t}{1 - \bar{\alpha}<em>t} \boldsymbol{\epsilon}</em>\theta(\mathbf{x}<em>t, t) \boldsymbol{\epsilon}</em>\theta(\mathbf{x}_t, t)^\top ]</p>
+<p><strong>预测噪声（Predicted Noise）</strong>：
+[ \boldsymbol{\epsilon}_\theta(\mathbf{x}<em>t, t) = \boldsymbol{\epsilon}</em>\theta(\mathbf{x}_t, t; \theta) ]</p>
+<p><strong>来源</strong>：Ho et al., 2020</p>
+<blockquote>
+<p>“We define the reverse diffusion process ( p_\theta(\mathbf{x}_{t-1} \mid \mathbf{x}_t) ) as a Markov chain that gradually removes noise and reconstructs data.”</p>
+</blockquote>
+<h3 id="263-变分界variational-bound" tabindex="-1">2.6.3 变分界（Variational Bound） <a class="heading-anchor" href="#263-变分界variational-bound" aria-hidden="true">#</a></h3>
+<p><strong>变分界</strong>：
+[ \text{VLB} = \mathbb{E}<em>q \left[ D</em>\text{KL}(q(\mathbf{x}<em>T) \mid p(\mathbf{x}<em>T)) + \sum</em>{t=1}^T D</em>\text{KL}}(q(\mathbf{x}<em>{t-1} \mid \mathbf{x}<em>t) \mid p</em>\theta(\mathbf{x}</em>{t-1} \mid \mathbf{x}_t)) \right] ]</p>
+<p><strong>简化变分界</strong>：
+[ \text{VLB}<em>{\text{simple}} = \mathbb{E}</em>{\mathbf{x}<em>0, \epsilon \sim \mathcal{N}(0, \mathbf{I}), t \sim \mathcal{U}[1, T]} \left| \epsilon - \epsilon</em>\theta(\mathbf{x}_t, t) \right|^2 ]</p>
+<p><strong>损失函数</strong>：
+[ L_{\text{simple}} = \mathbb{E}_{\mathbf{x}<em>0, \epsilon \sim \mathcal{N}(0, \mathbf{I}), t \sim \mathcal{U}[1, T]} \left| \epsilon - \epsilon</em>\theta(\mathbf{x}_t, t) \right|^2 ]</p>
+<p><strong>来源</strong>：Ho et al., 2020</p>
+<blockquote>
+<p>“We optimize the simplified variational lower bound: ( L_{\text{simple}} = \mathbb{E}\left| \epsilon - \epsilon_\theta(\mathbf{x}_t, t) \right|^2 ).”</p>
+</blockquote>
+<h3 id="264-扩散过程的优化" tabindex="-1">2.6.4 扩散过程的优化 <a class="heading-anchor" href="#264-扩散过程的优化" aria-hidden="true">#</a></h3>
+<p><strong>损失函数</strong>：
+[ L = \mathbb{E}_{\mathbf{x}<em>0, \epsilon \sim \mathcal{N}(0, \mathbf{I}), t \sim \mathcal{U}[1, T]} \left| \epsilon - \epsilon</em>\theta(\mathbf{x}_t, t; \phi) \right|^2 ]</p>
+<p><strong>优化目标</strong>：
+[ \phi^* = \arg\min_\phi L ]</p>
+<p><strong>优化方法</strong>：</p>
+<ul>
+<li>梯度下降（Gradient Descent）</li>
+<li>Adam 优化器</li>
+<li>混合精度训练（Mixed Precision Training）</li>
+<li>梯度累积（Gradient Accumulation）</li>
+</ul>
+<p><strong>来源</strong>：Ho et al., 2020</p>
+<blockquote>
+<p>“We optimize the parameters ( \phi ) of the neural network to minimize the loss function ( L ).”</p>
+</blockquote>
+<hr>
+<h2 id="结语" tabindex="-1">结语 <a class="heading-anchor" href="#结语" aria-hidden="true">#</a></h2>
+<p>本章介绍了扩散模型的数学基础，从随机过程到 Fokker-Planck 方程，建立了扩散模型的数学理论基础。扩散模型的数学基础包括：</p>
+<ol>
+<li><strong>随机过程基础</strong>：马尔可夫过程、离散时间马尔可夫链、连续时间马尔可夫链</li>
+<li><strong>布朗运动与维纳过程</strong>：布朗运动的定义、维纳过程的性质、数学描述、在扩散模型中的应用</li>
+<li><strong>Fokker-Planck 方程</strong>：推导、解、在扩散模型中的应用（正向和反向扩散过程）</li>
+<li><strong>随机微分方程</strong>：定义、数值解法、在扩散模型中的应用</li>
+<li><strong>概率密度函数</strong>：定义、性质、高斯分布、混合高斯分布、数据分布与噪声分布</li>
+<li><strong>扩散过程的数学描述</strong>：正向扩散过程、反向扩散过程、变分界、优化目标</li>
+</ol>
+<p>这些数学基础为后续的 DDPM、DDIM、Stable Diffusion 等章节奠定了坚实的理论基础。</p>
+<hr>
+<p><strong>参考文献</strong>：</p>
+<ol>
+<li>Wikipedia - Stochastic Process (2025)</li>
+<li>Wikipedia - Markov Chain (2025)</li>
+<li>Wikipedia - Brownian Motion (2025)</li>
+<li>Wikipedia - Wiener Process (2025)</li>
+<li>Wikipedia - Fokker-Planck Equation (2025)</li>
+<li>Wikipedia - Stochastic Differential Equation (2025)</li>
+<li>Wikipedia - Probability Density Function (2025)</li>
+<li>Wikipedia - Normal Distribution (2025)</li>
+<li>Wikipedia - Mixture Model (2025)</li>
+<li>Ho et al. - Denoising Diffusion Probabilistic Models (2020)</li>
+<li>Song et al. - Denoising Diffusion Implicit Models (2021)</li>
+<li>Chem LibreTexts - Brownian Motion and Markov Chains (2025)</li>
+</ol>
+<hr>
+<p><strong>章节版本</strong>：v1.0
+<strong>最后更新</strong>：2026-03-19</p>
+</div> <nav class="pager"> <a class="pager__link" href="/diffusion-models-knowledge-base/01-diffusion-models-overview/"> <span>上一篇</span> <strong>第一章：扩散模型概述（Diffusion Models Overview）</strong> </a> <a class="pager__link" href="/diffusion-models-knowledge-base/03-ddpm-and-ddim/"> <span>下一篇</span> <strong>第三章：DDPM 和 DDIM（DDPM and DDIM）</strong> </a> </nav> </article> </section>  </main> <footer class="site-footer"> <div class="site-footer__inner"> <p>Vinci Knowledge Base</p> <p>Source directory: <code>/Users/superone77/Documents/知识库/projects</code></p> </div> </footer> </div> </body></html>
