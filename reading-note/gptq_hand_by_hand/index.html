@@ -1,0 +1,194 @@
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>手把手带你写GPTQ (附Notebook) | Vinci Knowledge Base</title><meta name="description" content="手把手带你写GPTQ (附Notebook) 第一步：实现均匀对称量化 1. 计算原范围 ori range = x.abs().max() 2. 计算量化精度所能表示的范围 bits range = 2 (bits 1) 1 为什么？以int4举例 计算规则： int4可写作 b3 b2 b1 b0 十进制值 = 8 b3 + 4 b2 + 2 b1 + "><meta name="generator" content="Vinci Knowledge Base"><link rel="stylesheet" href="/_astro/_doc_.CY2v1inF.css"></head> <body> <div class="page-shell"> <header class="site-header"> <div class="site-header__inner"> <a class="brand" href="/"> <span class="brand__eyebrow">GitHub Pages Knowledge Site</span> <span class="brand__name">Vinci Knowledge Base</span> </a> <nav class="site-nav"> <a href="/">Projects</a> </nav> </div> </header> <main class="page-main">  <section class="article-hero"> <div> <p class="eyebrow">Knowledge Article</p> <h1>手把手带你写GPTQ (附Notebook)</h1> <p class="article-hero__breadcrumbs"> <a href="/">Home</a> <span>/</span> <a href="/reading-note/">Reading Note</a> </p> </div> <div class="meta-card"> <p><strong>Project</strong> Reading Note</p> <p><strong>Source</strong> <code>knowledge/gptq_hand_by_hand.md</code></p> <p><strong>Sections</strong> 6</p> </div> </section> <section class="content-grid"> <aside class="toc-card"> <p class="toc-card__title">本页目录</p> <ul class="toc-card__list"> <li class="toc-depth-1"> <a href="#手把手带你写gptq-附notebook">手把手带你写GPTQ (附Notebook)</a> </li><li class="toc-depth-3"> <a href="#第一步实现均匀对称量化">第一步：实现均匀对称量化</a> </li><li class="toc-depth-3"> <a href="#第二步实现hessian矩阵">第二步：实现Hessian矩阵</a> </li><li class="toc-depth-3"> <a href="#第三步如何为一行权重做gptq逐列更新">第三步：如何为一行权重做GPTQ逐列更新</a> </li><li class="toc-depth-3"> <a href="#第四步如何对整个线性层做gptq更新">第四步：如何对整个线性层做GPTQ更新</a> </li><li class="toc-depth-3"> <a href="#验证">验证</a> </li> </ul> </aside> <article class="prose-card"> <div class="prose"><h1 id="手把手带你写gptq-附notebook" tabindex="-1">手把手带你写GPTQ (附Notebook) <a class="heading-anchor" href="#手把手带你写gptq-附notebook" aria-hidden="true">#</a></h1>
+<h3 id="第一步实现均匀对称量化" tabindex="-1">第一步：实现均匀对称量化 <a class="heading-anchor" href="#第一步实现均匀对称量化" aria-hidden="true">#</a></h3>
+<h4>1. 计算原范围</h4>
+<p>ori_range = x.abs().max()</p>
+<h4>2. 计算量化精度所能表示的范围</h4>
+<p>bits_range = 2**(bits - 1) - 1
+为什么？以int4举例</p>
+<p>计算规则：</p>
+<ul>
+<li>int4可写作 <code>b3 b2 b1 b0</code></li>
+<li>十进制值 = <code>-8*b3 + 4*b2 + 2*b1 + 1*b0</code></li>
+<li>其中最高位 <code>b3</code> 是符号位，权重是 <code>-8</code>（不是 <code>+8</code>）</li>
+</ul>
+<hr>
+<p><code>int4</code> 全部取值表：</p>
+<table>
+<thead>
+<tr>
+<th>二进制</th>
+<th>计算</th>
+<th>十进制</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0000</code></td>
+<td><code>-8*0 + 4*0 + 2*0 + 1*0</code></td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>0001</code></td>
+<td><code>-8*0 + 4*0 + 2*0 + 1*1</code></td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>0010</code></td>
+<td><code>-8*0 + 4*0 + 2*1 + 1*0</code></td>
+<td><code>2</code></td>
+</tr>
+<tr>
+<td><code>0011</code></td>
+<td><code>-8*0 + 4*0 + 2*1 + 1*1</code></td>
+<td><code>3</code></td>
+</tr>
+<tr>
+<td><code>0100</code></td>
+<td><code>-8*0 + 4*1 + 2*0 + 1*0</code></td>
+<td><code>4</code></td>
+</tr>
+<tr>
+<td><code>0101</code></td>
+<td><code>-8*0 + 4*1 + 2*0 + 1*1</code></td>
+<td><code>5</code></td>
+</tr>
+<tr>
+<td><code>0110</code></td>
+<td><code>-8*0 + 4*1 + 2*1 + 1*0</code></td>
+<td><code>6</code></td>
+</tr>
+<tr>
+<td><code>0111</code></td>
+<td><code>-8*0 + 4*1 + 2*1 + 1*1</code></td>
+<td><code>7</code></td>
+</tr>
+<tr>
+<td><code>1000</code></td>
+<td><code>-8*1 + 4*0 + 2*0 + 1*0</code></td>
+<td><code>-8</code></td>
+</tr>
+<tr>
+<td><code>1001</code></td>
+<td><code>-8*1 + 4*0 + 2*0 + 1*1</code></td>
+<td><code>-7</code></td>
+</tr>
+<tr>
+<td><code>1010</code></td>
+<td><code>-8*1 + 4*0 + 2*1 + 1*0</code></td>
+<td><code>-6</code></td>
+</tr>
+<tr>
+<td><code>1011</code></td>
+<td><code>-8*1 + 4*0 + 2*1 + 1*1</code></td>
+<td><code>-5</code></td>
+</tr>
+<tr>
+<td><code>1100</code></td>
+<td><code>-8*1 + 4*1 + 2*0 + 1*0</code></td>
+<td><code>-4</code></td>
+</tr>
+<tr>
+<td><code>1101</code></td>
+<td><code>-8*1 + 4*1 + 2*0 + 1*1</code></td>
+<td><code>-3</code></td>
+</tr>
+<tr>
+<td><code>1110</code></td>
+<td><code>-8*1 + 4*1 + 2*1 + 1*0</code></td>
+<td><code>-2</code></td>
+</tr>
+<tr>
+<td><code>1111</code></td>
+<td><code>-8*1 + 4*1 + 2*1 + 1*1</code></td>
+<td><code>-1</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p>所以 <code>int4</code> 范围是：<strong><code>-8 ~ 7</code></strong>。<br>
+如果你愿意，我还可以再给你一版“用补码取反加一”来验证负数的推导过程。</p>
+<h4>3. 计算缩放因子</h4>
+<p>scale = ori_range / bits_range</p>
+<h4>4. 量化 + 反量化</h4>
+<p>x_q = (x / scale).round()
+x_q = x_q * scale
+return x_q</p>
+<h3 id="第二步实现hessian矩阵" tabindex="-1">第二步：实现Hessian矩阵 <a class="heading-anchor" href="#第二步实现hessian矩阵" aria-hidden="true">#</a></h3>
+<p>什么是黑森矩阵，如何计算一个线性层输入的黑森矩阵？
+黑森矩阵（Hessian）是一个函数对参数的二阶偏导数组成的矩阵，用来描述“曲率”。
+对标量损失 (L(\theta))，Hessian 定义为： [ H_{ij}=\frac{\partial^2 L}{\partial \theta_i\partial \theta_j} ]</p>
+<p>对角线大：该方向曲率大，参数改一点损失就变很多
+非对角线大：两个参数之间耦合强（一起变化会影响损失）</p>
+<p>在GPTQ中，使用如下近似
+H ~= X^T X / N + damping * I
+含义是：
+X：线性层输入样本矩阵，形状通常是 ([N, d_{in}])
+N：样本数
+(\frac{X^\top X}{N})：输入协方差（或二阶矩）近似，反映不同输入维度的相关性
+(\lambda I)（damping）：阻尼项，让矩阵更稳定、更可逆，防止数值问题
+最后通常还会算 (H^{-1})（H_inv），用于后续量化误差补偿
+所以代码如下
+def build_hessian(calib_x: torch.Tensor, damping: float = 1e-4):
+“”&quot;
+Approximate Hessian for linear layer inputs:
+H ~= X^T X / N + damping * I
+Returns H and H_inv.
+“”&quot;
+x_t = calib_x.T
+N = x_t.shape[0]
+I = torch.eye(x_t.shape[0])
+H = calib_x @ x_t / N + damping * I
+H_inv = torch.linalg.inv(H)
+return H,H_inv</p>
+<h3 id="第三步如何为一行权重做gptq逐列更新" tabindex="-1">第三步：如何为一行权重做GPTQ逐列更新 <a class="heading-anchor" href="#第三步如何为一行权重做gptq逐列更新" aria-hidden="true">#</a></h3>
+<p>把线性层权重矩阵中的“一行”做 GPTQ 量化，而不是像 RTN 一样直接一把 round 完。
+GPTQ 的核心就在这里：按列（按元素）依次量化 + 误差补偿到后续列。</p>
+<p>大致流程是：
+复制当前行权重作为可更新向量 w_work
+从第 j 个元素开始，取当前值 w_work[j]
+对这个标量做 4-bit 量化，得到 q_j
+计算量化误差 e_j = w_work[j] - q_j
+用 h_inv 把这个误差“传播/补偿”到后面的元素（j+1…），让后续量化考虑前面误差
+最终得到整行的量化结果 q_row</p>
+<p>def gptq_quantize_row(w_row: torch.Tensor, h_inv: torch.Tensor, bits: int = 4):
+“”&quot;
+Quantize one output row of W with GPTQ-style column-wise updates.
+“”&quot;
+w_work = w_row.clone()
+for j in range(w_work.shape[0]):
+tmp = w_work[j]
+tmp_q = quantize_tensor_symmetric(tmp, bits)
+e_j = tmp - tmp_q
+w_work[j+1:] = w_work[j+1:] - e_j * h_inv[j+1:,j]
+w_work[j] = tmp_q
+return w_work</p>
+<h3 id="第四步如何对整个线性层做gptq更新" tabindex="-1">第四步：如何对整个线性层做GPTQ更新 <a class="heading-anchor" href="#第四步如何对整个线性层做gptq更新" aria-hidden="true">#</a></h3>
+<p>用 calib_x 构建 Hessian 近似和逆矩阵：H, H_inv = build_hessian(calib_x, damping)
+深拷贝原始 linear，避免改坏原模型
+遍历每个输出通道（即 weight 的每一行 w_row）
+对每一行调用 gptq_quantize_row(w_row, h_inv=H_inv, bits=bits) 得到量化行
+把所有量化行拼回新的 weight
+bias 原样保留不变（题目要求）
+返回这个量化后的 q_layer（由于Parameter没有copy()所以要用copy_()原地拷贝。</p>
+<p>def gptq_quantize_linear(
+linear: nn.Linear,
+calib_x: torch.Tensor,
+bits: int = 4,
+damping: float = 1e-4,
+):
+“”&quot;
+Return a new quantized Linear layer using GPTQ.
+“”&quot;
+# build hessian based on calibration data
+H, H_inv = build_hessian(calib_x, damping)
+q_layer = copy.deepcopy(linear)
+with torch.no_grad():
+q_w = []
+for r in range(linear.weight.shape[0]):
+q_r = gptq_quantize_row(linear.weight[r], h_inv=H_inv, bits=bits)
+q_w.append(q_r)
+q_layer.weight.copy_(torch.stack(q_w, dim=0))
+return q_layer</p>
+<h3 id="验证" tabindex="-1">验证 <a class="heading-anchor" href="#验证" aria-hidden="true">#</a></h3>
+<p>至此你已经完成了GPTQ算法所需的大部分操作，请验证你的结果。</p>
+</div> <nav class="pager"> <a class="pager__link" href="/reading-note/cities-and-ambition/"> <span>上一篇</span> <strong>城市与雄心</strong> </a> <a class="pager__link" href="/reading-note/openclaw_report/"> <span>下一篇</span> <strong>详细解读OpenClaw</strong> </a> </nav> </article> </section>  </main> <footer class="site-footer"> <div class="site-footer__inner"> <p>Vinci Knowledge Base</p> <p>Source directory: <code>/Users/superone77/Documents/知识库/projects</code></p> </div> </footer> </div> </body></html>
