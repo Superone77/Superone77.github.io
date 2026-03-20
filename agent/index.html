@@ -1,0 +1,63 @@
+<!DOCTYPE html><html lang="zh-CN"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Agent Entry | Vinci Knowledge Base</title><meta name="description" content="面向 agent 的原始 Markdown 知识入口。"><meta name="generator" content="Vinci Knowledge Base"><link rel="stylesheet" href="/_astro/_doc_.TZyNsrgi.css"></head> <body> <div class="page-shell"> <header class="site-header"> <div class="site-header__inner"> <a class="brand" href="/"> <span class="brand__eyebrow">GitHub Pages Knowledge Site</span> <span class="brand__name">Vinci Knowledge Base</span> </a> <nav class="site-nav"> <a href="/">Human</a> <a href="/agent/">Agent</a> </nav> </div> </header> <main class="page-main">  <section class="hero"> <div class="hero__content"> <p class="eyebrow">Raw Markdown For Agents</p> <h1>Agent Entry</h1> <p class="hero__lead">
+这里提供面向 agent 的原始 Markdown 入口。每个项目通过独立的 <code>/agent/</code> 路由暴露，
+        便于稳定抓取、复制和机器处理。
+</p> <div class="mode-switch" aria-label="Knowledge entry mode"> <a class="mode-switch__link" href="/">Human Entry</a> <a class="mode-switch__link mode-switch__link--active" href="/agent/">
+Agent Entry
+<span class="mode-switch__meta">0 个项目</span> </a> </div> <div class="hero__meta"> <span>0 个 agent 项目</span> <span>0 篇 agent 文档</span> <span>最近构建 2026年3月20日</span> </div> </div> <div class="search-panel"> <label class="search-panel__label" for="agent-search">搜索 agent 项目和文档标题</label> <input class="search-panel__input" id="agent-search" name="agent-search" placeholder="例如：index、overview、agent" type="search"> <div class="search-results" id="agent-search-results"> <p class="search-results__hint">输入关键字后，会在 agent 项目名和文档标题中即时筛选。</p> </div> </div> </section> <section class="section-header"> <div> <p class="eyebrow">Agent Projects</p> <h2>Raw Markdown Index</h2> </div> </section> <section class="project-grid" id="agent-project-grid"> <article class="empty-state"> <p class="eyebrow">Agent Mode</p> <h1>还没有 agent 文档</h1> <p>在外部知识库项目目录下新增 <code>agent/INDEX.md</code> 和 <code>agent/*.md</code> 后，这里会自动出现。</p> </article> </section> <script id="agent-search-data" type="application/json">[]</script> <script>
+    const input = document.getElementById("agent-search");
+    const projectGrid = document.getElementById("agent-project-grid");
+    const results = document.getElementById("agent-search-results");
+    const searchDataNode = document.getElementById("agent-search-data");
+    const entries = searchDataNode ? JSON.parse(searchDataNode.textContent || "[]") : [];
+
+    function renderResults(items, query) {
+      if (!results) return;
+
+      if (!query) {
+        results.innerHTML =
+          '<p class="search-results__hint">输入关键字后，会在 agent 项目名和文档标题中即时筛选。</p>';
+        return;
+      }
+
+      if (!items.length) {
+        results.innerHTML = '<p class="search-results__hint">没有匹配结果。</p>';
+        return;
+      }
+
+      const html = items
+        .slice(0, 8)
+        .map(
+          (item) => `
+            <a class="search-result" href="${item.url}">
+              <span class="search-result__kind">${item.kind === "project" ? "Project" : "Doc"}</span>
+              <span class="search-result__title">${item.title}</span>
+              <span class="search-result__subtitle">${item.subtitle}</span>
+            </a>
+          `
+        )
+        .join("");
+
+      results.innerHTML = html;
+    }
+
+    function filterProjects(query) {
+      if (!projectGrid) return;
+
+      const cards = projectGrid.querySelectorAll(".project-card");
+      cards.forEach((card) => {
+        const haystack = (card.getAttribute("data-search") || "").toLowerCase();
+        const matched = !query || haystack.includes(query);
+        card.style.display = matched ? "" : "none";
+      });
+    }
+
+    input?.addEventListener("input", (event) => {
+      const query = String(event.target.value || "").trim().toLowerCase();
+      const matched = entries.filter((entry) =>
+        `${entry.title} ${entry.subtitle} ${entry.projectSlug}`.toLowerCase().includes(query)
+      );
+
+      filterProjects(query);
+      renderResults(matched, query);
+    });
+  </script>  </main> <footer class="site-footer"> <div class="site-footer__inner"> <p>Vinci Knowledge Base</p> <p>Source directory: <code>/Users/superone77/Documents/知识库/projects</code></p> </div> </footer> </div> </body></html>
