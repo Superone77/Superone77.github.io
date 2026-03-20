@@ -20,8 +20,8 @@ const searchJson = JSON.stringify(site.agentSearchEntries);
       <p class="eyebrow">Raw Markdown For Agents</p>
       <h1>Agent Entry</h1>
       <p class="hero__lead">
-        这里提供面向 agent 的原始 Markdown 入口。每个项目通过独立的 <code>/agent/</code> 路由暴露，
-        便于稳定抓取、复制和机器处理。
+        这里提供与 Human 入口同源的原始 Markdown 入口。每个项目的 <code>knowledge/*.md</code> 会通过
+        独立的 <code>/agent/</code> 路由暴露，便于稳定抓取、复制和机器处理。
       </p>
       <div class="mode-switch" aria-label="Knowledge entry mode">
         <a class="mode-switch__link" href="/">Human Entry</a>
@@ -31,18 +31,18 @@ const searchJson = JSON.stringify(site.agentSearchEntries);
         </a>
       </div>
       <div class="hero__meta">
-        <span>{projects.length} 个 agent 项目</span>
-        <span>{site.agentSearchEntries.filter((entry) => entry.kind === "doc").length} 篇 agent 文档</span>
+        <span>{projects.length} 个项目</span>
+        <span>{site.agentSearchEntries.filter((entry) => entry.kind === "doc").length} 篇 Markdown</span>
         <span>最近构建 {formatDate(site.generatedAt)}</span>
       </div>
     </div>
     <div class="search-panel">
-      <label class="search-panel__label" for="agent-search">搜索 agent 项目和文档标题</label>
+      <label class="search-panel__label" for="agent-search">搜索项目和 Markdown 标题</label>
       <input
         class="search-panel__input"
         id="agent-search"
         name="agent-search"
-        placeholder="例如：index、overview、agent"
+        placeholder="例如：Agent、推理、量化、memory"
         type="search"
       />
       <div class="search-results" id="agent-search-results">
@@ -80,7 +80,7 @@ const searchJson = JSON.stringify(site.agentSearchEntries);
                   {project.displayName}
                 </a>
               </h3>
-              <p class="project-card__date">Agent docs {project.agentDocCount}</p>
+              <p class="project-card__date">Markdown {project.agentDocCount}</p>
             </div>
             <p class="project-card__summary">{project.agentDescription}</p>
             <p class="project-card__agent-link">
@@ -103,8 +103,8 @@ const searchJson = JSON.stringify(site.agentSearchEntries);
       ) : (
         <article class="empty-state">
           <p class="eyebrow">Agent Mode</p>
-          <h1>还没有 agent 文档</h1>
-          <p>在外部知识库项目目录下新增 <code>agent/INDEX.md</code> 和 <code>agent/*.md</code> 后，这里会自动出现。</p>
+          <h1>还没有可发布的 Markdown</h1>
+          <p>当项目下存在 <code>knowledge/INDEX.md</code> 或 <code>knowledge/*.md</code> 时，这里会自动出现。</p>
         </article>
       )
     }
