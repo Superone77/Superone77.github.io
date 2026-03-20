@@ -247,14 +247,7 @@ function loadProject(projectPath: string): ProjectPage {
     ? renderMarkdown(readmeRaw, status.displayName ?? prettifySlug(slug))
     : undefined;
   const { docs, indexPage: knowledgeIndex } = loadDocs(slug, path.join(projectPath, "knowledge"), "knowledge");
-  const agentDocs = docs;
-  const agentIndex = knowledgeIndex
-    ? {
-        ...knowledgeIndex,
-        relativePath: knowledgeIndex.relativePath,
-        sourcePath: knowledgeIndex.sourcePath
-      }
-    : undefined;
+  const { docs: agentDocs, indexPage: agentIndex } = loadDocs(slug, path.join(projectPath, "agent"), "agent");
   const updatedAt = getLatestUpdatedAt(projectPath, status.updatedAt, docs, agentDocs);
   const displayName = status.displayName ?? readme?.title ?? prettifySlug(slug);
   const description =
@@ -262,9 +255,9 @@ function loadProject(projectPath: string): ProjectPage {
     knowledgeIndex?.description ??
     docs[0]?.description ??
     `${displayName} 的知识库项目`;
-  const hasAgentContent = Boolean(knowledgeIndex) || docs.length > 0;
+  const hasAgentContent = Boolean(agentIndex) || agentDocs.length > 0;
   const agentDescription =
-    knowledgeIndex?.description ?? docs[0]?.description ?? `${displayName} 的 Agent 知识入口`;
+    agentIndex?.description ?? agentDocs[0]?.description ?? `${displayName} 的 Agent 知识入口`;
 
   return {
     agentDescription,
@@ -332,9 +325,9 @@ export function getSiteContent(): SiteContent {
       kind: "project",
       mode: "agent",
       projectSlug: project.slug,
-      subtitle: `${project.agentDocCount} 篇 Markdown`,
+      subtitle: `${project.agentDocCount} 篇 agent 文档`,
       title: project.displayName,
-      url: `/agent/${project.slug}/index.md`
+      url: `/agent/${project.slug}/`
     });
 
     for (const doc of project.agentDocs) {
@@ -344,7 +337,7 @@ export function getSiteContent(): SiteContent {
         projectSlug: project.slug,
         subtitle: project.displayName,
         title: doc.title,
-        url: `/agent/${project.slug}/${doc.slug}.md`
+        url: `/agent/${project.slug}/${doc.slug}/`
       });
     }
   }
