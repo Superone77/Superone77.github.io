@@ -28,7 +28,6 @@ Maintain the Astro site in this repository and republish it to GitHub Pages. Tre
 4. Keep the publish scope aligned with the current site policy:
    - Publish project root `README.md`
    - Publish `knowledge/*.md`
-   - Publish `agent/INDEX.md` and `agent/*.md` through the `/agent/.../*.md` raw Markdown routes
    - Read `STATUS.yaml` for metadata
    - Do not expose `REVIEW.md`, `SUBMISSION.md`, `TASKS.md`, `RESEARCH.md`, or similar workflow files unless the user explicitly changes that rule
 
@@ -63,10 +62,6 @@ Maintain the Astro site in this repository and republish it to GitHub Pages. Tre
 - Preserve the branch split:
   - `main` for source code
   - `gh-pages` and `master` for generated static output
-- Preserve the dual-entry convention:
-  - Human docs from `knowledge/`
-  - Agent raw Markdown from `agent/`
-  - Agent homepage at `/agent/`
 
 ## References
 

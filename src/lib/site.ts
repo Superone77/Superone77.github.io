@@ -6,18 +6,6 @@ export function buildDocUrl(projectSlug: string, docSlug: string): string {
   return `/${projectSlug}/${docSlug}/`;
 }
 
-export function buildAgentHomeUrl(): string {
-  return "/agent/";
-}
-
-export function buildAgentProjectUrl(projectSlug: string): string {
-  return `/agent/${projectSlug}/index.md`;
-}
-
-export function buildAgentDocUrl(projectSlug: string, docSlug: string): string {
-  return `/agent/${projectSlug}/${docSlug}.md`;
-}
-
 export function formatDate(value?: string | number | Date | null): string {
   if (!value) {
     return "未知";

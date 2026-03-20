@@ -10,7 +10,6 @@
 ## Important Files
 
 - `src/lib/content.ts`: scan project folders, read `README.md`, `STATUS.yaml`, and `knowledge/*.md`, and exclude workflow documents from publication
-- `src/pages/agent/`: raw Markdown agent entry routes and the agent homepage
 - `src/lib/markdown.ts`: convert Markdown to HTML and generate heading IDs
 - `src/pages/index.astro`: site homepage and title search UI
 - `src/pages/[project]/index.astro`: project landing page
@@ -78,6 +77,5 @@ Current policy:
 
 - Publish project root `README.md`
 - Publish `knowledge/*.md`
-- Publish `agent/INDEX.md` and `agent/*.md` on `/agent/.../*.md` routes
 - Read `STATUS.yaml` as metadata only
 - Exclude `REVIEW.md`, `SUBMISSION.md`, `TASKS.md`, `RESEARCH.md`, `OUTLINE.md`, and similar workflow files unless the user explicitly changes the scope
