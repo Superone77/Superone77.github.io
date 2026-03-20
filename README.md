@@ -68,6 +68,7 @@ GITHUB_PAGES_CNAME=your.domain.com
 
 - 项目根目录 `README.md`
 - `knowledge/*.md` 正文文件
+- `agent/INDEX.md` 与 `agent/*.md` 的 agent 原始 Markdown 入口
 - `STATUS.yaml` 元数据
 
 默认不公开以下过程文件：
@@ -77,6 +78,42 @@ GITHUB_PAGES_CNAME=your.domain.com
 - `TASKS.md`
 - `RESEARCH.md`
 - `OUTLINE.md`
+
+## Human / Agent 双入口
+
+当前站点支持两套入口：
+
+- Human：现有网页入口，继续使用 `knowledge/*.md`
+- Agent：独立的 raw Markdown 入口，使用 `agent/*.md`
+
+外部知识库项目目录约定：
+
+```text
+<project>/
+  README.md
+  knowledge/
+    INDEX.md
+    *.md
+  agent/
+    INDEX.md
+    *.md
+```
+
+路由约定：
+
+- Human 首页：`/`
+- Human 项目：`/<project>/`
+- Human 文档：`/<project>/<doc>/`
+- Agent 首页：`/agent/`
+- Agent 项目 raw index：`/agent/<project>/index.md`
+- Agent 文档 raw markdown：`/agent/<project>/<doc>.md`
+
+说明：
+
+- `agent/` 内容完全独立维护，不从 human 文档自动生成
+- 没有 `agent/` 目录的项目不会出现在 `/agent/` 首页
+- Agent 路由直接输出 Markdown 原文，适合被 agent 或外部系统稳定抓取
+- 使用显式 `.md` 路径是为了兼容静态站点输出和 GitHub Pages 文件托管
 
 ## 备注
 

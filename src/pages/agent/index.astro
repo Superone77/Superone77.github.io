@@ -1,0 +1,172 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getSiteContent } from "../../lib/content";
+import {
+  buildAgentDocUrl,
+  buildAgentHomeUrl,
+  buildAgentProjectUrl,
+  buildProjectUrl,
+  formatDate
+} from "../../lib/site";
+
+const site = getSiteContent();
+const projects = site.agentProjects;
+const searchJson = JSON.stringify(site.agentSearchEntries);
+---
+
+<BaseLayout description="面向 agent 的原始 Markdown 知识入口。" title="Agent Entry">
+  <section class="hero">
+    <div class="hero__content">
+      <p class="eyebrow">Raw Markdown For Agents</p>
+      <h1>Agent Entry</h1>
+      <p class="hero__lead">
+        这里提供面向 agent 的原始 Markdown 入口。每个项目通过独立的 <code>/agent/</code> 路由暴露，
+        便于稳定抓取、复制和机器处理。
+      </p>
+      <div class="mode-switch" aria-label="Knowledge entry mode">
+        <a class="mode-switch__link" href="/">Human Entry</a>
+        <a class="mode-switch__link mode-switch__link--active" href={buildAgentHomeUrl()}>
+          Agent Entry
+          <span class="mode-switch__meta">{projects.length} 个项目</span>
+        </a>
+      </div>
+      <div class="hero__meta">
+        <span>{projects.length} 个 agent 项目</span>
+        <span>{site.agentSearchEntries.filter((entry) => entry.kind === "doc").length} 篇 agent 文档</span>
+        <span>最近构建 {formatDate(site.generatedAt)}</span>
+      </div>
+    </div>
+    <div class="search-panel">
+      <label class="search-panel__label" for="agent-search">搜索 agent 项目和文档标题</label>
+      <input
+        class="search-panel__input"
+        id="agent-search"
+        name="agent-search"
+        placeholder="例如：index、overview、agent"
+        type="search"
+      />
+      <div class="search-results" id="agent-search-results">
+        <p class="search-results__hint">输入关键字后，会在 agent 项目名和文档标题中即时筛选。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-header">
+    <div>
+      <p class="eyebrow">Agent Projects</p>
+      <h2>Raw Markdown Index</h2>
+    </div>
+  </section>
+
+  <section class="project-grid" id="agent-project-grid">
+    {
+      projects.length > 0 ? (
+        projects.map((project) => (
+          <article
+            class="project-card"
+            data-search={[
+              project.displayName,
+              project.slug,
+              project.agentDescription,
+              ...project.agentDocs.map((doc) => doc.title)
+            ]
+              .join(" ")
+              .toLowerCase()}
+          >
+            <div class="project-card__header">
+              <p class="project-card__status">Agent</p>
+              <h3>
+                <a href={project.agentIndex ? buildAgentProjectUrl(project.slug) : buildProjectUrl(project.slug)}>
+                  {project.displayName}
+                </a>
+              </h3>
+              <p class="project-card__date">Agent docs {project.agentDocCount}</p>
+            </div>
+            <p class="project-card__summary">{project.agentDescription}</p>
+            <p class="project-card__agent-link">
+              <a href={buildProjectUrl(project.slug)}>查看 Human 入口</a>
+            </p>
+            <ul class="compact-list">
+              {project.agentIndex && (
+                <li>
+                  <a href={buildAgentProjectUrl(project.slug)}>INDEX.md</a>
+                </li>
+              )}
+              {project.agentDocs.slice(0, 6).map((doc) => (
+                <li>
+                  <a href={buildAgentDocUrl(project.slug, doc.slug)}>{doc.title}</a>
+                </li>
+              ))}
+            </ul>
+          </article>
+        ))
+      ) : (
+        <article class="empty-state">
+          <p class="eyebrow">Agent Mode</p>
+          <h1>还没有 agent 文档</h1>
+          <p>在外部知识库项目目录下新增 <code>agent/INDEX.md</code> 和 <code>agent/*.md</code> 后，这里会自动出现。</p>
+        </article>
+      )
+    }
+  </section>
+
+  <script id="agent-search-data" set:html={searchJson} type="application/json"></script>
+  <script is:inline>
+    const input = document.getElementById("agent-search");
+    const projectGrid = document.getElementById("agent-project-grid");
+    const results = document.getElementById("agent-search-results");
+    const searchDataNode = document.getElementById("agent-search-data");
+    const entries = searchDataNode ? JSON.parse(searchDataNode.textContent || "[]") : [];
+
+    function renderResults(items, query) {
+      if (!results) return;
+
+      if (!query) {
+        results.innerHTML =
+          '<p class="search-results__hint">输入关键字后，会在 agent 项目名和文档标题中即时筛选。</p>';
+        return;
+      }
+
+      if (!items.length) {
+        results.innerHTML = '<p class="search-results__hint">没有匹配结果。</p>';
+        return;
+      }
+
+      const html = items
+        .slice(0, 8)
+        .map(
+          (item) => `
+            <a class="search-result" href="${item.url}">
+              <span class="search-result__kind">${item.kind === "project" ? "Project" : "Doc"}</span>
+              <span class="search-result__title">${item.title}</span>
+              <span class="search-result__subtitle">${item.subtitle}</span>
+            </a>
+          `
+        )
+        .join("");
+
+      results.innerHTML = html;
+    }
+
+    function filterProjects(query) {
+      if (!projectGrid) return;
+
+      const cards = projectGrid.querySelectorAll(".project-card");
+      cards.forEach((card) => {
+        const haystack = (card.getAttribute("data-search") || "").toLowerCase();
+        const matched = !query || haystack.includes(query);
+        card.style.display = matched ? "" : "none";
+      });
+    }
+
+    input?.addEventListener("input", (event) => {
+      const query = String(event.target.value || "").trim().toLowerCase();
+      const matched = entries.filter((entry) =>
+        `${entry.title} ${entry.subtitle} ${entry.projectSlug}`.toLowerCase().includes(query)
+      );
+
+      filterProjects(query);
+      renderResults(matched, query);
+    });
+  </script>
+</BaseLayout>

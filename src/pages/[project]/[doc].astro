@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { getSiteContent, type DocPage, type ProjectPage } from "../../lib/content";
-import { buildDocUrl, buildProjectUrl } from "../../lib/site";
+import { buildAgentDocUrl, buildAgentProjectUrl, buildDocUrl, buildProjectUrl } from "../../lib/site";
 
 export function getStaticPaths() {
   const site = getSiteContent();
@@ -28,6 +28,7 @@ interface Props {
 
 const { doc, nextDoc, previousDoc, project } = Astro.props;
 const tocItems = doc.headings.filter((heading) => heading.depth <= 3);
+const matchingAgentDoc = project.agentDocs.find((candidate) => candidate.slug === doc.slug);
 ---
 
 <BaseLayout description={doc.description} title={doc.title}>
@@ -45,6 +46,12 @@ const tocItems = doc.headings.filter((heading) => heading.depth <= 3);
       <p><strong>Project</strong> {project.displayName}</p>
       <p><strong>Source</strong> <code>{doc.relativePath}</code></p>
       <p><strong>Sections</strong> {tocItems.length}</p>
+      {matchingAgentDoc && (
+        <p><strong>Agent Doc</strong> <a href={buildAgentDocUrl(project.slug, matchingAgentDoc.slug)}>Open raw markdown</a></p>
+      )}
+      {!matchingAgentDoc && project.agentIndex && (
+        <p><strong>Agent Entry</strong> <a href={buildAgentProjectUrl(project.slug)}>Open project agent index</a></p>
+      )}
     </div>
   </section>
 

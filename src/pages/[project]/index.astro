@@ -1,7 +1,13 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { getSiteContent, type ProjectPage } from "../../lib/content";
-import { buildDocUrl, buildProjectUrl, formatDate, labelStatus } from "../../lib/site";
+import {
+  buildAgentProjectUrl,
+  buildDocUrl,
+  buildProjectUrl,
+  formatDate,
+  labelStatus
+} from "../../lib/site";
 
 export function getStaticPaths() {
   return getSiteContent().projects.map((project) => ({
@@ -27,8 +33,12 @@ const { project } = Astro.props;
     <div class="meta-card">
       <p><strong>Status</strong> {labelStatus(project.status)}</p>
       <p><strong>Docs</strong> {project.docCount}</p>
+      {project.hasAgentContent && <p><strong>Agent Docs</strong> {project.agentDocCount}</p>}
       <p><strong>Updated</strong> {formatDate(project.updatedAt)}</p>
       <p><strong>Path</strong> <code>{project.slug}</code></p>
+      {project.hasAgentContent && (
+        <p><strong>Agent</strong> <a href={buildAgentProjectUrl(project.slug)}>Open raw agent index</a></p>
+      )}
     </div>
   </section>
 

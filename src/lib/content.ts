@@ -24,17 +24,30 @@ export interface DocPage {
   html: string;
   order: number;
   projectSlug: string;
+  rawMarkdown: string;
   relativePath: string;
   slug: string;
   sourcePath: string;
   title: string;
 }
 
+export interface IndexPage extends RenderedMarkdown {
+  projectSlug: string;
+  rawMarkdown: string;
+  relativePath: string;
+  sourcePath: string;
+}
+
 export interface ProjectPage {
+  agentDescription: string;
+  agentDocCount: number;
+  agentDocs: DocPage[];
+  agentIndex?: IndexPage;
   description: string;
   displayName: string;
   docCount: number;
   docs: DocPage[];
+  hasAgentContent: boolean;
   knowledgeIndex?: RenderedMarkdown;
   readme?: RenderedMarkdown;
   slug: string;
@@ -45,6 +58,7 @@ export interface ProjectPage {
 
 export interface SearchEntry {
   kind: "doc" | "project";
+  mode: "agent" | "human";
   projectSlug: string;
   subtitle: string;
   title: string;
@@ -52,6 +66,8 @@ export interface SearchEntry {
 }
 
 export interface SiteContent {
+  agentProjects: ProjectPage[];
+  agentSearchEntries: SearchEntry[];
   generatedAt: string;
   projects: ProjectPage[];
   searchEntries: SearchEntry[];
@@ -121,29 +137,46 @@ function getNaturalOrder(fileName: string, index: number): number {
   return 10000 + index;
 }
 
-function loadDocs(projectSlug: string, knowledgeDir: string): {
+function buildIndexPage(
+  projectSlug: string,
+  relativePath: string,
+  sourcePath: string,
+  rawMarkdown: string
+): IndexPage {
+  const rendered = renderMarkdown(rawMarkdown, "Index");
+
+  return {
+    ...rendered,
+    projectSlug,
+    rawMarkdown,
+    relativePath,
+    sourcePath
+  };
+}
+
+function loadDocs(projectSlug: string, contentDir: string, rootName: string): {
   docs: DocPage[];
-  knowledgeIndex?: RenderedMarkdown;
+  indexPage?: IndexPage;
 } {
-  if (!fs.existsSync(knowledgeDir)) {
+  if (!fs.existsSync(contentDir)) {
     return { docs: [] };
   }
 
   const entries = fs
-    .readdirSync(knowledgeDir, { withFileTypes: true })
+    .readdirSync(contentDir, { withFileTypes: true })
     .filter((entry) => entry.isFile() && entry.name.endsWith(".md"))
     .sort((a, b) => collator.compare(a.name, b.name));
 
   const docs: DocPage[] = [];
-  let knowledgeIndex: RenderedMarkdown | undefined;
+  let indexPage: IndexPage | undefined;
 
   entries.forEach((entry, index) => {
-    const fullPath = path.join(knowledgeDir, entry.name);
+    const fullPath = path.join(contentDir, entry.name);
     const raw = fs.readFileSync(fullPath, "utf8");
-    const relativePath = path.join("knowledge", entry.name);
+    const relativePath = path.join(rootName, entry.name);
 
     if (entry.name === "INDEX.md") {
-      knowledgeIndex = renderMarkdown(raw, "Knowledge Index");
+      indexPage = buildIndexPage(projectSlug, relativePath, fullPath, raw);
       return;
     }
 
@@ -162,6 +195,7 @@ function loadDocs(projectSlug: string, knowledgeDir: string): {
       html: rendered.html,
       order: getNaturalOrder(entry.name, index),
       projectSlug,
+      rawMarkdown: raw,
       relativePath,
       slug,
       sourcePath: fullPath,
@@ -177,19 +211,20 @@ function loadDocs(projectSlug: string, knowledgeDir: string): {
     return collator.compare(left.fileName, right.fileName);
   });
 
-  return { docs, knowledgeIndex };
+  return { docs, indexPage };
 }
 
 function getLatestUpdatedAt(
   sourcePath: string,
   statusUpdatedAt: string | undefined,
-  docs: DocPage[]
+  docs: DocPage[],
+  agentDocs: DocPage[]
 ): string | undefined {
   if (statusUpdatedAt) {
     return statusUpdatedAt;
   }
 
-  const candidates = docs.map((doc) => {
+  const candidates = [...docs, ...agentDocs].map((doc) => {
     const stat = fs.statSync(doc.sourcePath);
     return stat.mtime;
   });
@@ -211,20 +246,29 @@ function loadProject(projectPath: string): ProjectPage {
   const readme = readmeRaw
     ? renderMarkdown(readmeRaw, status.displayName ?? prettifySlug(slug))
     : undefined;
-  const { docs, knowledgeIndex } = loadDocs(slug, path.join(projectPath, "knowledge"));
-  const updatedAt = getLatestUpdatedAt(projectPath, status.updatedAt, docs);
+  const { docs, indexPage: knowledgeIndex } = loadDocs(slug, path.join(projectPath, "knowledge"), "knowledge");
+  const { docs: agentDocs, indexPage: agentIndex } = loadDocs(slug, path.join(projectPath, "agent"), "agent");
+  const updatedAt = getLatestUpdatedAt(projectPath, status.updatedAt, docs, agentDocs);
   const displayName = status.displayName ?? readme?.title ?? prettifySlug(slug);
   const description =
     readme?.description ??
     knowledgeIndex?.description ??
     docs[0]?.description ??
     `${displayName} 的知识库项目`;
+  const hasAgentContent = Boolean(agentIndex) || agentDocs.length > 0;
+  const agentDescription =
+    agentIndex?.description ?? agentDocs[0]?.description ?? `${displayName} 的 Agent 知识入口`;
 
   return {
+    agentDescription,
+    agentDocCount: agentDocs.length,
+    agentDocs,
+    agentIndex,
     description,
     displayName,
     docCount: docs.length,
     docs,
+    hasAgentContent,
     knowledgeIndex,
     readme,
     slug,
@@ -249,10 +293,13 @@ export function getSiteContent(): SiteContent {
 
   const projects = projectDirs.map(loadProject);
   const searchEntries: SearchEntry[] = [];
+  const agentSearchEntries: SearchEntry[] = [];
+  const agentProjects = projects.filter((project) => project.hasAgentContent);
 
   for (const project of projects) {
     searchEntries.push({
       kind: "project",
+      mode: "human",
       projectSlug: project.slug,
       subtitle: `${project.docCount} 篇文章`,
       title: project.displayName,
@@ -262,15 +309,42 @@ export function getSiteContent(): SiteContent {
     for (const doc of project.docs) {
       searchEntries.push({
         kind: "doc",
+        mode: "human",
         projectSlug: project.slug,
         subtitle: project.displayName,
         title: doc.title,
         url: `/${project.slug}/${doc.slug}/`
       });
     }
+
+    if (!project.hasAgentContent) {
+      continue;
+    }
+
+    agentSearchEntries.push({
+      kind: "project",
+      mode: "agent",
+      projectSlug: project.slug,
+      subtitle: `${project.agentDocCount} 篇 agent 文档`,
+      title: project.displayName,
+      url: `/agent/${project.slug}/`
+    });
+
+    for (const doc of project.agentDocs) {
+      agentSearchEntries.push({
+        kind: "doc",
+        mode: "agent",
+        projectSlug: project.slug,
+        subtitle: project.displayName,
+        title: doc.title,
+        url: `/agent/${project.slug}/${doc.slug}/`
+      });
+    }
   }
 
   cache = {
+    agentProjects,
+    agentSearchEntries,
     generatedAt: new Date().toISOString(),
     projects,
     searchEntries
@@ -285,4 +359,12 @@ export function getProjectBySlug(projectSlug: string): ProjectPage | undefined {
 
 export function getDocBySlug(projectSlug: string, docSlug: string): DocPage | undefined {
   return getProjectBySlug(projectSlug)?.docs.find((doc) => doc.slug === docSlug);
+}
+
+export function getAgentProjectBySlug(projectSlug: string): ProjectPage | undefined {
+  return getSiteContent().agentProjects.find((project) => project.slug === projectSlug);
+}
+
+export function getAgentDocBySlug(projectSlug: string, docSlug: string): DocPage | undefined {
+  return getAgentProjectBySlug(projectSlug)?.agentDocs.find((doc) => doc.slug === docSlug);
 }

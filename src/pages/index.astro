@@ -1,7 +1,14 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getSiteContent } from "../lib/content";
-import { buildProjectUrl, buildDocUrl, formatDate, labelStatus } from "../lib/site";
+import {
+  buildAgentHomeUrl,
+  buildAgentProjectUrl,
+  buildDocUrl,
+  buildProjectUrl,
+  formatDate,
+  labelStatus
+} from "../lib/site";
 
 const site = getSiteContent();
 const searchJson = JSON.stringify(site.searchEntries);
@@ -15,6 +22,13 @@ const searchJson = JSON.stringify(site.searchEntries);
       <p class="hero__lead">
         自动读取 <code>~/Documents/知识库/projects/</code> 下的项目目录，生成结构化知识站点并部署到 GitHub Pages。
       </p>
+      <div class="mode-switch" aria-label="Knowledge entry mode">
+        <a class="mode-switch__link mode-switch__link--active" href="/">Human Entry</a>
+        <a class="mode-switch__link" href={buildAgentHomeUrl()}>
+          Agent Entry
+          <span class="mode-switch__meta">{site.agentProjects.length} 个项目</span>
+        </a>
+      </div>
       <div class="hero__meta">
         <span>{site.projects.length} 个项目</span>
         <span>{site.searchEntries.filter((entry) => entry.kind === "doc").length} 篇文章</span>
@@ -65,6 +79,11 @@ const searchJson = JSON.stringify(site.searchEntries);
             <p class="project-card__date">更新于 {formatDate(project.updatedAt)}</p>
           </div>
           <p class="project-card__summary">{project.description}</p>
+          {project.hasAgentContent && (
+            <p class="project-card__agent-link">
+              <a href={buildAgentProjectUrl(project.slug)}>查看 Agent 入口</a>
+            </p>
+          )}
           <ul class="compact-list">
             {project.docs.slice(0, 5).map((doc) => (
               <li>
