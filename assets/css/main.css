@@ -252,6 +252,10 @@ a:hover {
   padding: 6px 12px;
 }
 
+.work-image-frame--unicache {
+  padding: 8px 6px;
+}
+
 .work-image-frame--alphaq {
   padding: 8px 6px;
 }
